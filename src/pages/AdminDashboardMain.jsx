@@ -145,14 +145,8 @@ const AdminDashboardMain = () => {
   return (
     <div className="min-h-screen bg-[#F5F7FA]">
       <div className="flex justify-between items-center px-6 py-4 bg-white shadow-sm">
-        <h1 className="text-blue-600 font-bold text-xl">Caryanam Admin Panel</h1>
+        <h1 className="text-blue-600 font-bold text-xl">Admin Panel</h1>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate("/owner")}
-            className="px-3 py-2 rounded-md border border-blue-500 text-blue-600 hover:bg-blue-50"
-          >
-            Owner Dashboard
-          </button>
           <button
             onClick={logout}
             className="px-3 py-2 rounded-md border border-red-500 text-red-600 hover:bg-red-50"

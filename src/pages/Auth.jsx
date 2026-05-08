@@ -370,6 +370,8 @@ import {
 
 export default function Auth() {
   const OWNER_ID_BY_EMAIL_KEY = "ownerIdByEmail";
+  const OWNER_NAME_KEY = "ownerName";
+  const OWNER_NAME_BY_EMAIL_KEY = "ownerNameByEmail";
   const [isLogin, setIsLogin] = useState(true);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const navigate = useNavigate();
@@ -508,7 +510,19 @@ export default function Auth() {
 
       if (formData.role === "PROPERTY_OWNER") {
         const ownerEmail = formData.email.toLowerCase().trim();
+        const ownerName = formData.fullName.trim();
         const registeredOwnerId = Number(res?.data?.data?.id);
+
+        if (ownerName) {
+          localStorage.setItem(OWNER_NAME_KEY, ownerName);
+        }
+
+        if (ownerEmail && ownerName) {
+          const rawNames = localStorage.getItem(OWNER_NAME_BY_EMAIL_KEY);
+          const ownerNameMap = rawNames ? JSON.parse(rawNames) : {};
+          ownerNameMap[ownerEmail] = ownerName;
+          localStorage.setItem(OWNER_NAME_BY_EMAIL_KEY, JSON.stringify(ownerNameMap));
+        }
 
         if (
           ownerEmail &&
@@ -580,9 +594,21 @@ export default function Auth() {
         const ownerEmail = (decoded?.sub || formData.email || "")
           .toLowerCase()
           .trim();
+        const ownerName = String(decoded?.fullName || decoded?.name || "").trim();
+
+        if (ownerName) {
+          localStorage.setItem(OWNER_NAME_KEY, ownerName);
+        }
 
         if (ownerEmail) {
           localStorage.setItem("ownerEmail", ownerEmail);
+
+          if (ownerName) {
+            const rawNames = localStorage.getItem(OWNER_NAME_BY_EMAIL_KEY);
+            const ownerNameMap = rawNames ? JSON.parse(rawNames) : {};
+            ownerNameMap[ownerEmail] = ownerName;
+            localStorage.setItem(OWNER_NAME_BY_EMAIL_KEY, JSON.stringify(ownerNameMap));
+          }
 
           const rawMap = localStorage.getItem(OWNER_ID_BY_EMAIL_KEY);
           const ownerIdMap = rawMap ? JSON.parse(rawMap) : {};

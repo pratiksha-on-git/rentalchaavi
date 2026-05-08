@@ -142,6 +142,10 @@ export const ownerApi = {
   uploadPropertyImages: (propertyId, formData) =>
     uploadApi.post(`/owner/uploadPropertyImagesByPropertyId/${propertyId}`, formData),
   buyPremium: (ownerId) => api.post(`/owner/buyPremiumByOwner/${ownerId}`),
+  saveFacilities: (ownerId, facilities) =>
+    api.post(`/owner/save-facilities`, { ownerId, facilities }),
+  getFacilities: (ownerId) =>
+    api.get(`/owner/get-facilities/${ownerId}`),
 };
 
 export const propertyApi = {
