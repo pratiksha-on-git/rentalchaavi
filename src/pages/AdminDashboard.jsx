@@ -150,6 +150,7 @@ const FACILITY_OPTIONS = [
   "LANDSCAPE_GARDEN",
   "GATED_COMMUNITY",
   "WATER_SUPPLY_24X7",
+  "WIFI_SUPPLY_24X7",
   "CCTV_SECURITY",
   "CHILDREN_PLAY_AREA",
   "VISITOR_PARKING",
@@ -1123,6 +1124,29 @@ const handleManualOwnerIdSubmit = () => {
       toast.success(response?.data?.message || "Property updated successfully");
       setShowEditModal(false);
       setEditingProperty(null);
+      // Reset form data after update
+      setFormData({
+        propertyTitle: "",
+        price: "",
+        propertyType: "",
+        pgType: "",
+        apartmentName: "",
+        location: "",
+        city: "",
+        address: "",
+        state: "",
+        pincode: "",
+        mobileNumber: "",
+        description: "",
+        bhkType: "",
+        furnishing: "",
+        carpetArea: "",
+      });
+      setAreaOptions([]);
+      setAreaMessage("");
+      setResolvedCity("");
+      setSelectedFacilities(new Set());
+      clearSelectedImages();
       await fetchProperties({ preserveCurrent: true });
     } catch (err) {
       console.error("Error updating property:", err);
