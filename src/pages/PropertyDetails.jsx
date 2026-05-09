@@ -1,44 +1,3 @@
-
-
-// import {
-//   useEffect,
-//   useMemo,
-//   useState,
-//   useCallback,
-// } from "react";
-
-// import {
-//   useParams,
-//   useNavigate,
-// } from "react-router-dom";
-
-// import Navbar from "../components/Navbar";
-
-// import {
-//   motion,
-//   AnimatePresence,
-// } from "framer-motion";
-
-// import { STATIC_BASE_URL } from "../services/api";
-
-// import {
-//   MapPin,
-//   Phone,
-//   ArrowLeft,
-//   Home,
-//   Maximize,
-//   Sofa,
-//   MessageCircle,
-//   ChevronLeft,
-//   ChevronRight,
-//   ShieldCheck,
-//   BedDouble,
-// } from "lucide-react";
-
-// const FALLBACK_IMAGE =
-//   "https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=1200";
-
-
 import {
   useEffect,
   useMemo,
@@ -150,10 +109,7 @@ const PropertyDetails = () => {
           propertyList.find(
             (item) =>
               String(item.id) ===
-                String(id) ||
-              String(
-                item.propertyId
-              ) === String(id)
+                String(id)
           );
 
         if (!selectedProperty) {
@@ -192,8 +148,6 @@ const PropertyDetails = () => {
       cancelled = true;
     };
   }, [id, navigate]);
-
-  
 
   const imageUrls = useMemo(() => {
     if (!property)
@@ -548,7 +502,6 @@ const PropertyDetails = () => {
           <div className="xl:col-span-4">
             <div className="sticky top-5 space-y-6">
               {/* CONTACT CARD */}
-
               <div className="bg-gradient-to-br from-[#081028] to-[#0b1d4d] text-white rounded-[32px] p-8 shadow-2xl">
                 <div className="flex items-center gap-4 mb-8">
                   <div className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center text-2xl font-black">
