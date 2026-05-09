@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import { ownerApi } from "../services/api";
+import { ownerApi, STATIC_BASE_URL } from "../services/api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import OwnerPremiumQrImage from "../assets/QR.jpeg";
@@ -85,7 +85,7 @@ const PropertyThumbnail = ({ imageName, title }) => {
   const cleanedName = rawValue.replace(/^\/+/, "").replace(/^uploads\//i, "");
   const imageUrl = /^(blob:|data:|https?:)/i.test(rawValue)
     ? rawValue
-    : `${window.location.origin}/uploads/${encodeURIComponent(cleanedName)}`;
+    : `${STATIC_BASE_URL}/${cleanedName}`;
 
   return (
     <img
@@ -398,16 +398,10 @@ const handleManualOwnerIdSubmit = () => {
     setProperties([]);
     fetchProperties();
     fetchOwnerPremiumStatus();
-    const intervalId = window.setInterval(() => {
-      syncOwnerApprovalStatus();
-      fetchProperties({ preserveCurrent: true, silent: true });
-      fetchOwnerPremiumStatus({ silent: true });
-    }, 10000);
 
     window.addEventListener("storage", syncOwnerApprovalStatus);
 
     return () => {
-      window.clearInterval(intervalId);
       window.removeEventListener("storage", syncOwnerApprovalStatus);
     };
   }, [ownerId]);
