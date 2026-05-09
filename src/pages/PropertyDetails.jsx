@@ -12,7 +12,11 @@ import {
 
 import Navbar from "../components/Navbar";
 import ChatDrawer from "../components/ChatDrawer";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+} from "framer-motion";
+
 import { STATIC_BASE_URL } from "../services/api";
 
 import {
@@ -28,23 +32,47 @@ import {
   ShieldCheck,
   BedDouble,
 } from "lucide-react";
+
 import { getUserIdFromToken } from "../utlis/authSync";
 
-const FALLBACK_IMAGE = "/no-image.png";
+const FALLBACK_IMAGE =
+  "/no-image.png";
 
 const PropertyDetails = () => {
   const { id } = useParams();
 
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
-  const [property, setProperty] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatCount, setChatCount] = useState(0);
-  const [selectedPropertyForChat, setSelectedPropertyForChat] = useState(null);
-  const currentUserId = getUserIdFromToken();
+  const [property, setProperty] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  const [currentIndex, setCurrentIndex] =
+    useState(0);
+
+  const [chatOpen, setChatOpen] =
+    useState(false);
+
+  const [chatCount, setChatCount] =
+    useState(0);
+
+  const [
+    selectedPropertyForChat,
+    setSelectedPropertyForChat,
+  ] = useState(null);
+
+  const currentUserId =
+    getUserIdFromToken();
+
+  // ✅ PREMIUM STATUS
+  const [isPremiumUser, setIsPremiumUser] =
+    useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,12 +88,6 @@ const PropertyDetails = () => {
             "userToken"
           );
 
-        if (!token) {
-          navigate("/buy-premium");
-
-          return;
-        }
-
         const payload = JSON.parse(
           atob(token.split(".")[1])
         );
@@ -75,19 +97,50 @@ const PropertyDetails = () => {
           payload.userId ||
           payload.sub;
 
-        const response = await fetch(
-          `http://localhost:8080/api/user/properties/${userId}`,
-          {
-            method: "GET",
+        // ✅ CHECK PREMIUM
+        try {
+          const premiumResponse =
+            await fetch(
+              `http://localhost:8080/api/user/${userId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
 
-            headers: {
-              Authorization: `Bearer ${token}`,
+          const premiumResult =
+            await premiumResponse.json();
 
-              "Content-Type":
-                "application/json",
-            },
-          }
-        );
+          const premiumStatus =
+            premiumResult?.data
+              ?.premiumStatus;
+
+          setIsPremiumUser(
+            premiumStatus ===
+              "APPROVED"
+          );
+        } catch (e) {
+          console.log(
+            "PREMIUM CHECK ERROR",
+            e
+          );
+        }
+
+        const response =
+          await fetch(
+            `http://localhost:8080/api/user/properties/${userId}`,
+            {
+              method: "GET",
+
+              headers: {
+                Authorization: `Bearer ${token}`,
+
+                "Content-Type":
+                  "application/json",
+              },
+            }
+          );
 
         const result =
           await response.json();
@@ -154,7 +207,9 @@ const PropertyDetails = () => {
       return [FALLBACK_IMAGE];
 
     if (
-      Array.isArray(property.images) &&
+      Array.isArray(
+        property.images
+      ) &&
       property.images.length > 0
     ) {
       return property.images.map(
@@ -163,7 +218,9 @@ const PropertyDetails = () => {
       );
     }
 
-    if (property.doctypeImages) {
+    if (
+      property.doctypeImages
+    ) {
       return property.doctypeImages
         .replace(/^\[|\]$/g, "")
         .split(",")
@@ -180,22 +237,25 @@ const PropertyDetails = () => {
     return [FALLBACK_IMAGE];
   }, [property]);
 
-  
+  const nextSlide =
+    useCallback(() => {
+      if (
+        imageUrls.length <= 1
+      )
+        return;
 
-  const nextSlide = useCallback(() => {
-    if (imageUrls.length <= 1)
-      return;
+      setCurrentIndex((prev) =>
+        prev ===
+        imageUrls.length - 1
+          ? 0
+          : prev + 1
+      );
+    }, [imageUrls]);
 
-    setCurrentIndex((prev) =>
-      prev === imageUrls.length - 1
-        ? 0
-        : prev + 1
-    );
-  }, [imageUrls]);
-
- 
   const prevSlide = () => {
-    if (imageUrls.length <= 1)
+    if (
+      imageUrls.length <= 1
+    )
       return;
 
     setCurrentIndex((prev) =>
@@ -205,21 +265,21 @@ const PropertyDetails = () => {
     );
   };
 
-  
   useEffect(() => {
-    if (imageUrls.length <= 1)
+    if (
+      imageUrls.length <= 1
+    )
       return;
 
-    const interval = setInterval(
-      nextSlide,
-      4000
-    );
+    const interval =
+      setInterval(
+        nextSlide,
+        4000
+      );
 
     return () =>
       clearInterval(interval);
   }, [imageUrls, nextSlide]);
-
-  
 
   if (loading) {
     return (
@@ -232,8 +292,6 @@ const PropertyDetails = () => {
       </div>
     );
   }
-
- 
 
   if (error) {
     return (
@@ -265,9 +323,15 @@ const PropertyDetails = () => {
 
   return (
     <div className="min-h-screen bg-[#f4f7fb] font-inter">
-      <Navbar onOpenChat={() => setChatOpen(true)} chatCount={chatCount} />
+      <Navbar
+        onOpenChat={() =>
+          setChatOpen(true)
+        }
+        chatCount={chatCount}
+      />
 
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+
         {/* BACK BUTTON */}
 
         <button
@@ -277,18 +341,20 @@ const PropertyDetails = () => {
           className="flex items-center gap-2 text-slate-700 font-semibold mb-6"
         >
           <ArrowLeft size={18} />
-
           Back to Properties
         </button>
 
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+
           {/* LEFT SIDE */}
 
           <div className="xl:col-span-8 space-y-8">
+
             {/* IMAGE SECTION */}
 
             <div className="bg-white rounded-[32px] overflow-hidden shadow-xl">
               <div className="relative h-[300px] md:h-[550px] overflow-hidden">
+
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={currentIndex}
@@ -319,11 +385,7 @@ const PropertyDetails = () => {
                   />
                 </AnimatePresence>
 
-                {/* DARK OVERLAY */}
-
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10"></div>
-
-                {/* SLIDER BUTTONS */}
 
                 {imageUrls.length >
                   1 && (
@@ -348,13 +410,14 @@ const PropertyDetails = () => {
                   </>
                 )}
 
-                {/* IMAGE DOTS */}
-
                 {imageUrls.length >
                   1 && (
                   <div className="absolute bottom-7 left-1/2 -translate-x-1/2 flex gap-3 z-20">
                     {imageUrls.map(
-                      (_, index) => (
+                      (
+                        _,
+                        index
+                      ) => (
                         <button
                           key={index}
                           onClick={() =>
@@ -374,7 +437,7 @@ const PropertyDetails = () => {
                   </div>
                 )}
 
-                {/* PROPERTY TITLE */}
+                {/* TITLE */}
 
                 <div className="absolute bottom-8 left-8 text-white z-20">
                   <h1 className="text-4xl md:text-6xl font-black drop-shadow-2xl">
@@ -389,9 +452,7 @@ const PropertyDetails = () => {
                     />
 
                     <span className="text-lg">
-                      {
-                        property?.location
-                      }
+                      {property?.location}
                     </span>
                   </div>
                 </div>
@@ -400,10 +461,12 @@ const PropertyDetails = () => {
 
             {/* PROPERTY OVERVIEW */}
 
+            {isPremiumUser ? (
+
             <div className="bg-white rounded-[32px] p-8 shadow-xl border border-slate-200">
-              {/* TOP */}
 
               <div className="flex items-start justify-between flex-wrap gap-5 mb-10">
+
                 <div>
                   <h2 className="text-[28px] font-black text-[#0f172a] leading-tight">
                     Property Overview
@@ -415,9 +478,8 @@ const PropertyDetails = () => {
                   </p>
                 </div>
 
-                {/* PRICE CARD */}
-
                 <div className="bg-[#0b132b] text-white px-7 py-5 rounded-[24px] shadow-lg min-w-[170px]">
+
                   <p className="text-xs uppercase tracking-[3px] text-slate-300 mb-1">
                     Price
                   </p>
@@ -430,14 +492,11 @@ const PropertyDetails = () => {
                 </div>
               </div>
 
-              {/* INFO GRID */}
-
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
                 <OverviewCard
                   icon={
-                    <Home
-                      size={24}
-                    />
+                    <Home size={24} />
                   }
                   title="Property Type"
                   value={
@@ -447,9 +506,7 @@ const PropertyDetails = () => {
 
                 <OverviewCard
                   icon={
-                    <BedDouble
-                      size={24}
-                    />
+                    <BedDouble size={24} />
                   }
                   title="BHK"
                   value={
@@ -459,9 +516,7 @@ const PropertyDetails = () => {
 
                 <OverviewCard
                   icon={
-                    <Sofa
-                      size={24}
-                    />
+                    <Sofa size={24} />
                   }
                   title="Furnishing"
                   value={
@@ -471,9 +526,7 @@ const PropertyDetails = () => {
 
                 <OverviewCard
                   icon={
-                    <Maximize
-                      size={24}
-                    />
+                    <Maximize size={24} />
                   }
                   title="Carpet Area"
                   value={
@@ -481,8 +534,6 @@ const PropertyDetails = () => {
                   }
                 />
               </div>
-
-              {/* ABOUT PROPERTY */}
 
               <div className="mt-12">
                 <h2 className="text-[34px] font-black text-[#0f172a] mb-5">
@@ -495,16 +546,76 @@ const PropertyDetails = () => {
                 </p>
               </div>
             </div>
+
+            ) : (
+
+            <div className="bg-white rounded-[32px] p-10 shadow-xl border border-slate-200 text-center">
+
+              <h2 className="text-3xl font-black text-[#0f172a] mb-4">
+                Property Details Locked
+              </h2>
+
+              <p className="text-slate-600 text-lg mb-8">
+                Buy premium to view full property details,
+                owner contact and complete information.
+              </p>
+
+              {/* NON PREMIUM INFO */}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
+
+                <div className="bg-[#f8fafc] rounded-2xl p-5 border">
+                  <p className="text-slate-500 mb-2">
+                    Location
+                  </p>
+
+                  <h3 className="text-xl font-bold">
+                    {property?.location ||
+                      "N/A"}
+                  </h3>
+                </div>
+
+                <div className="bg-[#f8fafc] rounded-2xl p-5 border">
+                  <p className="text-slate-500 mb-2">
+                    Price
+                  </p>
+
+                  <h3 className="text-xl font-bold">
+                    ₹ {property?.price || "N/A"}
+                  </h3>
+                </div>
+              </div>
+
+              <button
+                onClick={() =>
+                  navigate(
+                    "/buy-premium"
+                  )
+                }
+                className="mt-10 bg-[#0f172a] text-white px-8 py-4 rounded-2xl font-bold hover:scale-105 transition-all"
+              >
+                Buy Premium
+              </button>
+            </div>
+
+            )}
+
           </div>
 
           {/* RIGHT SIDE */}
 
+          {isPremiumUser && (
+
           <div className="xl:col-span-4">
+
             <div className="sticky top-5 space-y-6">
               {/* CONTACT CARD */}
               <div className="bg-gradient-to-br from-[#081028] to-[#0b1d4d] text-white rounded-[32px] p-8 shadow-2xl">
+
                 <div className="flex items-center gap-4 mb-8">
+
                   <div className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center text-2xl font-black">
+
                     {property?.ownerName?.charAt(
                       0
                     ) || "O"}
@@ -520,13 +631,13 @@ const PropertyDetails = () => {
                       <ShieldCheck
                         size={16}
                       />
-                      Verified
-                      Seller
+                      Verified Seller
                     </p>
                   </div>
                 </div>
 
                 <div className="bg-white/10 border border-white/10 rounded-3xl p-5 mb-6 backdrop-blur-xl">
+
                   <p className="text-xs uppercase tracking-[3px] text-slate-300 mb-2">
                     Direct Contact
                   </p>
@@ -547,12 +658,19 @@ const PropertyDetails = () => {
                   onClick={() => {
                     setSelectedPropertyForChat({
                       id: property?.id,
-                      title: property?.title,
-                      ownerName: property?.ownerName,
-                      ownerId: property?.ownerId || property?.userId,
+                      title:
+                        property?.title,
+                      ownerName:
+                        property?.ownerName,
+                      ownerId:
+                        property?.ownerId ||
+                        property?.userId,
                       _raw: property,
                     });
-                    setChatOpen(true);
+
+                    setChatOpen(
+                      true
+                    );
                   }}
                   className="w-full bg-white text-[#0f172a] py-4 rounded-2xl font-black text-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3"
                 >
@@ -564,68 +682,11 @@ const PropertyDetails = () => {
                 </button>
               </div>
 
-              {/* SAFETY */}
-
-              <div className="bg-white rounded-[32px] p-6 shadow-lg border border-slate-200">
-                <h3 className="text-2xl font-black mb-5 text-[#0f172a]">
-                  Safety Tips
-                </h3>
-
-                <div className="space-y-4 text-slate-600">
-                  <p>
-                    ✅ Visit property
-                    before making
-                    payment
-                  </p>
-
-                  <p>
-                    ✅ Verify owner
-                    identity and
-                    documents
-                  </p>
-
-                  <p>
-                    ✅ Never share OTP
-                    or banking details
-                  </p>
-                </div>
-              </div>
-
-              {/* QUICK INFO */}
-
-              <div className="bg-white rounded-[32px] p-6 shadow-lg border border-slate-200">
-                <h3 className="text-2xl font-black mb-5 text-[#0f172a]">
-                  Quick Info
-                </h3>
-
-                <div className="space-y-5">
-                  <QuickItem
-                    icon={<BedDouble />}
-                    label="BHK Type"
-                    value={
-                      property?.bhkType
-                    }
-                  />
-
-                  <QuickItem
-                    icon={<Sofa />}
-                    label="Furnishing"
-                    value={
-                      property?.furnishing
-                    }
-                  />
-
-                  <QuickItem
-                    icon={<Home />}
-                    label="Property Type"
-                    value={
-                      property?.propertyType
-                    }
-                  />
-                </div>
-              </div>
             </div>
           </div>
+
+          )}
+
         </div>
       </main>
 
@@ -633,18 +694,25 @@ const PropertyDetails = () => {
         isOpen={chatOpen}
         onClose={() => {
           setChatOpen(false);
-          setSelectedPropertyForChat(null);
+
+          setSelectedPropertyForChat(
+            null
+          );
         }}
         currentRole="USER"
-        currentUserId={currentUserId}
-        selectedProperty={selectedPropertyForChat}
-        onCountChange={setChatCount}
+        currentUserId={
+          currentUserId
+        }
+        selectedProperty={
+          selectedPropertyForChat
+        }
+        onCountChange={
+          setChatCount
+        }
       />
     </div>
   );
 };
-
-
 
 const OverviewCard = ({
   icon,
@@ -663,26 +731,6 @@ const OverviewCard = ({
     <h3 className="text-[22px] font-black text-[#0f172a] break-words leading-tight uppercase">
       {value || "N/A"}
     </h3>
-  </div>
-);
-
-
-
-const QuickItem = ({
-  icon,
-  label,
-  value,
-}) => (
-  <div className="flex items-center justify-between">
-    <div className="flex items-center gap-3 text-slate-700">
-      {icon}
-
-      <span>{label}</span>
-    </div>
-
-    <span className="font-bold text-slate-900 uppercase">
-      {value || "N/A"}
-    </span>
   </div>
 );
 
