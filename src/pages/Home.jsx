@@ -1,5 +1,6 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Home as HomeIcon,
   Search,
@@ -11,9 +12,24 @@ import {
   Building2,
   Key,
 } from "lucide-react";
+import img1 from "../assets/img1.jpg";
+import img2 from "../assets/img2.webp";
+import img3 from "../assets/img3.jpg";
+import img4 from "../assets/img4.jpg";
+
+const backgroundImages = [img1, img2, img3, img4];
 
 const Home = () => {
   const navigate = useNavigate();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const features = [
     {
@@ -80,28 +96,49 @@ const Home = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 md:px-6 bg-gradient-to-br from-slate-50 via-white to-blue-50">
-        <div className="max-w-7xl mx-auto">
+      <section className="pt-32 pb-20 px-4 md:px-6 relative overflow-hidden">
+        {/* Background Image Slideshow */}
+        <div className="absolute inset-0 z-0">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentImageIndex}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1, ease: "easeInOut" }}
+              className="absolute inset-0 w-full h-full"
+            >
+              <img
+                src={backgroundImages[currentImageIndex]}
+                alt="Background"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40" />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
                 <Star size={16} fill="currentColor" />
                 No Brokerage Platform
               </div>
-              <h1 className="text-5xl md:text-7xl font-black text-slate-900 leading-tight mb-6">
+              <h1 className="text-5xl md:text-7xl font-black text-white leading-tight mb-6">
                 Find Your Dream
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-300">
                   {" "}
                   Home
                 </span>
                 <br />
                 Without Brokers
               </h1>
-              <p className="text-xl text-slate-600 mb-8 leading-relaxed">
+              <p className="text-xl text-white/90 mb-8 leading-relaxed">
                 Connect directly with property owners. Save thousands on brokerage
                 fees. Browse verified listings across Pune and PCMC.
               </p>
@@ -125,10 +162,10 @@ const Home = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center">
-                    <div className="text-3xl font-black text-slate-900">
+                    <div className="text-3xl font-black text-white">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-slate-600 font-medium">
+                    <div className="text-sm text-white/90 font-medium">
                       {stat.label}
                     </div>
                   </div>
