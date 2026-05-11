@@ -1,19 +1,48 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Home as HomeIcon,
   Search,
-  ShieldCheck,
-  Users,
   Star,
   ArrowRight,
-  MapPin,
-  Building2,
-  Key,
+  Menu,
+  X,
+  ArrowUp,
 } from "lucide-react";
+import img1 from "../assets/img1.jpg";
+import img2 from "../assets/img2.jpg";
+import img3 from "../assets/img3.jpg";
+import img4 from "../assets/img4.jpg";
+
+const backgroundImages = [img1, img2, img3, img4];
 
 const Home = () => {
   const navigate = useNavigate();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const features = [
     {
@@ -23,92 +52,243 @@ const Home = () => {
         "Find your perfect property with advanced filters for location, price, and amenities",
     },
     {
-      icon: <ShieldCheck size={28} />,
+      icon: <Star size={28} />,
       title: "Verified Listings",
       description:
         "All properties are verified by our team to ensure authenticity and safety",
     },
     {
-      icon: <Users size={28} />,
+      icon: <HomeIcon size={28} />,
       title: "Direct Connect",
       description:
         "Chat directly with property owners without any middlemen or brokers",
     },
     {
-      icon: <Key size={28} />,
+      icon: <ArrowRight size={28} />,
       title: "No Brokerage",
       description:
         "Save thousands by connecting directly with owners - zero brokerage fees",
     },
   ];
 
-  const stats = [
-    { value: "10K+", label: "Properties Listed" },
-    { value: "5K+", label: "Happy Users" },
-    { value: "50+", label: "Cities Covered" },
-    { value: "100%", label: "Verified Listings" },
-  ];
-
   return (
-    <div className="min-h-screen bg-white font-inter">
+    <div className="min-h-screen bg-white font-inter scroll-smooth">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-lg z-50 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#ff7f50] to-[#ff9f80] rounded-xl flex items-center justify-center">
               <HomeIcon size={24} className="text-white" />
             </div>
             <span className="text-2xl font-black text-slate-900">
               Caryanam Broker
             </span>
           </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate("/login")}
-              className="px-6 py-2.5 text-slate-700 font-semibold hover:text-slate-900 transition-colors"
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-12 flex-grow justify-center">
+            <a
+              href="#home"
+              className="text-slate-700 font-semibold hover:text-[#ff7f50] transition-colors"
             >
-              Login
-            </button>
-            <button
-              onClick={() => navigate("/login")}
-              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300"
+              Home
+            </a>
+            <a
+              href="#features"
+              className="text-slate-700 font-semibold hover:text-[#ff7f50] transition-colors"
+            >
+              Features
+            </a>
+            <a
+              href="#cta"
+              className="text-slate-700 font-semibold hover:text-[#ff7f50] transition-colors"
             >
               Get Started
+            </a>
+            <a
+              href="#contact"
+              className="text-slate-700 font-semibold hover:text-[#ff7f50] transition-colors"
+            >
+              Contact
+            </a>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-4">
+              <button
+                onClick={() => navigate("/login")}
+                className="px-6 py-2.5 text-slate-700 font-semibold hover:text-slate-900 transition-colors"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate("/login")}
+                className="px-6 py-2.5 bg-gradient-to-r from-[#ff7f50] to-[#ff9f80] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#ff7f50]/30 transition-all duration-300"
+              >
+                Get Started
+              </button>
+            </div>
+            
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 text-slate-700 hover:text-[#ff7f50] transition-colors"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
+        
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-white border-b border-slate-100 overflow-hidden"
+            >
+              <div className="px-4 py-4 space-y-4">
+                <a
+                  href="#home"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block text-slate-700 font-semibold hover:text-[#ff7f50] transition-colors py-2"
+                >
+                  Home
+                </a>
+                <a
+                  href="#features"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block text-slate-700 font-semibold hover:text-[#ff7f50] transition-colors py-2"
+                >
+                  Features
+                </a>
+                <a
+                  href="#cta"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block text-slate-700 font-semibold hover:text-[#ff7f50] transition-colors py-2"
+                >
+                  Get Started
+                </a>
+                <a
+                  href="#contact"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block text-slate-700 font-semibold hover:text-[#ff7f50] transition-colors py-2"
+                >
+                  Contact
+                </a>
+                <div className="pt-4 border-t border-slate-200 space-y-3">
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate("/login");
+                    }}
+                    className="w-full px-6 py-2.5 text-slate-700 font-semibold hover:text-slate-900 transition-colors border border-slate-200 rounded-xl"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate("/login");
+                    }}
+                    className="w-full px-6 py-2.5 bg-gradient-to-r from-[#ff7f50] to-[#ff9f80] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#ff7f50]/30 transition-all duration-300"
+                  >
+                    Get Started
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 md:px-6 bg-gradient-to-br from-slate-50 via-white to-blue-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section id="home" className="pt-32 pb-60 px-4 md:px-6 relative overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1c1c1c] via-[#2a2a2a] to-[#3a2b2b] z-0" />
+        
+        {/* Animated Background Lines */}
+        {Array.from({ length: 4 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute h-[2px] bg-[#ff7f50]/20 rounded-full z-0"
+            initial={{
+              width: `${180 + i * 90}px`,
+              x: i % 2 === 0 ? -300 : 1600,
+              y: Math.random() * 800,
+              rotate: Math.random() * 360,
+              opacity: 0,
+            }}
+            animate={{
+              x: i % 2 === 0 ? 1600 : -300,
+              y: Math.random() * 800,
+              rotate: Math.random() * 360,
+              opacity: [0, 0.4, 0],
+            }}
+            transition={{
+              duration: 8 + i * 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+
+        {/* Background Image Slideshow */}
+        <div className="absolute inset-0 z-0">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentImageIndex}
+              initial={{ x: "100%", opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "-100%", opacity: 0 }}
+              transition={{ duration: 1, ease: "easeInOut" }}
+              className="absolute inset-0 w-full h-full"
+            >
+              <img
+                src={backgroundImages[currentImageIndex]}
+                alt="Background"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40" />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="flex flex-col items-center justify-center text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              <div className="inline-flex items-center gap-2 bg-[#ff7f50]/20 backdrop-blur-sm text-[#ff7f50] px-4 py-2 rounded-full text-sm font-semibold mb-6">
                 <Star size={16} fill="currentColor" />
                 No Brokerage Platform
               </div>
-              <h1 className="text-5xl md:text-7xl font-black text-slate-900 leading-tight mb-6">
+              <h1 className="text-5xl md:text-7xl font-black text-white leading-tight mb-4">
                 Find Your Dream
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff7f50] to-[#ff9f80]">
                   {" "}
                   Home
                 </span>
                 <br />
                 Without Brokers
               </h1>
-              <p className="text-xl text-slate-600 mb-8 leading-relaxed">
+              <p className="text-2xl text-[#ff7f50] font-semibold mb-2">
+                Save money, live better - zero brokerage guaranteed
+              </p>
+              <p className="text-xl text-[#ff7f50] font-semibold mb-6">
+                (पैसे वाचवा, उत्तम जगा - शून्य ब्रोकरेजची हमी)
+              </p>
+              <p className="text-xl text-white/90 mb-8 leading-relaxed">
                 Connect directly with property owners. Save thousands on brokerage
                 fees. Browse verified listings across Pune and PCMC.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={() => navigate("/login")}
-                  className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-bold text-lg rounded-2xl hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 flex items-center justify-center gap-2"
+                  className="px-8 py-4 bg-gradient-to-r from-[#ff7f50] to-[#ff9f80] text-white font-bold text-lg rounded-2xl hover:shadow-xl hover:shadow-[#ff7f50]/30 transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   Browse Properties
                   <ArrowRight size={20} />
@@ -121,96 +301,13 @@ const Home = () => {
                 </button>
               </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
-                {stats.map((stat, index) => (
-                  <div key={index} className="text-center">
-                    <div className="text-3xl font-black text-slate-900">
-                      {stat.value}
-                    </div>
-                    <div className="text-sm text-slate-600 font-medium">
-                      {stat.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative"
-            >
-              <div className="relative bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[40px] p-8 shadow-2xl shadow-blue-500/30">
-                <div className="bg-white rounded-[32px] p-6 space-y-4">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                      <Building2 size={24} className="text-blue-600" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-slate-900">Premium Apartment</div>
-                      <div className="text-sm text-slate-600 flex items-center gap-1">
-                        <MapPin size={14} />
-                        Kothrud, Pune
-                      </div>
-                    </div>
-                  </div>
-                  <div className="h-40 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center">
-                    <HomeIcon size={48} className="text-slate-400" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-2xl font-black text-slate-900">
-                        ₹25,000
-                      </div>
-                      <div className="text-sm text-slate-600">per month</div>
-                    </div>
-                    <div className="flex gap-2">
-                      <div className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
-                        2 BHK
-                      </div>
-                      <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-                        Semi-Furnished
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating elements */}
-              <div className="absolute -top-4 -right-4 bg-white p-4 rounded-2xl shadow-xl">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <ShieldCheck size={20} className="text-green-600" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-slate-900 text-sm">Verified</div>
-                    <div className="text-xs text-slate-600">Owner Listed</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute -bottom-4 -left-4 bg-white p-4 rounded-2xl shadow-xl">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Users size={20} className="text-blue-600" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-slate-900 text-sm">
-                      500+ Views
-                    </div>
-                    <div className="text-xs text-slate-600">This Week</div>
-                  </div>
-                </div>
-              </div>
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 md:px-6 bg-white">
+      <section id="features" className="py-20 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">
@@ -231,7 +328,7 @@ const Home = () => {
                 viewport={{ once: true }}
                 className="bg-slate-50 border border-slate-200 rounded-[24px] p-8 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group"
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#ff7f50] to-[#ff9f80] rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform duration-300">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-3">
@@ -247,18 +344,18 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 md:px-6 bg-gradient-to-br from-blue-600 to-indigo-700">
+      <section id="cta" className="py-20 px-4 md:px-6 bg-gradient-to-br from-[#ff7f50] to-[#ff9f80]">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-black text-white mb-6">
             Ready to Find Your Perfect Home?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-white/90 mb-8">
             Join thousands of happy users who found their dream property without
             paying brokerage
           </p>
           <button
             onClick={() => navigate("/login")}
-            className="px-10 py-5 bg-white text-blue-700 font-bold text-lg rounded-2xl hover:shadow-2xl transition-all duration-300 inline-flex items-center gap-2"
+            className="px-10 py-5 bg-white text-[#ff7f50] font-bold text-lg rounded-2xl hover:shadow-2xl transition-all duration-300 inline-flex items-center gap-2"
           >
             Get Started Free
             <ArrowRight size={20} />
@@ -267,12 +364,12 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-white py-12 px-4 md:px-6">
+      <footer id="contact" className="bg-slate-900 text-white py-12 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#ff7f50] to-[#ff9f80] rounded-xl flex items-center justify-center">
                   <HomeIcon size={24} />
                 </div>
                 <span className="text-2xl font-black">Caryanam</span>
@@ -333,6 +430,21 @@ const Home = () => {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0 }}
+            onClick={scrollToTop}
+            className="fixed bottom-8 right-8 w-12 h-12 bg-slate-800 text-white rounded-full shadow-lg hover:shadow-xl hover:shadow-slate-800/40 flex items-center justify-center z-50 transition-all duration-300 hover:scale-110"
+          >
+            <ArrowUp size={20} />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
