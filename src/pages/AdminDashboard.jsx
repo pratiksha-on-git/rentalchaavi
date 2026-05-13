@@ -2451,16 +2451,16 @@ const handleManualOwnerIdSubmit = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] flex flex-col">
+    <div className="min-h-screen bg-[#f7f0e8] flex flex-col">
       {/* Header */}
 
-      <div className="flex justify-between items-center px-6 py-4 bg-white shadow-sm">
+      <div className="flex justify-between items-center px-6 py-4 bg-[#fff7ed]/95 backdrop-blur-md border-b border-[#d8c2a8] shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
 
         <div className="flex items-center gap-3">
 
           <svg
 
-            className="w-8 h-8 text-blue-600"
+            className="w-8 h-8 text-[#ff7a00]"
 
             fill="none"
 
@@ -2484,7 +2484,7 @@ const handleManualOwnerIdSubmit = () => {
 
           </svg>
 
-          <h1 className="text-blue-600 font-bold text-xl">
+          <h1 className="text-[#ff7a00] font-bold text-xl">
 
              Caryanam Broker
 
@@ -2496,7 +2496,7 @@ const handleManualOwnerIdSubmit = () => {
 
         <div className="flex items-center gap-4 text-sm">
 
-          <span className="text-black font-bold">
+          <span className="text-[#1a1a1a] font-bold">
 
             {ownerDisplayName}
 
@@ -2506,7 +2506,7 @@ const handleManualOwnerIdSubmit = () => {
 
             onClick={() => setChatOpen(true)}
 
-            className="relative text-gray-700 hover:text-blue-500"
+            className="relative text-[#3d3127] hover:text-[#ff7a00]"
 
             title="Messages"
 
@@ -2516,7 +2516,7 @@ const handleManualOwnerIdSubmit = () => {
 
             {chatCount > 0 && (
 
-              <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-[#f97316] text-white text-xs rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center">
 
                 {chatCount}
 
@@ -2530,7 +2530,7 @@ const handleManualOwnerIdSubmit = () => {
 
           onClick={handleLogout}
 
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-red-200 transition-all duration-300 active:scale-95">
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-[24px] shadow-lg hover:shadow-red-200 transition-all duration-300 active:scale-95">
 
             <LogOut size={18} />
 
@@ -2548,13 +2548,13 @@ const handleManualOwnerIdSubmit = () => {
 
         <div>
 
-          <h1 className="text-3xl font-bold text-gray-800">
+          <h1 className="text-3xl font-bold text-[#1a1a1a]">
 
             Dashboard
 
           </h1>
 
-          <p className="text-gray-500 mt-1">
+          <p className="text-[#3d3127] mt-1">
 
             Manage property listings
 
@@ -2566,7 +2566,7 @@ const handleManualOwnerIdSubmit = () => {
 
         {ownerSessionMessage && (
 
-          <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
 
             <p className="text-sm text-amber-800 mb-3">
 
@@ -2630,7 +2630,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   }}
 
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1.5 rounded-md text-sm transition-colors"
+                  className="bg-[#d8c2a8] hover:bg-[#c9af91] text-[#3d3127] px-4 py-1.5 rounded-md text-sm transition-colors"
 
                 >
 
@@ -2648,13 +2648,13 @@ const handleManualOwnerIdSubmit = () => {
 
 
 
-        <div className="mt-8 bg-white rounded-xl shadow-sm p-8">
+        <div className="upload-property-panel mt-8 bg-[#050505] rounded-[24px] border-2 border-[#1f1f1f] shadow-[0_25px_80px_rgba(0,0,0,0.28)] p-8">
 
           <div className="flex items-center gap-3 mb-6">
 
             <svg
 
-              className="w-6 h-6 text-blue-600"
+              className="w-6 h-6 text-[#ff7a00]"
 
               fill="none"
 
@@ -2678,7 +2678,7 @@ const handleManualOwnerIdSubmit = () => {
 
             </svg>
 
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-2xl font-bold text-[#1a1a1a]">
 
               Upload Property
 
@@ -2696,7 +2696,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Property Title <span className="text-red-500">*</span>
 
@@ -2706,7 +2706,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
 
                   placeholder="Enter property title"
 
@@ -2726,7 +2726,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Price <span className="text-red-500">*</span>
 
@@ -2736,7 +2736,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
 
                   placeholder="Enter price"
 
@@ -2756,7 +2756,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Property Type <span className="text-red-500">*</span>
 
@@ -2764,7 +2764,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <select
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
 
                   value={formData.propertyType}
 
@@ -2792,7 +2792,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   PG Type
 
@@ -2800,7 +2800,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <select
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
 
                   value={formData.pgType}
 
@@ -2834,7 +2834,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   City <span className="text-red-500">*</span>
 
@@ -2842,7 +2842,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <select
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
 
                   value={formData.city}
 
@@ -2870,7 +2870,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Location <span className="text-red-500">*</span>
 
@@ -2878,7 +2878,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <select
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
 
                   value={formData.location}
 
@@ -2914,7 +2914,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Apartment Name <span className="text-red-500">*</span>
 
@@ -2924,7 +2924,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
 
                   placeholder="Enter apartment name"
 
@@ -2950,7 +2950,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Address <span className="text-red-500">*</span>
 
@@ -2960,7 +2960,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
 
                   placeholder="Enter address"
 
@@ -2980,7 +2980,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   State <span className="text-red-500">*</span>
 
@@ -2990,7 +2990,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#efe4d7]"
 
                   placeholder="Auto-filled from city"
 
@@ -3012,7 +3012,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Pincode <span className="text-red-500">*</span>
 
@@ -3022,7 +3022,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#efe4d7]"
 
                   placeholder="Auto-filled based on location"
 
@@ -3038,7 +3038,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Mobile Number <span className="text-red-500">*</span>
 
@@ -3048,7 +3048,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
 
                   placeholder="Enter mobile number"
 
@@ -3072,7 +3072,7 @@ const handleManualOwnerIdSubmit = () => {
 
             <div>
 
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                 Description <span className="text-red-500">*</span>
 
@@ -3080,7 +3080,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <textarea
 
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
 
                 placeholder="Enter property description"
 
@@ -3106,7 +3106,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   BHK Type <span className="text-red-500">*</span>
 
@@ -3114,7 +3114,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <select
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
 
                   value={formData.bhkType}
 
@@ -3146,7 +3146,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Furnishing <span className="text-red-500">*</span>
 
@@ -3154,7 +3154,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <select
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
 
                   value={formData.furnishing}
 
@@ -3182,7 +3182,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Carpet Area <span className="text-red-500">*</span>
 
@@ -3192,7 +3192,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
 
                   placeholder="Enter carpet area"
 
@@ -3220,7 +3220,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <svg
 
-                  className="w-6 h-6 text-blue-600"
+                  className="w-6 h-6 text-[#ff7a00]"
 
                   fill="none"
 
@@ -3244,7 +3244,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 </svg>
 
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-[#3d3127]">
 
                   Property Images <span className="text-red-500">(Minimum 4 images required, Door image mandatory)</span>
 
@@ -3276,7 +3276,7 @@ const handleManualOwnerIdSubmit = () => {
 
                       htmlFor={`image-${index}`}
 
-                      className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center transition-colors cursor-pointer min-h-[120px] ${
+                      className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center transition-colors cursor-pointer min-h-[120px] ${
 
                         imagePreviews[index]
 
@@ -3284,9 +3284,9 @@ const handleManualOwnerIdSubmit = () => {
 
                           : index === 0
 
-                            ? "border-blue-500 bg-blue-50"
+                            ? "border-[#ff7a00] bg-[#fff3e7]"
 
-                          : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+                          : "border-[#d9c7b2] hover:border-[#ff7a00] hover:bg-[#fff3e7]"
 
                       }`}
 
@@ -3310,7 +3310,7 @@ const handleManualOwnerIdSubmit = () => {
 
                           <svg
 
-                            className="w-10 h-10 text-gray-400 mb-3"
+                            className="w-10 h-10 text-[#8b8178] mb-3"
 
                             fill="none"
 
@@ -3334,7 +3334,7 @@ const handleManualOwnerIdSubmit = () => {
 
                           </svg>
 
-                          <span className="text-xs text-gray-500 text-center font-medium">
+                          <span className="text-xs text-[#7d6c5c] text-center font-medium">
 
                             {label}
 
@@ -3382,7 +3382,7 @@ const handleManualOwnerIdSubmit = () => {
 
             {/* Facilities Section */}
 
-            <div className="mt-8 bg-gray-50 rounded-xl p-6">
+            <div className="mt-8 bg-[#efe4d7] rounded-[24px] p-6">
 
                 <div className="flex items-center justify-between mb-4">
 
@@ -3390,7 +3390,7 @@ const handleManualOwnerIdSubmit = () => {
 
                     <svg
 
-                      className="w-5 h-5 text-blue-600"
+                      className="w-5 h-5 text-[#ff7a00]"
 
                       fill="none"
 
@@ -3414,7 +3414,7 @@ const handleManualOwnerIdSubmit = () => {
 
                     </svg>
 
-                    <h3 className="text-lg font-semibold text-gray-800">
+                    <h3 className="text-lg font-semibold text-[#1a1a1a]">
 
                       Facilities
 
@@ -3422,7 +3422,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   </div>
 
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-[#7d6c5c]">
 
                     Saved after preview
 
@@ -3436,7 +3436,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   <div className="text-center py-4">
 
-                    <p className="text-gray-500 text-sm">Loading facilities...</p>
+                    <p className="text-[#7d6c5c] text-sm">Loading facilities...</p>
 
                   </div>
 
@@ -3444,7 +3444,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   <div className="text-center py-4">
 
-                    <p className="text-gray-500 text-sm">Facilities are unavailable right now.</p>
+                    <p className="text-[#7d6c5c] text-sm">Facilities are unavailable right now.</p>
 
                   </div>
 
@@ -3458,7 +3458,7 @@ const handleManualOwnerIdSubmit = () => {
 
                         key={facility.facilityName}
 
-                        className="flex items-center gap-2 p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        className="flex items-center gap-2 p-3 bg-[#f7f0e8] border border-[#d9c7b2] rounded-xl hover:bg-[#efe4d7] cursor-pointer transition-colors"
 
                       >
 
@@ -3474,9 +3474,9 @@ const handleManualOwnerIdSubmit = () => {
 
                         />
 
-                        <span className="w-4 h-4 rounded-full border border-gray-400 bg-white flex-shrink-0 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-focus:ring-2 peer-focus:ring-blue-500 peer-focus:ring-offset-1" />
+                        <span className="w-4 h-4 rounded-full border border-[#8b8178] bg-[#f7f0e8] flex-shrink-0 peer-checked:border-[#ff7a00] peer-checked:bg-[#f97316] peer-focus:ring-2 peer-focus:ring-[#ff7a00]/30 peer-focus:ring-offset-1" />
 
-                        <span className="text-sm text-gray-700">
+                        <span className="text-sm text-[#3d3127]">
 
                           {formatFacilityName(facility.facilityName)}
 
@@ -3506,7 +3506,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 disabled={loading || !ownerId}
 
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="w-full bg-[#f97316] text-white py-3 rounded-xl font-semibold hover:bg-[#ea6a0a] transition-colors shadow-[0_10px_30px_rgba(0,0,0,0.12)] disabled:bg-[#c9af91] disabled:cursor-not-allowed"
 
               >
 
@@ -3532,7 +3532,7 @@ const handleManualOwnerIdSubmit = () => {
 
         {/* Properties Section */}
 
-        <div className="mt-8 bg-white rounded-xl shadow-sm p-8">
+        <div className="mt-8 bg-[#f7f0e8] rounded-[24px] border-2 border-[#d8c2a8] shadow-[0_25px_80px_rgba(0,0,0,0.28)] p-8">
 
           <div className="flex items-center justify-between mb-6">
 
@@ -3540,7 +3540,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <svg
 
-                className="w-6 h-6 text-blue-600"
+                className="w-6 h-6 text-[#ff7a00]"
 
                 fill="none"
 
@@ -3564,7 +3564,7 @@ const handleManualOwnerIdSubmit = () => {
 
               </svg>
 
-              <h2 className="text-2xl font-bold text-gray-800">
+              <h2 className="text-2xl font-bold text-[#1a1a1a]">
 
                 Properties
 
@@ -3572,7 +3572,7 @@ const handleManualOwnerIdSubmit = () => {
 
             </div>
 
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-[#7d6c5c]">
 
               {properties.length} Properties
 
@@ -3586,7 +3586,7 @@ const handleManualOwnerIdSubmit = () => {
 
             <div className="text-center py-8">
 
-              <p className="text-gray-500">Loading properties...</p>
+              <p className="text-[#7d6c5c]">Loading properties...</p>
 
             </div>
 
@@ -3594,7 +3594,7 @@ const handleManualOwnerIdSubmit = () => {
 
             <div className="text-center py-8">
 
-              <p className="text-gray-500">
+              <p className="text-[#7d6c5c]">
 
                 {propertyFetchMessage || "No properties found"}
 
@@ -3612,11 +3612,11 @@ const handleManualOwnerIdSubmit = () => {
 
                   key={property.id}
 
-                  className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                  className="border border-[#d9c7b2] bg-[#f9f3ed] rounded-xl overflow-hidden hover:shadow-[0_14px_34px_rgba(249,115,22,0.16)] transition-shadow"
 
                 >
 
-                  <div className="h-48 bg-gray-200">
+                  <div className="h-48 bg-[#d8c2a8]">
 
                     <PropertyThumbnail
 
@@ -3632,7 +3632,7 @@ const handleManualOwnerIdSubmit = () => {
 
                     <div className="flex items-start justify-between gap-2 mb-2">
 
-                      <h3 className="font-semibold text-gray-800">
+                      <h3 className="font-semibold text-[#1a1a1a]">
 
                         {property.title}
 
@@ -3654,21 +3654,21 @@ const handleManualOwnerIdSubmit = () => {
 
                     </div>
 
-                    <p className="text-xs text-gray-400 mb-1">ID: {property.id}</p>
+                    <p className="text-xs text-[#8b8178] mb-1">ID: {property.id}</p>
 
-                    <p className="text-sm text-gray-500 mb-1">
+                    <p className="text-sm text-[#7d6c5c] mb-1">
 
                       {property.location}
 
                     </p>
 
-                    <p className="text-sm font-medium text-blue-600 mb-1">
+                    <p className="text-sm font-medium text-[#ff7a00] mb-1">
 
                       ₹{property.price?.toLocaleString()}
 
                     </p>
 
-                    <p className="text-sm text-gray-500 mb-3">
+                    <p className="text-sm text-[#7d6c5c] mb-3">
 
                       {property.mobileNumber}
 
@@ -3681,7 +3681,7 @@ const handleManualOwnerIdSubmit = () => {
 
                         onClick={() => handleEditProperty(property)}
 
-                        className="text-blue-500 hover:text-blue-700"
+                        className="text-[#ff7a00] hover:text-[#e36a00]"
 
                       >
 
@@ -3773,15 +3773,15 @@ const handleManualOwnerIdSubmit = () => {
 
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
 
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
+          <div className="bg-[#f7f0e8] rounded-[24px] shadow-xl max-w-md w-full mx-4 p-6">
 
-            <h2 className="text-xl font-bold text-gray-800 text-center">
+            <h2 className="text-xl font-bold text-[#1a1a1a] text-center">
 
               Payment Required for Property
 
             </h2>
 
-            <p className="text-sm text-gray-600 text-center mt-2">
+            <p className="text-sm text-[#5d5145] text-center mt-2">
 
               Scan this QR code, complete payment, then click Done to submit your property for admin approval.
 
@@ -3789,7 +3789,7 @@ const handleManualOwnerIdSubmit = () => {
 
             {pendingPropertyId && (
 
-              <p className="text-xs text-blue-600 text-center mt-1 font-medium">
+              <p className="text-xs text-[#ff7a00] text-center mt-1 font-medium">
 
                 Property ID: {pendingPropertyId}
 
@@ -3807,7 +3807,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 alt="Owner premium payment QR"
 
-                className="w-full rounded-lg border border-gray-200"
+                className="w-full rounded-xl border border-[#d9c7b2]"
 
               />
 
@@ -3815,7 +3815,7 @@ const handleManualOwnerIdSubmit = () => {
 
 
 
-            <div className="mt-5 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+            <div className="mt-5 bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-800">
 
               After clicking Done, your request appears in admin dashboard for approval or rejection.
 
@@ -3831,7 +3831,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 onClick={() => setShowPremiumModal(false)}
 
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50"
+                className="flex-1 px-4 py-3 border border-[#d9c7b2] rounded-xl font-semibold hover:bg-[#efe4d7]"
 
               >
 
@@ -3847,7 +3847,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 disabled={premiumLoading}
 
-                className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400"
+                className="flex-1 bg-[#f97316] text-white py-3 rounded-xl font-semibold hover:bg-[#ea6a0a] disabled:bg-[#c9af91]"
 
               >
 
@@ -3859,7 +3859,7 @@ const handleManualOwnerIdSubmit = () => {
 
 
 
-            <p className="text-xs text-gray-500 text-center mt-3">
+            <p className="text-xs text-[#7d6c5c] text-center mt-3">
 
               Current premium status: {ownerPremiumStatus}
 
@@ -3897,11 +3897,11 @@ const handleManualOwnerIdSubmit = () => {
 
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 
-          <div className="bg-white rounded-xl shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#f7f0e8] rounded-[24px] shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
 
             <div className="flex justify-between items-center p-6 border-b">
 
-              <h2 className="text-2xl font-bold text-gray-800">Preview Property</h2>
+              <h2 className="text-2xl font-bold text-[#1a1a1a]">Preview Property</h2>
 
               <button
 
@@ -3909,7 +3909,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 onClick={() => setShowPreviewModal(false)}
 
-                className="text-gray-500 hover:text-gray-700"
+                className="text-[#7d6c5c] hover:text-[#3d3127]"
 
                 aria-label="Close preview"
 
@@ -3951,21 +3951,21 @@ const handleManualOwnerIdSubmit = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
 
-                <div><span className="font-semibold text-gray-700">Title:</span> {formData.propertyTitle}</div>
+                <div><span className="font-semibold text-[#3d3127]">Title:</span> {formData.propertyTitle}</div>
 
-                <div><span className="font-semibold text-gray-700">Price:</span> ₹{Number(formData.price || 0).toLocaleString()}</div>
+                <div><span className="font-semibold text-[#3d3127]">Price:</span> ₹{Number(formData.price || 0).toLocaleString()}</div>
 
-                <div><span className="font-semibold text-gray-700">Type:</span> {formData.propertyType}</div>
+                <div><span className="font-semibold text-[#3d3127]">Type:</span> {formData.propertyType}</div>
 
-                <div><span className="font-semibold text-gray-700">BHK:</span> {formData.bhkType}</div>
+                <div><span className="font-semibold text-[#3d3127]">BHK:</span> {formData.bhkType}</div>
 
-                <div><span className="font-semibold text-gray-700">Furnishing:</span> {formData.furnishing}</div>
+                <div><span className="font-semibold text-[#3d3127]">Furnishing:</span> {formData.furnishing}</div>
 
-                <div><span className="font-semibold text-gray-700">Mobile:</span> {formData.mobileNumber}</div>
+                <div><span className="font-semibold text-[#3d3127]">Mobile:</span> {formData.mobileNumber}</div>
 
-                <div className="md:col-span-2"><span className="font-semibold text-gray-700">Location:</span> {formData.location}</div>
+                <div className="md:col-span-2"><span className="font-semibold text-[#3d3127]">Location:</span> {formData.location}</div>
 
-                <div className="md:col-span-2"><span className="font-semibold text-gray-700">Description:</span> {formData.description}</div>
+                <div className="md:col-span-2"><span className="font-semibold text-[#3d3127]">Description:</span> {formData.description}</div>
 
               </div>
 
@@ -3973,11 +3973,11 @@ const handleManualOwnerIdSubmit = () => {
 
               <div className="mt-6">
 
-                <h3 className="font-semibold text-gray-800 mb-3">Selected Facilities</h3>
+                <h3 className="font-semibold text-[#1a1a1a] mb-3">Selected Facilities</h3>
 
                 {Array.from(selectedFacilities).length === 0 ? (
 
-                  <p className="text-sm text-gray-500">No facilities selected</p>
+                  <p className="text-sm text-[#7d6c5c]">No facilities selected</p>
 
                 ) : (
 
@@ -3993,13 +3993,13 @@ const handleManualOwnerIdSubmit = () => {
 
                         key={facilityName}
 
-                        className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg bg-gray-50"
+                        className="flex items-center gap-2 p-3 border border-[#d9c7b2] rounded-xl bg-[#efe4d7]"
 
                       >
 
-                        <span className="w-4 h-4 rounded-full border border-blue-600 bg-blue-600 flex-shrink-0" />
+                        <span className="w-4 h-4 rounded-full border border-[#ff7a00] bg-[#f97316] flex-shrink-0" />
 
-                        <span className="text-sm text-gray-700">
+                        <span className="text-sm text-[#3d3127]">
 
                           {formatFacilityName(facilityName)}
 
@@ -4019,7 +4019,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div className="mt-6">
 
-                <h3 className="font-semibold text-gray-800 mb-3">Selected Images</h3>
+                <h3 className="font-semibold text-[#1a1a1a] mb-3">Selected Images</h3>
 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
 
@@ -4031,7 +4031,7 @@ const handleManualOwnerIdSubmit = () => {
 
                     .map((item) => (
 
-                      <div key={item.index} className="border rounded-lg p-2">
+                      <div key={item.index} className="border rounded-xl p-2">
 
                         <img
 
@@ -4043,7 +4043,7 @@ const handleManualOwnerIdSubmit = () => {
 
                         />
 
-                        <p className="text-xs text-gray-600 mt-2 text-center">{imageLabels[item.index]}</p>
+                        <p className="text-xs text-[#5d5145] mt-2 text-center">{imageLabels[item.index]}</p>
 
                       </div>
 
@@ -4063,7 +4063,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   onClick={() => setShowPreviewModal(false)}
 
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-3 border border-[#d9c7b2] rounded-xl font-semibold hover:bg-[#efe4d7] transition-colors"
 
                 >
 
@@ -4079,7 +4079,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   disabled={uploading}
 
-                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                  className="flex-1 bg-[#f97316] text-white py-3 rounded-xl font-semibold hover:bg-[#ea6a0a] transition-colors disabled:bg-[#c9af91]"
 
                 >
 
@@ -4105,17 +4105,17 @@ const handleManualOwnerIdSubmit = () => {
 
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#f7f0e8] rounded-[24px] shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
 
             <div className="flex justify-between items-center p-6 border-b">
 
-              <h2 className="text-2xl font-bold text-gray-800">Edit Property</h2>
+              <h2 className="text-2xl font-bold text-[#1a1a1a]">Edit Property</h2>
 
               <button
 
                 onClick={handleCloseEditModal}
 
-                className="text-gray-500 hover:text-gray-700"
+                className="text-[#7d6c5c] hover:text-[#3d3127]"
 
               >
 
@@ -4157,7 +4157,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <div>
 
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                     Property Title <span className="text-red-500">*</span>
 
@@ -4167,7 +4167,7 @@ const handleManualOwnerIdSubmit = () => {
 
                     type="text"
 
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
 
                     value={formData.propertyTitle}
 
@@ -4185,7 +4185,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <div>
 
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                     Price <span className="text-red-500">*</span>
 
@@ -4195,7 +4195,7 @@ const handleManualOwnerIdSubmit = () => {
 
                     type="text"
 
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
 
                     value={formData.price}
 
@@ -4213,7 +4213,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <div>
 
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                     Property Type <span className="text-red-500">*</span>
 
@@ -4221,7 +4221,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   <select
 
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
 
                     value={formData.propertyType}
 
@@ -4249,7 +4249,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <div>
 
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                     PG Type
 
@@ -4257,7 +4257,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   <select
 
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
 
                     value={formData.pgType}
 
@@ -4287,7 +4287,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Apartment Name <span className="text-red-500">*</span>
 
@@ -4297,7 +4297,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
 
                   value={formData.apartmentName}
 
@@ -4315,7 +4315,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Location <span className="text-red-500">*</span>
 
@@ -4325,7 +4325,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
 
                   value={formData.location}
 
@@ -4343,7 +4343,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   City <span className="text-red-500">*</span>
 
@@ -4353,7 +4353,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
 
                   value={formData.city}
 
@@ -4371,7 +4371,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Address <span className="text-red-500">*</span>
 
@@ -4381,7 +4381,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
 
                   value={formData.address}
 
@@ -4399,7 +4399,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   State <span className="text-red-500">*</span>
 
@@ -4409,7 +4409,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#efe4d7]"
 
                   placeholder="Auto-filled from city"
 
@@ -4425,7 +4425,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Pincode <span className="text-red-500">*</span>
 
@@ -4435,7 +4435,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
 
                   value={formData.pincode}
 
@@ -4453,7 +4453,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Mobile Number <span className="text-red-500">*</span>
 
@@ -4463,7 +4463,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   type="text"
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
 
                   value={formData.mobileNumber}
 
@@ -4481,7 +4481,7 @@ const handleManualOwnerIdSubmit = () => {
 
               <div>
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                   Description <span className="text-red-500">*</span>
 
@@ -4489,7 +4489,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <textarea
 
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
 
                   rows="4"
 
@@ -4511,7 +4511,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <div>
 
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                     BHK Type <span className="text-red-500">*</span>
 
@@ -4519,7 +4519,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   <select
 
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
 
                     value={formData.bhkType}
 
@@ -4551,7 +4551,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <div>
 
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                     Furnishing <span className="text-red-500">*</span>
 
@@ -4559,7 +4559,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   <select
 
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
 
                     value={formData.furnishing}
 
@@ -4587,7 +4587,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 <div>
 
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#3d3127] mb-2">
 
                     Carpet Area <span className="text-red-500">*</span>
 
@@ -4597,7 +4597,7 @@ const handleManualOwnerIdSubmit = () => {
 
                     type="text"
 
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
 
                     value={formData.carpetArea}
 
@@ -4615,11 +4615,11 @@ const handleManualOwnerIdSubmit = () => {
 
 
 
-              <div className="bg-gray-50 rounded-xl p-5">
+              <div className="bg-[#efe4d7] rounded-[24px] p-5">
 
                 <div className="flex items-center justify-between mb-4">
 
-                  <h3 className="text-lg font-semibold text-gray-800">
+                  <h3 className="text-lg font-semibold text-[#1a1a1a]">
 
                     Facilities
 
@@ -4627,7 +4627,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   {facilitiesLoading && (
 
-                    <span className="text-sm text-gray-500">Loading...</span>
+                    <span className="text-sm text-[#7d6c5c]">Loading...</span>
 
                   )}
 
@@ -4641,7 +4641,7 @@ const handleManualOwnerIdSubmit = () => {
 
                       key={facility.facilityName}
 
-                      className="flex items-center gap-2 p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="flex items-center gap-2 p-3 bg-[#f7f0e8] border border-[#d9c7b2] rounded-xl hover:bg-[#efe4d7] cursor-pointer transition-colors"
 
                     >
 
@@ -4657,9 +4657,9 @@ const handleManualOwnerIdSubmit = () => {
 
                       />
 
-                      <span className="w-4 h-4 rounded-full border border-gray-400 bg-white flex-shrink-0 peer-checked:border-blue-600 peer-checked:bg-blue-600 peer-focus:ring-2 peer-focus:ring-blue-500 peer-focus:ring-offset-1" />
+                      <span className="w-4 h-4 rounded-full border border-[#8b8178] bg-[#f7f0e8] flex-shrink-0 peer-checked:border-[#ff7a00] peer-checked:bg-[#f97316] peer-focus:ring-2 peer-focus:ring-[#ff7a00]/30 peer-focus:ring-offset-1" />
 
-                      <span className="text-sm text-gray-700">
+                      <span className="text-sm text-[#3d3127]">
 
                         {formatFacilityName(facility.facilityName)}
 
@@ -4683,7 +4683,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   onClick={handleCloseEditModal}
 
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-3 border border-[#d9c7b2] rounded-xl font-semibold hover:bg-[#efe4d7] transition-colors"
 
                 >
 
@@ -4697,7 +4697,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   disabled={loading}
 
-                  className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                  className="flex-1 bg-[#f97316] text-white py-3 rounded-xl font-semibold hover:bg-[#ea6a0a] transition-colors disabled:bg-[#c9af91]"
 
                 >
 
@@ -4725,7 +4725,7 @@ const handleManualOwnerIdSubmit = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#ff7f50] to-[#ff9f80] rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#ff7f50] to-[#ff9f80] rounded-[24px] flex items-center justify-center">
                   <span className="text-white font-bold text-lg">C</span>
                 </div>
                 <span className="text-2xl font-black">Caryanam</span>
