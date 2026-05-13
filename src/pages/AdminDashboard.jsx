@@ -47,6 +47,8 @@ const OWNER_ID_BY_EMAIL_KEY = "ownerIdByEmail";
 
 const OWNER_APPROVAL_STATUS_KEY = "ownerApprovalStatuses";
 
+const PROPERTY_PAYMENT_STATUS_KEY = "propertyPaymentStatuses";
+
 const OWNER_NAME_KEY = "ownerName";
 
 const OWNER_NAME_BY_EMAIL_KEY = "ownerNameByEmail";
@@ -114,6 +116,48 @@ const writeStoredOwnerApprovalStatus = (ownerId, status) => {
   if (ownerEmail) approvalStatuses[`email:${ownerEmail}`] = status;
 
   localStorage.setItem(OWNER_APPROVAL_STATUS_KEY, JSON.stringify(approvalStatuses));
+
+};
+
+
+
+const readPropertyPaymentStatuses = () => {
+
+  try {
+
+    const parsed = JSON.parse(localStorage.getItem(PROPERTY_PAYMENT_STATUS_KEY) || "{}");
+
+    return parsed && typeof parsed === "object" ? parsed : {};
+
+  } catch {
+
+    return {};
+
+  }
+
+};
+
+
+
+const getStoredPropertyPaymentStatus = (propertyId) => {
+
+  if (!propertyId) return "";
+
+  return String(readPropertyPaymentStatuses()[String(propertyId)] || "").toUpperCase();
+
+};
+
+
+
+const writeStoredPropertyPaymentStatus = (propertyId, status) => {
+
+  if (!propertyId) return;
+
+  const paymentStatuses = readPropertyPaymentStatuses();
+
+  paymentStatuses[String(propertyId)] = status;
+
+  localStorage.setItem(PROPERTY_PAYMENT_STATUS_KEY, JSON.stringify(paymentStatuses));
 
 };
 
@@ -958,6 +1002,19 @@ const handleManualOwnerIdSubmit = () => {
 
     const detailImages = getDetailImages(property || {});
 
+    const propertyId = property?.id || property?.propertyId;
+
+    const backendPaymentStatus = String(property?.paymentStatus || "").toUpperCase();
+
+    if (
+      propertyId &&
+      (backendPaymentStatus === "APPROVED" ||
+        backendPaymentStatus === "REJECTED" ||
+        backendPaymentStatus === "PENDING")
+    ) {
+      writeStoredPropertyPaymentStatus(propertyId, backendPaymentStatus);
+    }
+
     return {
 
       ...property,
@@ -1216,46 +1273,40 @@ const handleManualOwnerIdSubmit = () => {
 
   const resolvePropertyApprovalStatus = (property) => {
 
-    // First, check property-specific paymentStatus from database (this is the individual property status)
+    const propertyId = property?.id || property?.propertyId;
+
+    // Backend property payment status takes precedence over local cache.
     const propertyPaymentStatus = String(property?.paymentStatus || "").toUpperCase();
 
-    if (propertyPaymentStatus) {
+    if (
+      propertyPaymentStatus === "APPROVED" ||
+      propertyPaymentStatus === "REJECTED" ||
+      propertyPaymentStatus === "PENDING"
+    ) {
       return propertyPaymentStatus;
     }
 
-    // Fallback to property premiumStatus (owner's status copied to property)
-    const propertyPremiumStatus = String(property?.premiumStatus || "").toUpperCase();
+    const storedPropertyStatus = getStoredPropertyPaymentStatus(propertyId);
 
-    // Parse comma-separated status string and prioritize: PENDING > APPROVED > REJECTED
-    if (propertyPremiumStatus) {
-      const statuses = propertyPremiumStatus.split(',').map(s => s.trim());
-      if (statuses.includes('PENDING')) return "PENDING";
-      if (statuses.includes('APPROVED')) return "APPROVED";
-      if (statuses.includes('REJECTED')) return "REJECTED";
-      // If none of the expected statuses, return the last one
-      return statuses[statuses.length - 1] || "PENDING";
+    if (storedPropertyStatus) {
+
+      return storedPropertyStatus;
+
     }
 
-    // Fallback to owner-level status if property status is not set
-    const workflowStatus = String(ownerApprovalStatus || ownerPremiumStatus || "").toUpperCase();
-
-    if (workflowStatus === "APPROVED") return "APPROVED";
-
-    if (workflowStatus === "REJECTED") return "REJECTED";
-
-    if (workflowStatus === "PENDING") return "PENDING";
-
-
+    // Do not use property.premiumStatus here. Backend may copy owner-level
+    // premium state into this field, which can incorrectly mark new properties
+    // as APPROVED/PENDING before this property's payment flow starts.
 
     const backendStatus = String(property?.status || "").toUpperCase();
 
-    if (backendStatus === "PENDING") return "PENDING";
+    if (backendStatus === "PENDING") return "PAYMENT_DUE";
 
     if (backendStatus === "INACTIVE") return "REJECTED";
 
-    if (backendStatus === "ACTIVE") return "PENDING";
+    if (backendStatus === "ACTIVE") return "PAYMENT_DUE";
 
-    return "PENDING";
+    return "PAYMENT_DUE";
 
   };
 
@@ -1272,6 +1323,12 @@ const handleManualOwnerIdSubmit = () => {
     if (status === "REJECTED") {
 
       return "bg-red-100 text-red-700 border border-red-200";
+
+    }
+
+    if (status === "PAYMENT_DUE") {
+
+      return "bg-orange-100 text-orange-700 border border-orange-200";
 
     }
 
@@ -2049,13 +2106,7 @@ const handleManualOwnerIdSubmit = () => {
 
         setPropertyFetchMessage("");
 
-        setOwnerPremiumStatus("PENDING");
-
-        setOwnerApprovalStatus("PENDING");
-
-        setPendingPropertyId(createdPropertyId);
-
-        setShowPremiumModal(true);
+        toast.info("Property uploaded. You can complete payment anytime from this property card.");
 
 
 
@@ -2160,6 +2211,36 @@ const handleManualOwnerIdSubmit = () => {
       toast.error(err.response?.data?.message || err.message || "Failed to delete property");
 
     }
+
+  };
+
+
+
+  const handleOpenPropertyPayment = (property) => {
+
+    const propertyId = property?.id || property?.propertyId;
+
+    if (!propertyId) {
+
+      toast.error("Property ID is missing for this listing.");
+
+      return;
+
+    }
+
+    setPendingPropertyId(propertyId);
+
+    setShowPremiumModal(true);
+
+  };
+
+
+
+  const handleClosePremiumModal = () => {
+
+    setShowPremiumModal(false);
+
+    setPendingPropertyId(null);
 
   };
 
@@ -2446,6 +2527,8 @@ const handleManualOwnerIdSubmit = () => {
       const nextStatus = String(status).toUpperCase() === "APPROVED" ? "APPROVED" : "PENDING";
 
       writeStoredOwnerApprovalStatus(ownerId, nextStatus);
+
+      writeStoredPropertyPaymentStatus(pendingPropertyId, nextStatus);
 
       setOwnerPremiumStatus(nextStatus);
 
@@ -3517,11 +3600,18 @@ const handleManualOwnerIdSubmit = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-              {properties.map((property) => (
+              {properties.map((property) => {
+
+                const approvalStatus = resolvePropertyApprovalStatus(property);
+
+                const shouldShowPaymentButton =
+                  approvalStatus !== "APPROVED" && approvalStatus !== "PENDING";
+
+                return (
 
                 <div
 
-                  key={property.id}
+                  key={property.id || property.propertyId}
 
                   className="border border-[#d9c7b2] bg-[#f9f3ed] rounded-xl overflow-hidden hover:shadow-[0_14px_34px_rgba(249,115,22,0.16)] transition-shadow"
 
@@ -3553,13 +3643,13 @@ const handleManualOwnerIdSubmit = () => {
 
                         className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${getApprovalBadgeClasses(
 
-                          resolvePropertyApprovalStatus(property)
+                          approvalStatus
 
                         )}`}
 
                       >
 
-                        {resolvePropertyApprovalStatus(property)}
+                        {approvalStatus === "PAYMENT_DUE" ? "PAYMENT DUE" : approvalStatus}
 
                       </span>
 
@@ -3585,7 +3675,25 @@ const handleManualOwnerIdSubmit = () => {
 
                 </p>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-3">
+
+                      {shouldShowPaymentButton && (
+
+                        <button
+
+                          type="button"
+
+                          onClick={() => handleOpenPropertyPayment(property)}
+
+                          className="inline-flex items-center justify-center rounded-xl bg-[#f97316] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(249,115,22,0.25)] hover:bg-[#ea6a0a] transition-colors"
+
+                        >
+
+                          {approvalStatus === "REJECTED" ? "Pay Again" : "Pay Now"}
+
+                        </button>
+
+                      )}
 
 
                       <button
@@ -3666,7 +3774,10 @@ const handleManualOwnerIdSubmit = () => {
 
                 </div>
 
-              ))}
+                );
+
+              })}
+
 
             </div>
 
@@ -3694,7 +3805,7 @@ const handleManualOwnerIdSubmit = () => {
 
             <p className="text-sm text-[#5d5145] text-center mt-2">
 
-              Scan this QR code, complete payment, then click Done to submit your property for admin approval.
+              Scan this QR code, complete payment, then click Done to submit this property for admin approval.
 
             </p>
 
@@ -3740,7 +3851,7 @@ const handleManualOwnerIdSubmit = () => {
 
                 type="button"
 
-                onClick={() => setShowPremiumModal(false)}
+                onClick={handleClosePremiumModal}
 
                 className="flex-1 px-4 py-3 border border-[#d9c7b2] rounded-xl font-semibold hover:bg-[#efe4d7]"
 
