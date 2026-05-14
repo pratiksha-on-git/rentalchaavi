@@ -2695,12 +2695,12 @@ setOtp("");
 
 
   const handleLogin = async () => {
-    const error = validate();
+  const error = validate();
 
-    if (error) {
-      alert(error);
-      return;
-    }
+  if (error) {
+    toast.error(error);  
+    return;
+  }
 
     try {
       setLoading(true);
@@ -2797,6 +2797,12 @@ useEffect(() => {
   <ToastContainer
   position="top-right"
   autoClose={2500}
+  hideProgressBar={false}
+  newestOnTop
+  closeOnClick
+  pauseOnHover
+  draggable
+  limit={1}
   theme="dark"
   toastStyle={{
     background: "#111111",
@@ -3281,14 +3287,16 @@ className="bg-[#fff8ef] border border-[#ead8c4] rounded-3xl shadow-2xl p-5 sm:p-
 {!isLogin && (
   <>
     {!emailVerified && (
-      <button
-        type="button"
-        onClick={sendEmailOtp}
-        disabled={loading}
-        className="w-full h-11 rounded-xl bg-blue-500 text-white font-semibold"
-      >
-        {loading ? "Sending OTP..." : "Verify Email"}
-      </button>
+      <div className="flex justify-end">
+  <button
+    type="button"
+    onClick={sendEmailOtp}
+    disabled={loading}
+    className="px-4 py-2 rounded-lg bg-[#ff7b32] text-white text-sm font-semibold hover:bg-[#e66a1f] transition-colors w-fit"
+  >
+    {loading ? "Sending OTP..." : "Verify Email"}
+  </button>
+</div>
     )}
 
     {showOtpBox && (
@@ -3305,7 +3313,7 @@ className="bg-[#fff8ef] border border-[#ead8c4] rounded-3xl shadow-2xl p-5 sm:p-
           type="button"
           onClick={verifyOtp}
           disabled={loading}
-          className="w-full h-11 rounded-xl bg-green-500 text-white font-semibold"
+  className="w-full h-11 rounded-xl bg-[#ff7b32] text-white font-semibold hover:bg-[#e66a1f] transition-colors"
         >
           {loading ? "Verifying..." : "Verify OTP"}
         </button>

@@ -1,4 +1,5 @@
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { useState } from "react";
 import { authApi } from "../services/api";
@@ -26,7 +27,7 @@ export default function ForgotPassword() {
 
   const sendOtp = async () => {
     if (!email) {
-      alert("Email required");
+      toast.error("Email required");
       return;
     }
 
@@ -37,10 +38,10 @@ export default function ForgotPassword() {
         email: email.toLowerCase().trim(),
       });
 
-      alert("OTP sent successfully");
+      toast.success("OTP sent successfully");
       setStep(2);
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to send OTP");
+      toast.error(err.response?.data?.message || "Failed to send OTP");
     } finally {
       setLoading(false);
     }
@@ -48,7 +49,8 @@ export default function ForgotPassword() {
 
   const verifyOtp = async () => {
     if (!otp) {
-      alert("OTP required");
+      toast.error("OTP required");
+
       return;
     }
 
@@ -60,10 +62,10 @@ export default function ForgotPassword() {
         otp,
       });
 
-      alert("OTP verified");
+      toast.success("OTP verified");
       setStep(3);
     } catch (err) {
-      alert(err.response?.data?.message || "Invalid OTP");
+      toast.error(err.response?.data?.message || "Invalid OTP");
     } finally {
       setLoading(false);
     }
@@ -71,12 +73,12 @@ export default function ForgotPassword() {
 
   const resetPassword = async () => {
     if (!form.newPassword || !form.confirmPassword) {
-      alert("Fill all fields");
+      toast.error("Fill all fields");
       return;
     }
 
     if (form.newPassword !== form.confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -89,10 +91,10 @@ export default function ForgotPassword() {
         confirmPassword: form.confirmPassword,
       });
 
-      alert("Password updated successfully");
+      toast.success("Password updated successfully");
       navigate("/login");
     } catch (err) {
-      alert(err.response?.data?.message || "Reset failed");
+      toast.error(err.response?.data?.message || "Reset failed");
     } finally {
       setLoading(false);
     }
@@ -100,6 +102,12 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-r from-[#1c1c1c] via-[#2a2a2a] to-[#3a2b2b]">
+      <ToastContainer
+  position="top-right"
+  autoClose={2500}
+  theme="dark"
+  limit={1}
+/>
       <motion.div
         initial={{ scale: 0.94, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
