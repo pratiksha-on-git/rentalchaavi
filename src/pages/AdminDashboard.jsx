@@ -12,7 +12,24 @@ import "react-toastify/dist/ReactToastify.css";
 
 import OwnerPremiumQrImage from "../assets/QR.jpeg";
 
-import { LogOut, MessageCircle } from "lucide-react";
+import {
+  AlignLeft,
+  Armchair,
+  BedDouble,
+  Building2,
+  FileText,
+  IndianRupee,
+  Landmark,
+  LogOut,
+  MapPin,
+  MapPinned,
+  MessageCircle,
+  Navigation,
+  Phone,
+  Ruler,
+  Upload,
+  Users,
+} from "lucide-react";
 
 import ChatDrawer from "../components/ChatDrawer";
 
@@ -35,6 +52,16 @@ const OWNER_NAME_KEY = "ownerName";
 const OWNER_NAME_BY_EMAIL_KEY = "ownerNameByEmail";
 
 const PROPERTY_STATE = "Maharashtra";
+const uploadFieldClass =
+  "w-full pl-11 pr-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed] text-black placeholder:text-black";
+const uploadSelectClass =
+  "w-full pl-11 pr-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8] text-black";
+const uploadReadonlyFieldClass =
+  "w-full pl-11 pr-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#efe4d7] text-black placeholder:text-black";
+const uploadIconClass =
+  "pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#ff7a00]";
+const uploadTextareaIconClass =
+  "pointer-events-none absolute left-4 top-4 h-5 w-5 text-[#ff7a00]";
 
 
 
@@ -2652,31 +2679,7 @@ const handleManualOwnerIdSubmit = () => {
 
           <div className="flex items-center gap-3 mb-6">
 
-            <svg
-
-              className="w-6 h-6 text-[#ff7a00]"
-
-              fill="none"
-
-              stroke="currentColor"
-
-              viewBox="0 0 24 24"
-
-            >
-
-              <path
-
-                strokeLinecap="round"
-
-                strokeLinejoin="round"
-
-                strokeWidth={2}
-
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-
-              />
-
-            </svg>
+            <Upload className="w-6 h-6 text-[#ff7a00]" aria-hidden="true" />
 
             <h2 className="text-2xl font-bold text-[#1a1a1a]">
 
@@ -2702,23 +2705,18 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <input
-
-                  type="text"
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
-
-                  placeholder="Enter property title"
-
-                  value={formData.propertyTitle}
-
-                  onChange={(e) =>
-
-                    setFormData({ ...formData, propertyTitle: e.target.value })
-
-                  }
-
-                />
+                <div className="relative">
+                  <FileText className={uploadIconClass} aria-hidden="true" />
+                  <input
+                    type="text"
+                    className={uploadFieldClass}
+                    placeholder="Enter property title"
+                    value={formData.propertyTitle}
+                    onChange={(e) =>
+                      setFormData({ ...formData, propertyTitle: e.target.value })
+                    }
+                  />
+                </div>
 
               </div>
 
@@ -2732,23 +2730,18 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <input
-
-                  type="text"
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
-
-                  placeholder="Enter price"
-
-                  value={formData.price}
-
-                  onChange={(e) =>
-
-                    setFormData({ ...formData, price: e.target.value })
-
-                  }
-
-                />
+                <div className="relative">
+                  <IndianRupee className={uploadIconClass} aria-hidden="true" />
+                  <input
+                    type="text"
+                    className={uploadFieldClass}
+                    placeholder="Enter price"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                  />
+                </div>
 
               </div>
 
@@ -2762,29 +2755,21 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <select
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
-
-                  value={formData.propertyType}
-
-                  onChange={(e) => {
-
-                    setFormData({ ...formData, propertyType: e.target.value, pgType: "" });
-
-                  }}
-
-                >
-
-                  <option value="">Select property type</option>
-
-                  <option value="APARTMENT">Apartment</option>
-
-                  <option value="INDEPENDENT_HOUSE">Independent House</option>
-
-                  <option value="STANDALONE_BUILDING">Standalone Building</option>
-
-                </select>
+                <div className="relative">
+                  <Building2 className={uploadIconClass} aria-hidden="true" />
+                  <select
+                    className={uploadSelectClass}
+                    value={formData.propertyType}
+                    onChange={(e) => {
+                      setFormData({ ...formData, propertyType: e.target.value, pgType: "" });
+                    }}
+                  >
+                    <option value="">Select property type</option>
+                    <option value="APARTMENT">Apartment</option>
+                    <option value="INDEPENDENT_HOUSE">Independent House</option>
+                    <option value="STANDALONE_BUILDING">Standalone Building</option>
+                  </select>
+                </div>
 
               </div>
 
@@ -2798,29 +2783,21 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <select
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
-
-                  value={formData.pgType}
-
-                  onChange={(e) =>
-
-                    setFormData({ ...formData, pgType: e.target.value })
-
-                  }
-
-                >
-
-                  <option value="">Select PG type</option>
-
-                  <option value="GIRLS_ONLY">Girls PG</option>
-
-                  <option value="BOYS_ONLY">Boys PG</option>
-
-                  <option value="CO_ED">Co-Ed PG</option>
-
-                </select>
+                <div className="relative">
+                  <Users className={uploadIconClass} aria-hidden="true" />
+                  <select
+                    className={uploadSelectClass}
+                    value={formData.pgType}
+                    onChange={(e) =>
+                      setFormData({ ...formData, pgType: e.target.value })
+                    }
+                  >
+                    <option value="">Select PG type</option>
+                    <option value="GIRLS_ONLY">Girls PG</option>
+                    <option value="BOYS_ONLY">Boys PG</option>
+                    <option value="CO_ED">Co-Ed PG</option>
+                  </select>
+                </div>
 
               </div>
 
@@ -2840,29 +2817,21 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <select
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
-
-                  value={formData.city}
-
-                  onChange={(e) => handleCityChange(e.target.value)}
-
-                >
-
-                  <option value="">Select city</option>
-
-                  {CITY_OPTIONS.map((city) => (
-
-                    <option key={city.value} value={city.value}>
-
-                      {city.label}
-
-                    </option>
-
-                  ))}
-
-                </select>
+                <div className="relative">
+                  <MapPinned className={uploadIconClass} aria-hidden="true" />
+                  <select
+                    className={uploadSelectClass}
+                    value={formData.city}
+                    onChange={(e) => handleCityChange(e.target.value)}
+                  >
+                    <option value="">Select city</option>
+                    {CITY_OPTIONS.map((city) => (
+                      <option key={city.value} value={city.value}>
+                        {city.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
               </div>
 
@@ -2876,31 +2845,22 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <select
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
-
-                  value={formData.location}
-
-                  onChange={(e) => handleLocationChange(e.target.value)}
-
-                  disabled={!formData.city || areaLoading}
-
-                >
-
-                  <option value="">{areaLoading ? "Loading areas..." : "Select location"}</option>
-
-                  {areaOptions.map((location) => (
-
-                    <option key={location} value={location}>
-
-                      {location}
-
-                    </option>
-
-                  ))}
-
-                </select>
+                <div className="relative">
+                  <MapPin className={uploadIconClass} aria-hidden="true" />
+                  <select
+                    className={uploadSelectClass}
+                    value={formData.location}
+                    onChange={(e) => handleLocationChange(e.target.value)}
+                    disabled={!formData.city || areaLoading}
+                  >
+                    <option value="">{areaLoading ? "Loading areas..." : "Select location"}</option>
+                    {areaOptions.map((location) => (
+                      <option key={location} value={location}>
+                        {location}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 {areaMessage && (
 
@@ -2920,23 +2880,18 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <input
-
-                  type="text"
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
-
-                  placeholder="Enter apartment name"
-
-                  value={formData.apartmentName}
-
-                  onChange={(e) =>
-
-                    setFormData({ ...formData, apartmentName: e.target.value })
-
-                  }
-
-                />
+                <div className="relative">
+                  <Landmark className={uploadIconClass} aria-hidden="true" />
+                  <input
+                    type="text"
+                    className={uploadFieldClass}
+                    placeholder="Enter apartment name"
+                    value={formData.apartmentName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, apartmentName: e.target.value })
+                    }
+                  />
+                </div>
 
               </div>
 
@@ -2956,23 +2911,18 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <input
-
-                  type="text"
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
-
-                  placeholder="Enter address"
-
-                  value={formData.address}
-
-                  onChange={(e) =>
-
-                    setFormData({ ...formData, address: e.target.value })
-
-                  }
-
-                />
+                <div className="relative">
+                  <Navigation className={uploadIconClass} aria-hidden="true" />
+                  <input
+                    type="text"
+                    className={uploadFieldClass}
+                    placeholder="Enter address"
+                    value={formData.address}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
+                  />
+                </div>
 
               </div>
 
@@ -2986,19 +2936,16 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <input
-
-                  type="text"
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#efe4d7]"
-
-                  placeholder="Auto-filled from city"
-
-                  value={formData.state}
-
-                  readOnly
-
-                />
+                <div className="relative">
+                  <MapPinned className={uploadIconClass} aria-hidden="true" />
+                  <input
+                    type="text"
+                    className={uploadReadonlyFieldClass}
+                    placeholder="Auto-filled from city"
+                    value={formData.state}
+                    readOnly
+                  />
+                </div>
 
               </div>
 
@@ -3018,19 +2965,16 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <input
-
-                  type="text"
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#efe4d7]"
-
-                  placeholder="Auto-filled based on location"
-
-                  value={formData.pincode}
-
-                  readOnly
-
-                />
+                <div className="relative">
+                  <MapPin className={uploadIconClass} aria-hidden="true" />
+                  <input
+                    type="text"
+                    className={uploadReadonlyFieldClass}
+                    placeholder="Auto-filled based on location"
+                    value={formData.pincode}
+                    readOnly
+                  />
+                </div>
 
               </div>
 
@@ -3044,23 +2988,18 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <input
-
-                  type="text"
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
-
-                  placeholder="Enter mobile number"
-
-                  value={formData.mobileNumber}
-
-                  onChange={(e) =>
-
-                    setFormData({ ...formData, mobileNumber: e.target.value })
-
-                  }
-
-                />
+                <div className="relative">
+                  <Phone className={uploadIconClass} aria-hidden="true" />
+                  <input
+                    type="text"
+                    className={uploadFieldClass}
+                    placeholder="Enter mobile number"
+                    value={formData.mobileNumber}
+                    onChange={(e) =>
+                      setFormData({ ...formData, mobileNumber: e.target.value })
+                    }
+                  />
+                </div>
 
               </div>
 
@@ -3078,23 +3017,18 @@ const handleManualOwnerIdSubmit = () => {
 
               </label>
 
-              <textarea
-
-                className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
-
-                placeholder="Enter property description"
-
-                rows="4"
-
-                value={formData.description}
-
-                onChange={(e) =>
-
-                  setFormData({ ...formData, description: e.target.value })
-
-                }
-
-              />
+              <div className="relative">
+                <AlignLeft className={uploadTextareaIconClass} aria-hidden="true" />
+                <textarea
+                  className={`${uploadFieldClass} min-h-[112px] resize-y`}
+                  placeholder="Enter property description"
+                  rows="4"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                />
+              </div>
 
             </div>
 
@@ -3112,33 +3046,23 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <select
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
-
-                  value={formData.bhkType}
-
-                  onChange={(e) =>
-
-                    setFormData({ ...formData, bhkType: e.target.value })
-
-                  }
-
-                >
-
-                  <option value="">Select BHK type</option>
-
-                  <option value="ONE_BHK">1BHK</option>
-
-                  <option value="TWO_BHK">2BHK</option>
-
-                  <option value="THREE_BHK">3BHK</option>
-
-                  <option value="FOUR_BHK">4BHK</option>
-
-                  <option value="STUDIO">Studio</option>
-
-                </select>
+                <div className="relative">
+                  <BedDouble className={uploadIconClass} aria-hidden="true" />
+                  <select
+                    className={uploadSelectClass}
+                    value={formData.bhkType}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bhkType: e.target.value })
+                    }
+                  >
+                    <option value="">Select BHK type</option>
+                    <option value="ONE_BHK">1BHK</option>
+                    <option value="TWO_BHK">2BHK</option>
+                    <option value="THREE_BHK">3BHK</option>
+                    <option value="FOUR_BHK">4BHK</option>
+                    <option value="STUDIO">Studio</option>
+                  </select>
+                </div>
 
               </div>
 
@@ -3152,29 +3076,21 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <select
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f7f0e8]"
-
-                  value={formData.furnishing}
-
-                  onChange={(e) =>
-
-                    setFormData({ ...formData, furnishing: e.target.value })
-
-                  }
-
-                >
-
-                  <option value="">Select furnishing type</option>
-
-                  <option value="FULLY_FURNISHED">Fully Furnished</option>
-
-                  <option value="SEMI_FURNISHED">Semi Furnished</option>
-
-                  <option value="UNFURNISHED">Unfurnished</option>
-
-                </select>
+                <div className="relative">
+                  <Armchair className={uploadIconClass} aria-hidden="true" />
+                  <select
+                    className={uploadSelectClass}
+                    value={formData.furnishing}
+                    onChange={(e) =>
+                      setFormData({ ...formData, furnishing: e.target.value })
+                    }
+                  >
+                    <option value="">Select furnishing type</option>
+                    <option value="FULLY_FURNISHED">Fully Furnished</option>
+                    <option value="SEMI_FURNISHED">Semi Furnished</option>
+                    <option value="UNFURNISHED">Unfurnished</option>
+                  </select>
+                </div>
 
               </div>
 
@@ -3188,23 +3104,18 @@ const handleManualOwnerIdSubmit = () => {
 
                 </label>
 
-                <input
-
-                  type="text"
-
-                  className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 focus:border-[#ff7a00] bg-[#f9f3ed]"
-
-                  placeholder="Enter carpet area"
-
-                  value={formData.carpetArea}
-
-                  onChange={(e) =>
-
-                    setFormData({ ...formData, carpetArea: e.target.value })
-
-                  }
-
-                />
+                <div className="relative">
+                  <Ruler className={uploadIconClass} aria-hidden="true" />
+                  <input
+                    type="text"
+                    className={uploadFieldClass}
+                    placeholder="Enter carpet area"
+                    value={formData.carpetArea}
+                    onChange={(e) =>
+                      setFormData({ ...formData, carpetArea: e.target.value })
+                    }
+                  />
+                </div>
 
               </div>
 
@@ -3310,7 +3221,7 @@ const handleManualOwnerIdSubmit = () => {
 
                           <svg
 
-                            className="w-10 h-10 text-[#8b8178] mb-3"
+                            className="w-10 h-10 text-[#ff7a00] mb-3"
 
                             fill="none"
 
@@ -3422,7 +3333,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   </div>
 
-                  <span className="text-sm text-[#7d6c5c]">
+                  <span className="text-sm text-black">
 
                     Saved after preview
 
@@ -3436,7 +3347,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   <div className="text-center py-4">
 
-                    <p className="text-[#7d6c5c] text-sm">Loading facilities...</p>
+                    <p className="text-black text-sm">Loading facilities...</p>
 
                   </div>
 
@@ -3444,7 +3355,7 @@ const handleManualOwnerIdSubmit = () => {
 
                   <div className="text-center py-4">
 
-                    <p className="text-[#7d6c5c] text-sm">Facilities are unavailable right now.</p>
+                    <p className="text-black text-sm">Facilities are unavailable right now.</p>
 
                   </div>
 
@@ -3458,7 +3369,7 @@ const handleManualOwnerIdSubmit = () => {
 
                         key={facility.facilityName}
 
-                        className="flex items-center gap-2 p-3 bg-[#f7f0e8] border border-[#d9c7b2] rounded-xl hover:bg-[#efe4d7] cursor-pointer transition-colors"
+                        className="flex items-center gap-2 p-3 bg-[#f7f0e8] border border-[#d9c7b2] rounded-xl text-black hover:bg-[#efe4d7] cursor-pointer transition-colors"
 
                       >
 
@@ -3476,7 +3387,7 @@ const handleManualOwnerIdSubmit = () => {
 
                         <span className="w-4 h-4 rounded-full border border-[#8b8178] bg-[#f7f0e8] flex-shrink-0 peer-checked:border-[#ff7a00] peer-checked:bg-[#f97316] peer-focus:ring-2 peer-focus:ring-[#ff7a00]/30 peer-focus:ring-offset-1" />
 
-                        <span className="text-sm text-[#3d3127]">
+                        <span className="text-sm font-medium !text-black">
 
                           {formatFacilityName(facility.facilityName)}
 
@@ -4659,7 +4570,7 @@ const handleManualOwnerIdSubmit = () => {
 
                       <span className="w-4 h-4 rounded-full border border-[#8b8178] bg-[#f7f0e8] flex-shrink-0 peer-checked:border-[#ff7a00] peer-checked:bg-[#f97316] peer-focus:ring-2 peer-focus:ring-[#ff7a00]/30 peer-focus:ring-offset-1" />
 
-                      <span className="text-sm text-[#3d3127]">
+                      <span className="text-sm font-medium !text-black">
 
                         {formatFacilityName(facility.facilityName)}
 
