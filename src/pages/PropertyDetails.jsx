@@ -2192,11 +2192,11 @@ if (!cancelled) {
                 </div>
 
                 <div className="bg-white/10 border border-white/10 text-white px-7 py-5 rounded-[24px] shadow-[0_10px_30px_rgba(0,0,0,0.24)] min-w-[170px]">
-                  <p className="text-xs uppercase tracking-[3px] text-[#ffbf8a] mb-1">
+                  <p className="text-xs uppercase tracking-[3px] text-[#f36c12] mb-1">
                     Price
                   </p>
 
-                  <h2 className="text-4xl font-black text-[#ff7a00]">
+                  <h2 className="text-4xl font-black text-[#f3ede7]">
                     ₹
                     {property?.price ||
                       "25,000"}

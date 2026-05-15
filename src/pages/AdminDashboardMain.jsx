@@ -144,30 +144,31 @@ const AdminDashboardMain = () => {
       </div>
 
       <div className="w-full max-w-7xl mx-auto p-6 flex-grow">
-        <div className="mb-8 rounded-[24px] border-2 border-[#d8c2a8] bg-[#fff7ed] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.18)]">
-          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.08em] text-[#f97316]">Moderation center</p>
-              <h2 className="mt-2 text-3xl font-black text-[#1a1a1a]">Admin Dashboard</h2>
-              <p className="text-[#7d6c5c] mt-1">Approve or reject premium users and property requests.</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-[#d9c7b2] bg-[#f7f0e8] px-4 py-3">
-                <div className="flex items-center gap-2 text-[#7d6c5c]">
+        <div className="mb-5">
+       
+          <h2 className="mt-2 text-3xl font-black text-[#1a1a1a]">Admin Dashboard</h2>
+          <p className="text-[#f97316] mt-1">Approve or reject premium users and property requests.</p>
+        </div>
+
+        <div className="mb-8 rounded-[24px] border border-white/10 bg-black/90 p-6 shadow-[0_25px_80px_rgba(0,0,0,0.28)]">
+          <div className="flex justify-end">
+            <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 md:w-auto">
+              <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+                <div className="flex items-center gap-2 text-[#f97316]">
                   <Users size={17} />
                   <span className="text-xs font-semibold uppercase">Users</span>
                 </div>
-                <p className="mt-1 text-2xl font-black text-[#1a1a1a]">{pendingUsers.length}</p>
+                <p className="mt-1 text-2xl font-black text-white">{pendingUsers.length}</p>
               </div>
-              <div className="rounded-2xl border border-[#d9c7b2] bg-[#f7f0e8] px-4 py-3">
-                <div className="flex items-center gap-2 text-[#7d6c5c]">
+              <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+                <div className="flex items-center gap-2 text-[#f97316]">
                   <Building2 size={17} />
                   <span className="text-xs font-semibold uppercase">Properties</span>
                 </div>
-                <p className="mt-1 text-2xl font-black text-[#1a1a1a]">{pendingOwners.length}</p>
+                <p className="mt-1 text-2xl font-black text-white">{pendingOwners.length}</p>
               </div>
-              <div className="col-span-2 rounded-2xl border border-[#d9c7b2] bg-[#1a1a1a] px-4 py-3 text-white sm:col-span-1">
-                <div className="flex items-center gap-2 text-[#ffbf8a]">
+              <div className="col-span-2 rounded-2xl border border-[#ff7a00]/30 bg-black/40 px-4 py-3 text-white sm:col-span-1">
+                <div className="flex items-center gap-2 text-[#f97316]">
                   <Clock size={17} />
                   <span className="text-xs font-semibold uppercase">Pending</span>
                 </div>
