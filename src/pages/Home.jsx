@@ -429,6 +429,176 @@ const Home = () => {
         </div>
       </section>
 
+   {/* DOWNLOAD APP SECTION */}
+      <section className="py-20 px-4 md:px-6 bg-[#fff7f2]">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            
+            {/* LEFT CONTENT */}
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#ffe7db] px-4 py-2 text-[#ff7438] font-bold text-sm mb-5">
+                📱 Download Our App
+              </div>
+
+              <h2 className="text-4xl md:text-5xl font-black text-slate-900 leading-tight mb-6">
+                Find Properties Faster <br />
+                With Our Mobile App
+              </h2>
+
+              <p className="text-lg text-slate-600 leading-relaxed mb-8">
+                Browse verified properties, connect directly with owners,
+                and manage your property journey anytime, anywhere.
+                Experience faster search, instant updates, and zero brokerage.
+              </p>
+
+              {/* FEATURES */}
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#ff7438]/10 flex items-center justify-center text-[#ff7438]">
+                    ✓
+                  </div>
+
+                  <p className="font-semibold text-slate-700">
+                    Instant Property Alerts
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#ff7438]/10 flex items-center justify-center text-[#ff7438]">
+                    ✓
+                  </div>
+
+                  <p className="font-semibold text-slate-700">
+                    Direct Owner Chat
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#ff7438]/10 flex items-center justify-center text-[#ff7438]">
+                    ✓
+                  </div>
+
+                  <p className="font-semibold text-slate-700">
+                    Save & Compare Properties
+                  </p>
+                </div>
+              </div>
+
+              {/* BUTTONS */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button className="px-7 py-4 rounded-2xl bg-black text-white font-bold hover:scale-105 transition-all duration-300">
+                  Download for Android
+                </button>
+
+                <button className="px-7 py-4 rounded-2xl border border-slate-300 bg-white text-slate-800 font-bold hover:border-[#ff7438] hover:text-[#ff7438] transition-all duration-300">
+                  Download for iPhone
+                </button>
+              </div>
+            </motion.div>
+
+            {/* RIGHT IMAGE */}
+            <motion.div
+              initial={{ opacity: 0, x: 40 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="relative flex justify-center"
+            >
+              <div className="relative">
+                {/* PHONE */}
+                <div className="w-[280px] sm:w-[330px] rounded-[40px] border-[10px] border-slate-900 bg-white shadow-[0_30px_60px_rgba(0,0,0,0.18)] overflow-hidden">
+                  
+                  {/* TOP BAR */}
+                  <div className="h-7 bg-slate-900 flex items-center justify-center">
+                    <div className="w-24 h-2 rounded-full bg-slate-700" />
+                  </div>
+
+                  {/* SCREEN */}
+                  <div className="p-5 bg-gradient-to-br from-[#fff4ec] to-white min-h-[580px]">
+                    <div className="bg-[#ff7438] rounded-3xl p-5 text-white mb-5">
+                      <p className="text-sm font-medium mb-1">
+                        Welcome to
+                      </p>
+
+                      <h3 className="text-2xl font-black">
+                        Caryanam
+                      </h3>
+
+                      <p className="text-sm opacity-90 mt-2">
+                        No Brokerage Property App
+                      </p>
+                    </div>
+
+                    {/* MOCK PROPERTY CARD */}
+                    <div className="bg-white rounded-3xl shadow-md p-4 mb-4">
+                      <div className="h-40 rounded-2xl bg-[#ffe3d3] mb-4"></div>
+
+                      <h4 className="font-bold text-slate-800 text-lg">
+                        Luxury Apartment
+                      </h4>
+
+                      <p className="text-sm text-slate-500 mb-3">
+                        Pune, Maharashtra
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <span className="font-black text-[#ff7438]">
+                          ₹25,000/mo
+                        </span>
+
+                        <button className="px-4 py-2 rounded-xl bg-[#ff7438] text-white text-sm font-bold">
+                          View
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* MINI CARDS */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-white rounded-2xl p-4 shadow-sm">
+                        <p className="text-xs text-slate-500">
+                          Listings
+                        </p>
+
+                        <h5 className="text-xl font-black text-slate-800">
+                          5K+
+                        </h5>
+                      </div>
+
+                      <div className="bg-white rounded-2xl p-4 shadow-sm">
+                        <p className="text-xs text-slate-500">
+                          Users
+                        </p>
+
+                        <h5 className="text-xl font-black text-slate-800">
+                          10K+
+                        </h5>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* FLOATING BADGE */}
+                <div className="absolute -top-6 -right-6 bg-white rounded-2xl shadow-xl px-5 py-3 border border-slate-100">
+                  <p className="text-sm font-bold text-slate-800">
+                    ⭐ 4.9 Rating
+                  </p>
+
+                  <p className="text-xs text-slate-500">
+                    Trusted by users
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+
       {/* FOOTER */}
       <footer
         id="contact"
