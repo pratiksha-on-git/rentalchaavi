@@ -10,6 +10,9 @@ export const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || 'https://r1.rentalchaavi.com'
   );
 
+export const CHAT_API_BASE_URL =
+  ensureApiBasePath(import.meta.env.VITE_CHAT_API_BASE_URL || API_BASE_URL);
+
 export const API_ORIGIN = (() => {
   try {
     return new URL(API_BASE_URL).origin;
@@ -30,6 +33,13 @@ const api = axios.create({
 
 const uploadApi = axios.create({
   baseURL: API_BASE_URL,
+});
+
+const chatRequestApi = axios.create({
+  baseURL: CHAT_API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 const rootApi = axios.create({
@@ -66,6 +76,7 @@ const attachAuthHeader = (config) => {
 
 api.interceptors.request.use(attachAuthHeader);
 uploadApi.interceptors.request.use(attachAuthHeader);
+chatRequestApi.interceptors.request.use(attachAuthHeader);
 rootApi.interceptors.request.use(attachAuthHeader);
 
 const normalizeApiResponse = (response) => {
@@ -84,6 +95,11 @@ api.interceptors.response.use(
 );
 
 uploadApi.interceptors.response.use(
+  (response) => normalizeApiResponse(response),
+  (error) => Promise.reject(error)
+);
+
+chatRequestApi.interceptors.response.use(
   (response) => normalizeApiResponse(response),
   (error) => Promise.reject(error)
 );
@@ -232,15 +248,15 @@ export const adminModerationApi = {
 };
 
 export const chatApi = {
-  sendMessage: (payload) => api.post("/chat/send", payload),
-  acceptChat: (payload) => api.post("/chat/accept", payload),
-  rejectChat: (payload) => api.post("/chat/reject", payload),
-  sendTyping: (payload) => api.post("/chat/typing", payload),
-  updateStatus: (payload) => api.post("/chat/status", payload),
-  getHistory: (roomId) => api.get(`/chat/history/${roomId}`),
-  getPendingChats: (ownerId) => api.get(`/chat/pending/${ownerId}`),
-  getAcceptedChats: (ownerId) => api.get(`/chat/accepted/${ownerId}`),
-  getRejectedChats: (ownerId) => api.get(`/chat/rejected/${ownerId}`),
+  sendMessage: (payload) => chatRequestApi.post("/chat/send", payload),
+  acceptChat: (payload) => chatRequestApi.post("/chat/accept", payload),
+  rejectChat: (payload) => chatRequestApi.post("/chat/reject", payload),
+  sendTyping: (payload) => chatRequestApi.post("/chat/typing", payload),
+  updateStatus: (payload) => chatRequestApi.post("/chat/status", payload),
+  getHistory: (roomId) => chatRequestApi.get(`/chat/history/${roomId}`),
+  getPendingChats: (ownerId) => chatRequestApi.get(`/chat/pending/${ownerId}`),
+  getAcceptedChats: (ownerId) => chatRequestApi.get(`/chat/accepted/${ownerId}`),
+  getRejectedChats: (ownerId) => chatRequestApi.get(`/chat/rejected/${ownerId}`),
 };
 
 export default api;
