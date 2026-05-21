@@ -711,15 +711,15 @@ setError(
               </h4>
 
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li>support@caryanam.com</li>
-                <li>+91 98765 43210</li>
+                <li>rentalchaavi@gmail.com</li>
+                <li>+91 74472 34294</li>
               </ul>
             </div>
           </div>
 
           <div className="border-t border-slate-800 pt-8 text-center text-slate-400 text-sm">
             <p>
-              2024 Caryanam. All rights reserved.
+              2026 Caryanam. All rights reserved.
             </p>
           </div>
         </div>
