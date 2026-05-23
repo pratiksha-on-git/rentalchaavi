@@ -109,6 +109,9 @@ const PropertyDetails = () => {
   const isPremiumUser =
     premiumStatus === "APPROVED";
 
+  const isPremiumRequestPending =
+    premiumStatus === "PENDING";
+
 
     const [userName, setUserName] =
   useState("");
@@ -785,13 +788,28 @@ if (!cancelled) {
 
                 {!isPremiumUser && (
                   <button
-                    onClick={() =>
-                      navigate("/buy-premium")
+                    type="button"
+                    disabled={isPremiumRequestPending}
+                    onClick={() => {
+                      if (isPremiumRequestPending) return;
+
+                      navigate("/buy-premium");
+                    }}
+                    title={
+                      isPremiumRequestPending
+                        ? "Your premium request is pending admin approval"
+                        : "Buy premium"
                     }
-                    className="mt-6 inline-flex items-center justify-center gap-3 rounded-2xl bg-[#f97316] px-6 py-3 text-white font-black shadow-[0_10px_30px_rgba(249,115,22,0.30)] transition-all duration-300 hover:bg-[#ea6a0a] hover:scale-[1.02]"
+                    className={`mt-6 inline-flex items-center justify-center gap-3 rounded-2xl px-6 py-3 text-white font-black shadow-[0_10px_30px_rgba(249,115,22,0.30)] transition-all duration-300 ${
+                      isPremiumRequestPending
+                        ? "cursor-not-allowed bg-slate-600 opacity-70"
+                        : "bg-[#f97316] hover:bg-[#ea6a0a] hover:scale-[1.02]"
+                    }`}
                   >
                     <Crown size={20} />
-                    Buy Premium
+                    {isPremiumRequestPending
+                      ? "Premium Request Pending"
+                      : "Buy Premium"}
                   </button>
                 )}
               </div>
