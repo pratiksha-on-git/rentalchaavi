@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut, MessageCircle, HomeIcon } from "lucide-react";
+import { LogOut, MessageCircle } from "lucide-react";
+import BrandLogo from "./BrandLogo";
 
 const Navbar = ({ onOpenChat, chatCount = 0, userName = "" }) => {
   const navigate = useNavigate();
@@ -67,13 +68,7 @@ const Navbar = ({ onOpenChat, chatCount = 0, userName = "" }) => {
     
     {/* Logo Section */}
     <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1">
-      <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-[14px] sm:rounded-[18px] bg-[#ff7438] text-white shadow-[0_14px_30px_rgba(255,116,56,0.24)] flex-shrink-0">
-        <HomeIcon size={18} />
-      </div>
-
-      <span className="min-w-0 text-[15px] min-[360px]:text-[16px] sm:text-xl md:text-2xl font-black text-white font-serif whitespace-nowrap truncate">
-        Rental <span className="text-[#ff7438]">Chaavi</span>
-      </span>
+      <BrandLogo size="sm" />
     </div>
 
     {/* Right Section */}
