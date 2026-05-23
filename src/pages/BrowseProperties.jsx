@@ -644,7 +644,7 @@ setError(
       {/* FOOTER */}
       <footer className="bg-gradient-to-r from-[#020617] via-[#041833] to-[#020617] text-white py-12 px-4 md:px-6 mt-10">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <BrandLogo size="md" />
@@ -654,36 +654,6 @@ setError(
                 India's first no-brokerage platform connecting property owners
                 directly with tenants.
               </p>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-4 text-white">
-                Quick Links
-              </h4>
-
-              <ul className="space-y-2 text-slate-400 text-sm">
-                <li>
-                  <a
-                    href="/home"
-                    className="hover:text-[#F97316] transition-colors"
-                  >
-                    Home
-                  </a>
-                </li>
-
-                <li>
-                  <a
-                    href="/browse"
-                    className="hover:text-[#F97316] transition-colors"
-                  >
-                    Browse Properties
-                  </a>
-                </li>
-
-                <li>
-                 
-                </li>
-              </ul>
             </div>
 
             <div>
