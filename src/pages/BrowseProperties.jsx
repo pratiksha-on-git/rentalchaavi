@@ -12,6 +12,7 @@ import Navbar from "../components/Navbar";
 import Filter from "../components/Filter";
 import PropertyList from "../components/PropertyList";
 import ChatDrawer from "../components/ChatDrawer";
+import BrandLogo from "../components/BrandLogo";
 
 import {
   API_BASE_URL,
@@ -646,15 +647,7 @@ setError(
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#F97316] to-[#FB923C] rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg">
-                    C
-                  </span>
-                </div>
-
-                <span className="text-2xl font-black">
-                  Rental Chaavi
-                </span>
+                <BrandLogo size="md" />
               </div>
 
               <p className="text-slate-400 text-sm">
@@ -712,7 +705,7 @@ setError(
 
               <ul className="space-y-2 text-slate-400 text-sm">
                 <li>rentalchaavi@gmail.com</li>
-                <li>+91 74472 34294</li>
+                <li>+91 94218 73407</li>
               </ul>
             </div>
           </div>

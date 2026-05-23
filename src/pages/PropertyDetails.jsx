@@ -35,10 +35,12 @@ Car,
 Zap,
 Dumbbell,
 Waves,
-Building2,
-Baby,
+  Building2,
+  Baby,
+  Crown,
 } from "lucide-react";
 
+import BrandLogo from "../components/BrandLogo";
 import { getUserIdFromToken } from "../utlis/authSync";
 import {
   FALLBACK_PROPERTY_IMAGE_DATA_URL,
@@ -780,6 +782,18 @@ if (!cancelled) {
                   {property?.description ||
                     "No description available"}
                 </p>
+
+                {!isPremiumUser && (
+                  <button
+                    onClick={() =>
+                      navigate("/buy-premium")
+                    }
+                    className="mt-6 inline-flex items-center justify-center gap-3 rounded-2xl bg-[#f97316] px-6 py-3 text-white font-black shadow-[0_10px_30px_rgba(249,115,22,0.30)] transition-all duration-300 hover:bg-[#ea6a0a] hover:scale-[1.02]"
+                  >
+                    <Crown size={20} />
+                    Buy Premium
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -952,10 +966,7 @@ if (!cancelled) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#ff7f50] to-[#ff9f80] rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">C</span>
-                </div>
-                <span className="text-2xl font-black">Rental Chaavi</span>
+                <BrandLogo size="md" />
               </div>
               <p className="text-slate-400 text-sm">
                 India's first no-brokerage platform connecting property owners
@@ -975,7 +986,7 @@ if (!cancelled) {
               <h4 className="font-bold mb-4">Contact</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
                 <li>rentalchaavi@gmail.com</li>
-                <li>+91 74472 34294</li>
+                <li>+91 94218 73407</li>
               </ul>
             </div>
           </div>
