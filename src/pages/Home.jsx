@@ -650,7 +650,7 @@ const Home = () => {
               <h4 className="font-bold mb-4">Contact</h4>
 
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li>support@caryanam.com</li>
+                <li>rentalchaavi@gmail.com</li>
                 <li>+91 94218 73407</li>
               </ul>
             </div>
