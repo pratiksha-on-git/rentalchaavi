@@ -1,0 +1,87 @@
+import { Link } from "react-router-dom";
+import BrandLogo from "./BrandLogo";
+
+const Footer = ({ id, className = "" }) => {
+  const footerClassName = [
+    "bg-slate-900 text-white py-12 px-4 md:px-6",
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    <footer id={id} className={footerClassName}>
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <BrandLogo size="md" />
+            </div>
+
+            <p className="text-slate-400 text-sm">
+              India's first no-brokerage platform connecting property owners
+              directly with tenants.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-4">Quick Links</h4>
+
+            <ul className="space-y-2 text-slate-400 text-sm">
+              <li>
+                <Link to="/login" className="hover:text-[#ff7438] transition-colors">
+                  Browse Properties
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" className="hover:text-[#ff7438] transition-colors">
+                  List Your Property
+                </Link>
+              </li>
+              <li>
+                <Link to="/about-us" className="hover:text-[#ff7438] transition-colors">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy-policy" className="hover:text-[#ff7438] transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms-and-conditions" className="hover:text-[#ff7438] transition-colors">
+                  Terms & Conditions
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-4">Locations</h4>
+
+            <ul className="space-y-2 text-slate-400 text-sm">
+              <li>Pune</li>
+              <li>PCMC</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-4">Contact</h4>
+
+            <ul className="space-y-2 text-slate-400 text-sm">
+              <li>rentalchaavi@gmail.com</li>
+              <li>+91 94218 73407</li>
+              <li>27FNCPA0353N1Z2</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-800 pt-8 text-center text-slate-400 text-sm">
+          <p>&copy; 2026 Caryanam. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
