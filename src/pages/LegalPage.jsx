@@ -131,6 +131,28 @@ const termsSections = [
   },
 ];
 
+const updatedTermsSections = termsSections.length
+  ? [
+  {
+    title: "Terms & Conditions",
+    body: [
+      "By using our website/app, you agree to follow these terms.",
+      "We provide services/products as described on our platform.",
+      "Payments must be completed before service delivery.",
+      "Users must not misuse the platform or engage in illegal activities.",
+      "We may suspend accounts for violations or suspicious activity.",
+      "Delivery/service timelines may vary depending on availability.",
+      "All content, logos, and materials are our intellectual property.",
+      "We are not responsible for indirect losses or damages.",
+      "For support or queries:",
+      "RentalChaavi",
+      "Email: rentalchaavi@gmail.com",
+      "Phone: +91 94218 73407",
+    ],
+  },
+    ]
+  : [];
+
 const pageContent = {
   "/about-us": {
     title: "About Us",
@@ -147,8 +169,8 @@ const pageContent = {
   "/terms-and-conditions": {
     title: "Terms & Conditions",
     intro:
-      "These terms define platform use, payments, refunds, user duties, service timelines, liability, and support details.",
-    sections: termsSections,
+      "By using our website/app, you agree to follow these terms.",
+    sections: updatedTermsSections,
   },
 };
 
@@ -160,9 +182,7 @@ const LegalPage = () => {
     <div className="min-h-screen bg-[#f8fafc] text-slate-900">
       <header className="bg-slate-950 text-white px-4 md:px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <Link to="/" className="min-w-0">
-            <BrandLogo size="sm" />
-          </Link>
+          <BrandLogo size="sm" />
 
           <Link
             to="/"
