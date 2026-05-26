@@ -633,6 +633,33 @@ const Home = () => {
                   </button>
                 </li>
 
+                <li>
+                  <button
+                    onClick={() => navigate("/about-us")}
+                    className="hover:text-[#ff7438] transition-colors"
+                  >
+                    About Us
+                  </button>
+                </li>
+
+                <li>
+                  <button
+                    onClick={() => navigate("/privacy-policy")}
+                    className="hover:text-[#ff7438] transition-colors"
+                  >
+                    Privacy Policy
+                  </button>
+                </li>
+
+                <li>
+                  <button
+                    onClick={() => navigate("/terms-and-conditions")}
+                    className="hover:text-[#ff7438] transition-colors"
+                  >
+                    Terms & Conditions
+                  </button>
+                </li>
+
               </ul>
             </div>
 
@@ -652,6 +679,7 @@ const Home = () => {
               <ul className="space-y-2 text-slate-400 text-sm">
                 <li>rentalchaavi@gmail.com</li>
                 <li>+91 94218 73407</li>
+                <li>27FNCPA0353N1Z2</li>
               </ul>
             </div>
           </div>

@@ -9,6 +9,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import BuyPremium from "./pages/BuyPremium";
 import Home from "./pages/Home";
 import ForgotPassword from "./pages/ForgotPassword";
+import LegalPage from "./pages/LegalPage";
 function App() {
   return (
     <BrowserRouter>
@@ -19,6 +20,9 @@ function App() {
 
         <Route path="/login" element={<Auth />} />
         <Route path="/buy-premium" element={<BuyPremium />} />
+        <Route path="/about-us" element={<LegalPage />} />
+        <Route path="/privacy-policy" element={<LegalPage />} />
+        <Route path="/terms-and-conditions" element={<LegalPage />} />
 
         {/* USER PROTECTED */}
         <Route

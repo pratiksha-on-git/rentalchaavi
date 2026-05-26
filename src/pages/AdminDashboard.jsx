@@ -4540,7 +4540,7 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
       {/* Footer */}
       <footer className="bg-slate-900 text-white py-12 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <BrandLogo size="lg" />
@@ -4549,6 +4549,36 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
                 India's first no-brokerage platform connecting property owners
                 directly with tenants.
               </p>
+            </div>
+            <div>
+              <h4 className="font-bold mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-slate-400 text-sm">
+                <li>
+                  <button onClick={() => navigate("/login")} className="hover:text-[#ff7438] transition-colors">
+                    Browse Properties
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate("/login")} className="hover:text-[#ff7438] transition-colors">
+                    List Your Property
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate("/about-us")} className="hover:text-[#ff7438] transition-colors">
+                    About Us
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate("/privacy-policy")} className="hover:text-[#ff7438] transition-colors">
+                    Privacy Policy
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate("/terms-and-conditions")} className="hover:text-[#ff7438] transition-colors">
+                    Terms & Conditions
+                  </button>
+                </li>
+              </ul>
             </div>
             <div>
               <h4 className="font-bold mb-4">Locations</h4>
@@ -4562,6 +4592,7 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
               <ul className="space-y-2 text-slate-400 text-sm">
                 <li>rentalchaavi@gmail.com</li>
                 <li>+91 94218 73407</li>
+                <li>27FNCPA0353N1Z2</li>
               </ul>
             </div>
           </div>

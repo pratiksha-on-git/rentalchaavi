@@ -266,13 +266,29 @@ const PropertyCard = ({
               onClick={
                 handleDetailsClick
               }
-              className="flex-1 bg-[#F8FAFC] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#111827] py-3 rounded-xl font-semibold transition-all duration-200"
+              className={`flex-1 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                isPremiumUser
+                  ? "bg-[#F8FAFC] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-[#111827]"
+                  : "bg-gradient-to-r from-[#F97316] to-[#EA580C] hover:opacity-95 text-white shadow-[0_10px_25px_rgba(249,115,22,0.35)]"
+              }`}
             >
-              <Eye
-                size={18}
-                className="inline mr-2"
-              />
-              Details
+              {isPremiumUser ? (
+                <>
+                  <Eye
+                    size={18}
+                    className="inline mr-2"
+                  />
+                  Details
+                </>
+              ) : (
+                <>
+                  <Crown
+                    size={18}
+                    className="inline mr-2"
+                  />
+                  Unlock Now @ ₹99
+                </>
+              )}
             </button>
 
             {/* CHAT BUTTON */}
