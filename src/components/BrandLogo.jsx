@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const BrandLogo = ({
   size = "md",
   showText = true,
@@ -25,7 +27,11 @@ const BrandLogo = ({
   const selectedSize = sizes[size] || sizes.md;
 
   return (
-    <div className={`flex items-center gap-2 min-w-0 ${className}`}>
+    <Link
+      to="/"
+      className={`flex items-center gap-2 min-w-0 ${className}`}
+      aria-label="Go to RentalChaavi home"
+    >
       <div
         className={`flex ${selectedSize.wrapper} items-center justify-center bg-black shadow-[0_14px_30px_rgba(255,116,56,0.24)] flex-shrink-0`}
       >
@@ -114,7 +120,7 @@ const BrandLogo = ({
           <span className="text-[#ff7438]">Rental</span>Chaavi
         </span>
       )}
-    </div>
+    </Link>
   );
 };
 
