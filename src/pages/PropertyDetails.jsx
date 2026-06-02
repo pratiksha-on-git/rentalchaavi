@@ -996,12 +996,12 @@ if (!cancelled) {
               <h4 className="font-bold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
                 <li>
-                  <button onClick={() => navigate("/login")} className="hover:text-[#ff7438] transition-colors">
+                  <button  className="hover:text-[#ff7438] transition-colors">
                     Browse Properties
                   </button>
                 </li>
                 <li>
-                  <button onClick={() => navigate("/login")} className="hover:text-[#ff7438] transition-colors">
+                  <button  className="hover:text-[#ff7438] transition-colors">
                     List Your Property
                   </button>
                 </li>
@@ -1036,7 +1036,7 @@ if (!cancelled) {
               <ul className="space-y-2 text-slate-400 text-sm">
                 <li>rentalchaavi@gmail.com</li>
                 <li>+91 94218 73407</li>
-                <li>27FNCPA0353N1Z2</li>
+                 <li> <span className="text-slate-400">GSTIN :</span> 27FNCPA0353N1Z2</li>
               </ul>
             </div>
           </div>

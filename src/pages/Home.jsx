@@ -485,7 +485,14 @@ const Home = () => {
 
               {/* BUTTONS */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="px-7 py-4 rounded-2xl bg-black text-white font-bold hover:scale-105 transition-all duration-300">
+                <button
+                  onClick={() => window.open(
+                    "https://drive.google.com/file/d/17XiDBjou-mv2q4RAs5yHWEfVXNvj1tAi/view?usp=sharing",
+                    "_blank",
+                    "noopener noreferrer"
+                  )}
+                  className="px-7 py-4 rounded-2xl bg-black text-white font-bold hover:scale-105 transition-all duration-300"
+                >
                   Download for Android
                 </button>
 
@@ -617,7 +624,7 @@ const Home = () => {
               <ul className="space-y-2 text-slate-400 text-sm">
                 <li>
                   <button
-                    onClick={() => navigate("/login")}
+                    
                     className="hover:text-[#ff7438] transition-colors"
                   >
                     Browse Properties
@@ -626,7 +633,7 @@ const Home = () => {
 
                 <li>
                   <button
-                    onClick={() => navigate("/login")}
+                    
                     className="hover:text-[#ff7438] transition-colors"
                   >
                     List Your Property
@@ -679,7 +686,7 @@ const Home = () => {
               <ul className="space-y-2 text-slate-400 text-sm">
                 <li>rentalchaavi@gmail.com</li>
                 <li>+91 94218 73407</li>
-                <li>27FNCPA0353N1Z2</li>
+                <li> <span className="text-slate-400">GSTIN :</span> 27FNCPA0353N1Z2</li>
               </ul>
             </div>
           </div>

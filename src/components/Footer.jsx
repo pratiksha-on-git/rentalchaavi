@@ -29,14 +29,14 @@ const Footer = ({ id, className = "" }) => {
 
             <ul className="space-y-2 text-slate-400 text-sm">
               <li>
-                <Link to="/login" className="hover:text-[#ff7438] transition-colors">
+                <div className="hover:text-[#ff7438] transition-colors">
                   Browse Properties
-                </Link>
+                </div>
               </li>
               <li>
-                <Link to="/login" className="hover:text-[#ff7438] transition-colors">
+                <div className="hover:text-[#ff7438] transition-colors">
                   List Your Property
-                </Link>
+                </div>
               </li>
               <li>
                 <Link to="/about-us" className="hover:text-[#ff7438] transition-colors">
@@ -71,7 +71,7 @@ const Footer = ({ id, className = "" }) => {
             <ul className="space-y-2 text-slate-400 text-sm">
               <li>rentalchaavi@gmail.com</li>
               <li>+91 94218 73407</li>
-              <li>27FNCPA0353N1Z2</li>
+               <li> <span className="text-slate-400">GSTIN :</span> 27FNCPA0353N1Z2</li>
             </ul>
           </div>
         </div>

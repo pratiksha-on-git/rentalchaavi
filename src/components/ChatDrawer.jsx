@@ -64,12 +64,40 @@ const getInitials = (name) => {
   return (a + b).toUpperCase();
 };
 
-const formatTime = (value) => {
+// const formatTime = (value) => {
+//   if (!value) return "";
+
+//   // Fix microseconds (JS supports only milliseconds)
+//   const cleanedValue =
+//     typeof value === "string" && value.includes(".")
+//       ? value.split(".")[0] + value.slice(value.indexOf("T") + 8, value.indexOf("T") + 8 + 3)
+//       : value;
+
+//   const date = new Date(cleanedValue);
+
+//   if (isNaN(date.getTime())) return "";
+
+//   return date.toLocaleTimeString([], {
+//     hour: "2-digit",
+//     minute: "2-digit",
+//   });
+// };
+const formatToIST = (value) => {
   if (!value) return "";
-  const num = Number(value);
-  const d = Number.isFinite(num) ? new Date(num) : new Date(String(value));
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  // Convert "YYYY-MM-DD HH:mm:ss" → ISO format
+  const isoString = value.replace(" ", "T") + "Z";
+
+  const date = new Date(isoString);
+
+  if (isNaN(date.getTime())) return "";
+
+  return date.toLocaleTimeString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 };
 
 const formatChatStatus = (status) => {
@@ -836,7 +864,7 @@ const ChatDrawer = ({
                                   mine ? "text-white/80" : "text-slate-500"
                                 }`}
                               >
-                                {formatTime(message.createdAt)}
+                                {formatToIST(message.createdAt)}
                               </div>
                             )}
                           </div>

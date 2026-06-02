@@ -30,8 +30,25 @@ export const getImageCandidates = (imageName) => {
   const rawValue = stripWrappingQuotes(imageName);
   if (!rawValue) return [];
 
+  const normalizeImageUrl = (value) => {
+    if (typeof value !== "string") return value;
+    const v = value.trim();
+    // Replace local endpoints (localhost or 127.0.0.1 with any port)
+    // that point to the property image API with the production host.
+    try {
+      const m = v.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/api\/owner\/property\/image\/.+)$/i);
+      if (m && m[1]) {
+        return `https://r1.rentalchaavi.com${m[1]}`;
+      }
+    } catch (e) {
+      // fallthrough
+    }
+
+    return v;
+  };
+
   if (/^(blob:|data:|https?:)/i.test(rawValue)) {
-    return [rawValue];
+    return [normalizeImageUrl(rawValue)];
   }
 
   const compactValue = rawValue.replace(/\s/g, "");
