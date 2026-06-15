@@ -312,7 +312,7 @@ const AdminDashboardMain = () => {
             <div>
               <h4 className="font-bold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li>
+                {/* <li>
                   <button  className="hover:text-[#ff7438] transition-colors">
                     Browse Properties
                   </button>
@@ -321,7 +321,7 @@ const AdminDashboardMain = () => {
                   <button  className="hover:text-[#ff7438] transition-colors">
                     List Your Property
                   </button>
-                </li>
+                </li> */}
                 <li>
                   <button onClick={() => navigate("/about-us")} className="hover:text-[#ff7438] transition-colors">
                     About Us
@@ -330,6 +330,11 @@ const AdminDashboardMain = () => {
                 <li>
                   <button onClick={() => navigate("/privacy-policy")} className="hover:text-[#ff7438] transition-colors">
                     Privacy Policy
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => navigate("/refund-policy")} className="hover:text-[#ff7438] transition-colors">
+                    Refund Policy
                   </button>
                 </li>
                 <li>
@@ -349,14 +354,15 @@ const AdminDashboardMain = () => {
             <div>
               <h4 className="font-bold mb-4">Contact</h4>
               <ul className="space-y-2 text-slate-400 text-sm">
-                <li>rentalchaavi@gmail.com</li>
+                <li>support@rentalchaavi.com</li>
                 <li>+91 94218 73407</li>
                  <li> <span className="text-slate-400">GSTIN :</span> 27FNCPA0353N1Z2</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-slate-800 pt-8 text-center text-slate-400 text-sm">
-            <p>&copy; 2026 Caryanam. All rights reserved.</p>
+                      <p>&copy; 2026 Caryanam. All rights reserved. TOSIF KASIM AATTAR</p>
+
           </div>
         </div>
       </footer>

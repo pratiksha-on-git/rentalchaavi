@@ -22,6 +22,7 @@ function App() {
         <Route path="/buy-premium" element={<BuyPremium />} />
         <Route path="/about-us" element={<LegalPage />} />
         <Route path="/privacy-policy" element={<LegalPage />} />
+        <Route path="/refund-policy" element={<LegalPage />} />
         <Route path="/terms-and-conditions" element={<LegalPage />} />
 
         {/* USER PROTECTED */}

@@ -66,7 +66,7 @@ const termsSections = [
   {
     title: "Business Name and Contact Details",
     body: [
-      "RentalChaavi is operated by CARYANAMINIDIA PVT LTD. Contact: rentalchaavi@gmail.com, +91 94218 73407. GSTIN: 27FNCPA0353N1Z2.",
+      "RentalChaavi is operated by CARYANAMINIDIA PVT LTD. Contact: support@rentalchaavi.com, +91 94218 73407. GSTIN: 27FNCPA0353N1Z2.",
     ],
   },
   {
@@ -84,7 +84,8 @@ const termsSections = [
   {
     title: "Refund and Cancellation Rules",
     body: [
-      "Paid access is generally non-refundable once listing access, tenant access, or owner contact access has been activated. Refund requests for duplicate payments, failed transactions, or incorrect charges may be reviewed after users contact support with payment proof. RentalChaavi may approve or reject refund requests based on verification.",
+      "RentalChaavi follows a no-refund policy once paid access has been activated or delivered. Refund requests are generally not granted for change of mind, cancelled plans, or inability to use the service after purchase.",
+      "Duplicate payments, failed transactions, or billing errors may be reviewed if users contact support with proof of payment. RentalChaavi may approve or reject such requests based on verification and applicable law.",
     ],
   },
   {
@@ -126,7 +127,7 @@ const termsSections = [
   {
     title: "Contact and Support",
     body: [
-      "For support, payment, account, privacy, or listing questions, contact rentalchaavi@gmail.com or call +91 94218 73407.",
+      "For support, payment, account, privacy, or listing questions, contact support@rentalchaavi.com or call +91 94218 73407.",
     ],
   },
 ];
@@ -146,12 +147,31 @@ const updatedTermsSections = termsSections.length
       "We are not responsible for indirect losses or damages.",
       "For support or queries:",
       "RentalChaavi",
-      "Email: rentalchaavi@gmail.com",
+      "Email: support@rentalchaavi.com",
       "Phone: +91 94218 73407",
     ],
   },
     ]
   : [];
+
+const refundSections = [
+  {
+    title: "No Refund Policy",
+    body: [
+      "RentalChaavi operates on a no-refund basis for paid access, listing activation, tenant access, and owner contact access once the service has been provided.",
+      "All payments are final once the requested access or service has been activated. No refunds will be issued for change of mind, cancelled plans, or inability to find a property after purchase.",
+      "Duplicate payments, failed transactions, or incorrect charges may be reviewed if users contact support with proof of payment.",
+      "RentalChaavi reserves the right to approve or reject any refund request. This policy does not affect your legal rights under applicable consumer protection laws.",
+    ],
+  },
+  {
+    title: "Billing and Support",
+    body: [
+      "For billing questions or refund-related inquiries, contact support@rentalchaavi.com or call +91 94218 73407.",
+      "Please include your order details, transaction ID, and the email used for payment so the support team can investigate.",
+    ],
+  },
+];
 
 const pageContent = {
   "/about-us": {
@@ -165,6 +185,12 @@ const pageContent = {
     intro:
       "This page explains how RentalChaavi collects, uses, retains, and protects information when users access the application.",
     sections: privacySections,
+  },
+  "/refund-policy": {
+    title: "Refund Policy",
+    intro:
+      "This page explains RentalChaavi's refund approach and no-refund policy for paid services.",
+    sections: refundSections,
   },
   "/terms-and-conditions": {
     title: "Terms & Conditions",
