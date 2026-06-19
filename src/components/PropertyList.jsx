@@ -42,7 +42,14 @@ const PropertyList = ({
   properties = [],
   onChatClick,
   premiumStatus,
+  likedPropertyIds = [],
+  onLikeToggle,
+  title = "Available Listings",
+  emptyTitle = "No properties match your current filters.",
+  emptySubtitle = "Try changing filters or search again",
 }) => {
+const likedIdSet = new Set(likedPropertyIds.map((id) => String(id)));
+
 return (
     <div className="w-full">
 
@@ -63,7 +70,7 @@ return (
           <div>
 
             <h3 className="text-2xl font-black text-[#111827] tracking-tight">
-              Available Listings
+              {title}
             </h3>
 
             <p className="text-sm text-[#6B7280] font-semibold">
@@ -136,6 +143,12 @@ return (
                     premiumStatus={
                       premiumStatus
                     }
+                    isLiked={
+                      likedIdSet.has(String(propertyId))
+                    }
+                    onLikeToggle={
+                      onLikeToggle
+                    }
                   />
 
                 </motion.div>
@@ -158,11 +171,11 @@ return (
             </div>
 
             <p className="text-[#E2E8F0] font-semibold text-lg">
-              No properties match your current filters.
+              {emptyTitle}
             </p>
 
             <p className="text-[#94A3B8] text-sm mt-2">
-              Try changing filters or search again
+              {emptySubtitle}
             </p>
 
           </div>

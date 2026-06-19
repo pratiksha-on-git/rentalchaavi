@@ -3,10 +3,10 @@ import {
   useState,
 } from "react";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { motion } from "framer-motion";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import Navbar from "../components/Navbar";
@@ -70,6 +70,8 @@ const rememberUserName = (decoded) => {
 };
 
 const BrowseProperties = () => {
+  const navigate = useNavigate();
+
   const [tempFilters, setTempFilters] =
     useState({
       type: "",
@@ -101,6 +103,12 @@ const BrowseProperties = () => {
   const [chatCount, setChatCount] =
     useState(0);
 
+  const [likedPropertyIds, setLikedPropertyIds] =
+    useState([]);
+
+  const [likedCount, setLikedCount] =
+    useState(0);
+
   const [
     selectedPropertyForChat,
     setSelectedPropertyForChat,
@@ -114,6 +122,11 @@ const BrowseProperties = () => {
 
   const isPremiumUser =
     premiumStatus === "APPROVED";
+
+  const getPropertyId = (property) =>
+    property?.id ||
+    property?.propertyId ||
+    property?._id;
 
   // =========================================
   // FETCH USER PREMIUM STATUS
@@ -291,6 +304,112 @@ setError(
       setProperties([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLikedMetadata = async () => {
+    try {
+      const [likedRes, countRes] =
+        await Promise.all([
+          propertyApi.getLikedProperties(),
+          propertyApi.getLikedPropertiesCount(),
+        ]);
+
+      const likedList =
+        Array.isArray(likedRes?.data)
+          ? likedRes.data
+          : likedRes?.data?.data || [];
+
+      setLikedPropertyIds(
+        likedList
+          .map(getPropertyId)
+          .filter(Boolean)
+      );
+
+      const countValue =
+        countRes?.data?.data ??
+        likedList.length;
+
+      setLikedCount(
+        Number(countValue) || 0
+      );
+    } catch {
+      setLikedPropertyIds([]);
+      setLikedCount(0);
+    }
+  };
+
+  const handleLikeToggle = async (property) => {
+    const propertyId =
+      getPropertyId(property);
+
+    if (!propertyId) {
+      toast.error("Property id missing");
+      return;
+    }
+
+    const wasLiked =
+      likedPropertyIds
+        .map((id) => String(id))
+        .includes(String(propertyId));
+
+    setLikedPropertyIds((current) =>
+      wasLiked
+        ? current.filter(
+            (id) =>
+              String(id) !== String(propertyId)
+          )
+        : [
+            ...current,
+            propertyId,
+          ]
+    );
+
+    setLikedCount((current) =>
+      Math.max(
+        0,
+        current + (wasLiked ? -1 : 1)
+      )
+    );
+
+    try {
+      const response =
+        await propertyApi.toggleLikeProperty(
+          propertyId
+        );
+
+      toast.success(
+        response?.data?.message ||
+          (wasLiked
+            ? "Property unliked successfully"
+            : "Property liked successfully")
+      );
+
+      fetchLikedMetadata();
+    } catch (err) {
+      setLikedPropertyIds((current) =>
+        wasLiked
+          ? [
+              ...current,
+              propertyId,
+            ]
+          : current.filter(
+              (id) =>
+                String(id) !== String(propertyId)
+            )
+      );
+
+      setLikedCount((current) =>
+        Math.max(
+          0,
+          current + (wasLiked ? 1 : -1)
+        )
+      );
+
+      toast.error(
+        err?.response?.data?.message ||
+          "Failed to update liked property"
+      );
     }
   };
 
@@ -506,6 +625,7 @@ setError(
   useEffect(() => {
     fetchAll();
     fetchPremiumStatus();
+    fetchLikedMetadata();
   }, []);
 
   return (
@@ -520,6 +640,10 @@ setError(
             : undefined
         }
         chatCount={chatCount}
+        likedCount={likedCount}
+        onOpenLikedProperties={() =>
+          navigate("/liked-properties")
+        }
       />
 
       <motion.div
@@ -637,6 +761,12 @@ setError(
                     );
                   }
                 : undefined
+            }
+            likedPropertyIds={
+              likedPropertyIds
+            }
+            onLikeToggle={
+              handleLikeToggle
             }
           />
         </div>

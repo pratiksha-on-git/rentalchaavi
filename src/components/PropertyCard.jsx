@@ -15,6 +15,7 @@ import {
   Eye,
   Crown,
   X,
+  Heart,
 } from "lucide-react";
 
 import {
@@ -28,6 +29,8 @@ const PropertyCard = ({
   premiumStatus,
   approvalStatus,
   onChatClick,
+  isLiked = false,
+  onLikeToggle,
 }) => {
   const navigate = useNavigate();
   const [showPremiumChatPopup, setShowPremiumChatPopup] =
@@ -116,6 +119,11 @@ const PropertyCard = ({
     onChatClick?.(property);  
   };
 
+  const handleLikeClick = (event) => {
+    event.stopPropagation();
+    onLikeToggle?.(property);
+  };
+
   return (
     <>
     <motion.div
@@ -167,7 +175,7 @@ const PropertyCard = ({
           {/* PREMIUM STATUS */}
           {effectivePremiumStatus && (
             <div
-              className={`absolute top-4 right-4 px-3 py-1 text-xs font-bold rounded-lg shadow-md
+              className={`absolute ${typeof onLikeToggle === "function" ? "top-14" : "top-4"} right-4 px-3 py-1 text-xs font-bold rounded-lg shadow-md
               ${
                 effectivePremiumStatus ===
                 "APPROVED"
@@ -189,6 +197,25 @@ const PropertyCard = ({
             >
               {effectivePremiumStatus}
             </div>
+          )}
+
+          {typeof onLikeToggle === "function" && (
+            <button
+              type="button"
+              onClick={handleLikeClick}
+              className={`absolute top-4 right-4 h-10 w-10 rounded-full flex items-center justify-center border shadow-lg backdrop-blur-md transition-all duration-300 ${
+                isLiked
+                  ? "bg-[#F97316] border-[#EA580C] text-white"
+                  : "bg-white/90 border-white/70 text-[#111827] hover:text-[#F97316]"
+              }`}
+              title={isLiked ? "Unlike property" : "Like property"}
+              aria-label={isLiked ? "Unlike property" : "Like property"}
+            >
+              <Heart
+                size={20}
+                fill={isLiked ? "currentColor" : "none"}
+              />
+            </button>
           )}
 
           {/* PROPERTY TYPE */}

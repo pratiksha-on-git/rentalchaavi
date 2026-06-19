@@ -10,6 +10,7 @@ import BuyPremium from "./pages/BuyPremium";
 import Home from "./pages/Home";
 import ForgotPassword from "./pages/ForgotPassword";
 import LegalPage from "./pages/LegalPage";
+import LikedProperties from "./pages/LikedProperties";
 function App() {
   return (
     <BrowserRouter>
@@ -41,6 +42,15 @@ function App() {
           element={
             <ProtectedRoute role="ROLE_USER">
               <PropertyDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/liked-properties"
+          element={
+            <ProtectedRoute role="ROLE_USER">
+              <LikedProperties />
             </ProtectedRoute>
           }
         />
