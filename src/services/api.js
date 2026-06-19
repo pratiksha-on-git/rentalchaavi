@@ -206,6 +206,13 @@ return api.post(`/user/filter-properties/${userId}`, filterData);
     });
   },
 
+  toggleLikeProperty: (propertyId) =>
+    api.post(`/user/likeProperty/${propertyId}`),
+
+  getLikedProperties: () => api.get("/user/likedProperties"),
+
+  getLikedPropertiesCount: () => api.get("/user/likedPropertiesCount"),
+
 };
 export const authApi = {
   login: (data) => api.post("/auth/login", data),

@@ -14,7 +14,7 @@ import {
   UserRound,
 } from "lucide-react";
 
-import img4 from "../assets/img4.jpg";
+import homeBgVideo from "../assets/Home_Bg_video.mp4";
 import BrandLogo from "../components/BrandLogo";
 
 const Home = () => {
@@ -235,20 +235,25 @@ const Home = () => {
       {/* HERO SECTION */}
       <section
         id="home"
-        className="relative overflow-hidden bg-[#e9ded0] px-2 sm:px-3 pt-2.5 pb-10 md:pb-16"
+        className="relative overflow-hidden bg-black px-2 sm:px-3 pt-2.5 pb-10 md:pb-16"
       >
-        <div className="relative mx-auto min-h-screen md:min-h-[760px] max-w-[1510px] overflow-hidden rounded-[20px] border-[4px] md:border-[6px] border-[#d8b88c] bg-[#f6eadc] shadow-[0_24px_70px_rgba(89,63,32,0.20)]">
+        <div className="relative mx-auto min-h-screen md:min-h-[760px] max-w-[1510px] overflow-hidden rounded-[20px] border-[4px] md:border-[6px] border-black/40 bg-black shadow-[0_50px_70px_rgba(0,0,0,0.10)]">
           {/* BACKGROUND */}
           <div className="absolute inset-0">
-            <img
-              src={img4}
-              alt="Luxury property"
-              className="h-full w-full object-cover object-[70%_center] opacity-90"
+            <video
+              src={homeBgVideo}
+              className="h-full w-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-hidden="true"
             />
 
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,246,235,0.98)_0%,rgba(255,246,235,0.92)_31%,rgba(255,246,235,0.54)_48%,rgba(255,246,235,0.08)_72%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.76)_0%,rgba(0,0,0,0.54)_42%,rgba(0,0,0,0.18)_75%)]" />
 
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_22%,rgba(255,184,103,0.38),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.34),rgba(255,239,216,0.16))]" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.34),rgba(0,0,0,0.16)_44%,rgba(0,0,0,0.48))]" />
           </div>
 
           {/* HERO CONTENT */}
@@ -260,13 +265,13 @@ const Home = () => {
               className="max-w-[650px]"
             >
               {/* BADGE */}
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#ffc49d] bg-white/70 px-3 py-1.5 text-[11px] sm:text-[12px] font-bold text-[#ff7438] shadow-sm backdrop-blur-sm">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/35 px-3 py-1.5 text-[11px] sm:text-[12px] font-bold text-[#ffb088] shadow-sm backdrop-blur-sm">
                 <Star size={14} fill="currentColor" />
                 No Brokerage Platform
               </div>
 
               {/* TITLE */}
-              <h1 className="mb-4 font-serif text-[36px] leading-tight font-black text-[#122231] sm:text-[48px] md:text-[64px] lg:text-[70px]">
+              <h1 className="mb-4 font-serif text-[36px] leading-tight font-black text-white drop-shadow-[0_8px_28px_rgba(0,0,0,0.55)] sm:text-[48px] md:text-[64px] lg:text-[70px]">
                 Find Your Dream{" "}
                 <span className="text-[#ff7438]">Home</span>
                 <br />
@@ -274,11 +279,11 @@ const Home = () => {
               </h1>
 
               {/* SUBTITLE */}
-              <p className="mb-1 text-[15px] sm:text-[17px] font-extrabold text-[#f06d31] md:text-[19px]">
+              <p className="mb-1 text-[15px] sm:text-[17px] font-extrabold text-[#ffd2bb] drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)] md:text-[19px]">
                 तुमच्या प्रत्येक प्रॉपर्टी डीलमध्ये विश्वासाची साथ.
               </p>
 
-              <p className="mb-6 text-[15px] sm:text-[17px] font-extrabold text-[#f06d31] md:text-[19px]">
+              <p className="mb-6 text-[15px] sm:text-[17px] font-extrabold text-[#ffd2bb] drop-shadow-[0_4px_18px_rgba(0,0,0,0.45)] md:text-[19px]">
                 Your Trusted Partner In Every Property Deal.
               </p>
 
@@ -294,7 +299,7 @@ const Home = () => {
 
                 <button
                   onClick={() => navigate("/login")}
-                  className="w-full sm:w-auto rounded-xl border border-[#cbbcae] bg-white/74 px-8 py-4 text-[14px] font-extrabold text-[#172333] shadow-sm backdrop-blur-sm hover:border-[#ff7438] hover:text-[#ff7438] transition-all duration-300"
+                  className="w-full sm:w-auto rounded-xl border border-white/35 bg-white/18 px-8 py-4 text-[14px] font-extrabold text-white shadow-sm backdrop-blur-sm hover:border-[#ff7438] hover:text-[#ffb088] transition-all duration-300"
                 >
                   List Your Property
                 </button>
@@ -537,7 +542,7 @@ const Home = () => {
 
                     {/* MOCK PROPERTY CARD */}
                     <div className="bg-white rounded-3xl shadow-md p-4 mb-4">
-                      <div className="h-40 rounded-2xl bg-[#ffe3d3] mb-4"></div>
+                      <div className="h-40 w-full rounded-2xl bg-[#ffe3d3] mb-4" />
 
                       <h4 className="font-bold text-slate-800 text-lg">
                         Luxury Apartment

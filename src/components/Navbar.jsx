@@ -1,10 +1,12 @@
-import { useNavigate } from "react-router-dom";
-import { LogOut, MessageCircle } from "lucide-react";
+import { Heart, LogOut, MessageCircle } from "lucide-react";
 import BrandLogo from "./BrandLogo";
 
-const Navbar = ({ onOpenChat, chatCount = 0, userName = "" }) => {
-  const navigate = useNavigate();
-
+const Navbar = ({
+  onOpenChat,
+  chatCount = 0,
+  userName = "",
+  onOpenLikedProperties,
+}) => {
   const handleLogout = () => {
     const adminToken = localStorage.getItem("adminToken");
     const ownerToken = localStorage.getItem("ownerToken");
@@ -59,10 +61,6 @@ const Navbar = ({ onOpenChat, chatCount = 0, userName = "" }) => {
     window.location.href = "/login";
   };
 
-  const isAdmin = Boolean(
-    localStorage.getItem("adminToken")
-  );
-
   return (
   <div className="flex justify-between items-center gap-2 px-2.5 sm:px-5 md:px-6 py-3 sm:py-4 bg-black/90 backdrop-blur-md border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.3)] w-full overflow-hidden">
     
@@ -95,6 +93,18 @@ const Navbar = ({ onOpenChat, chatCount = 0, userName = "" }) => {
               {chatCount}
             </span>
           )}
+        </button>
+      )}
+
+      {/* Liked Properties Button */}
+      {typeof onOpenLikedProperties === "function" && (
+        <button
+          onClick={() => onOpenLikedProperties()}
+          className="relative text-[#E2E8F0] hover:text-[#F97316] transition-all duration-300 flex-shrink-0"
+          title="Liked Properties"
+          aria-label="Liked Properties"
+        >
+          <Heart size={21} />
         </button>
       )}
 
