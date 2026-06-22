@@ -4,19 +4,18 @@ import { useNavigate } from "react-router-dom";
 
 import { jwtDecode } from "jwt-decode";
 
-import { ownerApi } from "../services/api";
+import { ownerApi, paymentApi } from "../services/api";
 
 import { toast, ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
-
-import OwnerPremiumQrImage from "../assets/QR.jpeg";
 
 import {
   AlignLeft,
   Armchair,
   BedDouble,
   Building2,
+  ExternalLink,
   FileText,
   IndianRupee,
   Landmark,
@@ -43,15 +42,59 @@ import {
 
 const IMAGE_FALLBACK = FALLBACK_PROPERTY_IMAGE_DATA_URL;
 
-const OWNER_PREMIUM_QR_IMAGE =
+const FIRST_FREE_OWNER_LIMIT = 100;
 
-  OwnerPremiumQrImage || IMAGE_FALLBACK;
+const getDashboardPropertyId = (property) =>
+  property?.propertyId ??
+  property?.id ??
+  property?.property_id ??
+  property?._raw?.propertyId ??
+  property?._raw?.id;
+
+const findPaymentRedirectUrl = (value, seen = new Set()) => {
+  if (!value) return "";
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return /^https?:\/\//i.test(trimmed) ? trimmed : "";
+  }
+
+  if (typeof value !== "object" || seen.has(value)) return "";
+  seen.add(value);
+
+  const preferredKeys = [
+    "paymentUrl",
+    "paymentURL",
+    "checkoutUrl",
+    "checkoutURL",
+    "redirectUrl",
+    "redirectURL",
+    "redirect_url",
+    "payUrl",
+    "payURL",
+    "url",
+  ];
+
+  for (const key of preferredKeys) {
+    const found = findPaymentRedirectUrl(value[key], seen);
+    if (found) return found;
+  }
+
+  for (const item of Object.values(value)) {
+    const found = findPaymentRedirectUrl(item, seen);
+    if (found) return found;
+  }
+
+  return "";
+};
 
 const OWNER_ID_BY_EMAIL_KEY = "ownerIdByEmail";
 
 const OWNER_APPROVAL_STATUS_KEY = "ownerApprovalStatuses";
 
 const PROPERTY_PAYMENT_STATUS_KEY = "propertyPaymentStatuses";
+
+const OWNER_PAYMENT_START_KEY = "ownerPaymentStart";
 
 const OWNER_NAME_KEY = "ownerName";
 
@@ -423,7 +466,11 @@ const PropertyOwnerDashboard = () => {
 
   const [premiumLoading, setPremiumLoading] = useState(false);
 
+  const premiumStartingRef = useRef(false);
+
   const [pendingPropertyId, setPendingPropertyId] = useState(null);
+
+  const [propertyPayment, setPropertyPayment] = useState(null);
 
   const [ownerPremiumStatus, setOwnerPremiumStatus] = useState("NONE");
 
@@ -522,6 +569,136 @@ const PropertyOwnerDashboard = () => {
     }
 
 
+
+    return null;
+
+  };
+
+  const resolveActiveOwnerId = () => {
+
+    const token = localStorage.getItem("ownerToken") || localStorage.getItem("token");
+
+    if (!token) return null;
+
+    try {
+
+      const tokenOwnerId = resolveOwnerIdFromToken(jwtDecode(token));
+
+      if (tokenOwnerId) {
+
+        if (String(tokenOwnerId) !== String(ownerId || "")) {
+
+          setOwnerId(Number(tokenOwnerId));
+
+          localStorage.setItem("ownerId", String(Number(tokenOwnerId)));
+
+        }
+
+        return Number(tokenOwnerId);
+
+      }
+
+    } catch {
+}
+
+    return ownerId;
+
+  };
+
+  const buildOwnerIdCandidates = () => {
+
+    const candidates = [
+
+      ownerId,
+
+      localStorage.getItem("ownerId"),
+
+      manualOwnerId,
+
+    ];
+
+    const token = localStorage.getItem("ownerToken") || localStorage.getItem("token");
+
+    if (token) {
+
+      try {
+
+        const decoded = jwtDecode(token);
+
+        candidates.push(
+
+          decoded?.ownerId,
+
+          decoded?.ownerID,
+
+          decoded?.owner_id,
+
+          decoded?.propertyOwnerId,
+
+          decoded?.property_owner_id,
+
+          decoded?.poOwnerId,
+
+          decoded?.po_owner_id,
+
+          decoded?.id,
+
+          decoded?.userId,
+
+          decoded?.user_id
+
+        );
+
+      } catch {
+}
+
+    }
+
+    return [...new Set(
+
+      candidates
+
+        .map((candidate) => Number(candidate))
+
+        .filter((candidate) => Number.isFinite(candidate) && candidate > 0)
+
+    )];
+
+  };
+
+  const resolveVerifiedOwnerId = async () => {
+
+    const candidates = buildOwnerIdCandidates();
+
+    for (const candidate of candidates) {
+
+      try {
+
+        await ownerApi.getOwnerProperties(candidate);
+
+        if (String(candidate) !== String(ownerId || "")) {
+
+          setOwnerId(candidate);
+
+          localStorage.setItem("ownerId", String(candidate));
+
+        }
+
+        return candidate;
+
+      } catch (error) {
+
+        const status = error?.response?.status || error?.response?.data?.status;
+
+        if (status !== 401 && status !== 403) {
+
+          return candidate;
+
+        }
+
+      }
+
+    }
 
     return null;
 
@@ -921,7 +1098,7 @@ const handleManualOwnerIdSubmit = () => {
 
     const detailImages = getDetailImages(property || {});
 
-    const propertyId = property?.id || property?.propertyId;
+    const propertyId = getDashboardPropertyId(property);
 
     const backendPaymentStatus = String(property?.paymentStatus || "").toUpperCase();
 
@@ -1169,27 +1346,39 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
 
 
-  const saveFacilitiesForProperty = async (propertyId) => {
+  const saveFacilitiesForProperty = async (propertyId, activeOwnerId = ownerId) => {
 
-    if (!ownerId || !propertyId) return;
+    if (!activeOwnerId || !propertyId) return;
 
     const facilitiesPayload = createFacilitiesPayload(selectedFacilities);
 
-    await ownerApi.saveFacilities(ownerId, propertyId, facilitiesPayload);
+    await ownerApi.saveFacilities(activeOwnerId, propertyId, facilitiesPayload);
 
   };
 
 
 
-  const resolvePropertyApprovalStatus = (property) => {
+  const resolvePropertyApprovalStatus = (property, firstFreePropertyId = null) => {
 
-    const propertyId = property?.id || property?.propertyId;
+    const propertyId = getDashboardPropertyId(property);
 
     // Backend property payment status takes precedence over local cache.
     const propertyPaymentStatus = String(property?.paymentStatus || "").toUpperCase();
 
+    const isResolvedFirstFreeProperty =
+      firstFreePropertyId && String(propertyId) === String(firstFreePropertyId);
+
+    if (isResolvedFirstFreeProperty) {
+      return "FREE_ACTIVE";
+    }
+
+    if (propertyPaymentStatus === "FREE_ACTIVE") {
+      return "PAYMENT_DUE";
+    }
+
     if (
       propertyPaymentStatus === "APPROVED" ||
+      propertyPaymentStatus === "SUCCESS" ||
       propertyPaymentStatus === "REJECTED" ||
       propertyPaymentStatus === "PENDING"
     ) {
@@ -1198,7 +1387,7 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
     const storedPropertyStatus = getStoredPropertyPaymentStatus(propertyId);
 
-    if (storedPropertyStatus === "PENDING" || storedPropertyStatus === "REJECTED") {
+    if (storedPropertyStatus === "PENDING" || storedPropertyStatus === "SUCCESS" || storedPropertyStatus === "REJECTED") {
 
       return storedPropertyStatus;
 
@@ -1227,6 +1416,12 @@ setFacilities(mergeFacilitiesWithBackendOptions());
     if (status === "APPROVED") {
 
       return "bg-green-100 text-green-700 border border-green-200";
+
+    }
+
+    if (status === "FREE_ACTIVE") {
+
+      return "bg-emerald-100 text-emerald-700 border border-emerald-200";
 
     }
 
@@ -1733,6 +1928,18 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
     const uploadedImages = [images[0], ...images.slice(1).filter(img => img !== undefined)].filter(Boolean);
 
+    resolveActiveOwnerId();
+
+    const activeOwnerId = await resolveVerifiedOwnerId();
+
+    if (!activeOwnerId) {
+
+      toast.error("Owner authorization failed. Please login again as the property owner.");
+
+      return;
+
+    }
+
 
 
     let createdPropertyId = null;
@@ -1787,7 +1994,7 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
       // Add property
 
-      const propertyResponse = await ownerApi.addProperty(ownerId, propertyData);
+      const propertyResponse = await ownerApi.addProperty(activeOwnerId, propertyData);
 
       
 
@@ -1858,7 +2065,7 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
           setFacilitiesLoading(true);
 
-          await saveFacilitiesForProperty(propertyId);
+          await saveFacilitiesForProperty(propertyId, activeOwnerId);
 
         } catch (facilityErr) {
 toast.error(facilityErr?.response?.data?.message || "Property added, but facilities were not saved");
@@ -1976,7 +2183,17 @@ if (createdPropertyId) {
 
       } else {
 
-        toast.error(getApiErrorMessage(err, "Failed to add property"));
+        const status = err?.response?.status || err?.response?.data?.status;
+
+        if (status === 403) {
+
+          toast.error("Backend blocked owner property submit. Allow POST /api/owner/** for ROLE_PROPERTY_OWNER, or fix backend logged-in owner id mapping.");
+
+        } else {
+
+          toast.error(getApiErrorMessage(err, "Failed to add property"));
+
+        }
 
       }
 
@@ -2023,7 +2240,7 @@ toast.error(err.response?.data?.message || err.message || "Failed to delete prop
 
   const handleOpenPropertyPayment = (property) => {
 
-    const propertyId = property?.id || property?.propertyId;
+    const propertyId = getDashboardPropertyId(property);
 
     if (!propertyId) {
 
@@ -2034,6 +2251,7 @@ toast.error(err.response?.data?.message || err.message || "Failed to delete prop
     }
 
     setPendingPropertyId(propertyId);
+    setPropertyPayment(null);
 
     setShowPremiumModal(true);
 
@@ -2046,6 +2264,7 @@ toast.error(err.response?.data?.message || err.message || "Failed to delete prop
     setShowPremiumModal(false);
 
     setPendingPropertyId(null);
+    setPropertyPayment(null);
 
   };
 
@@ -2055,7 +2274,7 @@ toast.error(err.response?.data?.message || err.message || "Failed to delete prop
 
   const handleEditProperty = async (property) => {
 
-    const propertyId = property.id || property.propertyId;
+    const propertyId = getDashboardPropertyId(property);
 
     setEditingProperty(property);
 
@@ -2201,7 +2420,7 @@ toast.error(err.response?.data?.message || err.message || "Failed to delete prop
 
 
 
-      const editingPropertyId = editingProperty.id || editingProperty.propertyId;
+      const editingPropertyId = getDashboardPropertyId(editingProperty);
 
       const response = await ownerApi.updateProperty(editingPropertyId, propertyData);
 
@@ -2326,7 +2545,13 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
   const handlePremiumDone = async () => {
 
-    if (!ownerId) {
+    if (premiumLoading || premiumStartingRef.current) {
+
+      return;
+
+    }
+
+    if (!localStorage.getItem("ownerToken") && !localStorage.getItem("token")) {
 
       toast.error("Owner session missing. Please login again.");
 
@@ -2334,55 +2559,143 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
     }
 
+    if (!pendingPropertyId) {
+
+      toast.error("Property ID is missing for this payment.");
+
+      return;
+
+    }
+
+    try {
+
+      const lastStart = JSON.parse(sessionStorage.getItem(OWNER_PAYMENT_START_KEY) || "{}");
+
+      if (
+        String(lastStart?.propertyId || "") === String(pendingPropertyId) &&
+        Date.now() - Number(lastStart?.timestamp || 0) < 30000
+      ) {
+
+        toast.info("PhonePe checkout is already starting. Please continue in the opened payment page.");
+
+        return;
+
+      }
+
+    } catch {
+}
+
 
 
     try {
 
+      premiumStartingRef.current = true;
+
       setPremiumLoading(true);
 
-      const response = await ownerApi.buyPremium(ownerId, pendingPropertyId);
+      sessionStorage.setItem(
+        OWNER_PAYMENT_START_KEY,
+        JSON.stringify({ propertyId: pendingPropertyId, timestamp: Date.now() })
+      );
+
+      const response = await paymentApi.buyPropertyPremium(pendingPropertyId);
+
+      const paymentData =
+
+        response?.data?.data ||
+
+        response?.data ||
+
+        {};
 
       const status =
 
-        response?.data?.data?.status ||
+        paymentData?.status ||
 
-        response?.data?.status ||
+        paymentData?.paymentStatus ||
 
         "PENDING";
 
       const nextStatus = String(status).toUpperCase() === "APPROVED" ? "APPROVED" : "PENDING";
 
-      writeStoredOwnerApprovalStatus(ownerId, nextStatus);
+      if (ownerId) writeStoredOwnerApprovalStatus(ownerId, nextStatus);
 
       writeStoredPropertyPaymentStatus(pendingPropertyId, nextStatus);
 
       setOwnerPremiumStatus(nextStatus);
 
       setOwnerApprovalStatus(nextStatus);
+      setPropertyPayment(paymentData);
 
-      toast.success(
-
-        `Payment request submitted for property ${pendingPropertyId || ''}. Admin can now approve or reject your property.`
-
+      const paymentUrl = findPaymentRedirectUrl(response?.data);
+      localStorage.setItem(
+        "lastPaymentContext",
+        JSON.stringify({
+          type: "property",
+          propertyId: pendingPropertyId,
+          orderId: paymentData?.orderId || "",
+          timestamp: Date.now(),
+        })
       );
 
-      setShowPremiumModal(false);
+      if (paymentUrl) {
 
-      setPendingPropertyId(null);
+        toast.success(`Payment initiated for property ${pendingPropertyId}. Redirecting to PhonePe.`);
+
+        window.location.href = paymentUrl;
+
+        return;
+
+      }
+
+      toast.error("PhonePe checkout URL missing in backend response. Backend must return paymentUrl from /premium/buy/{propertyId}.");
+
+      sessionStorage.removeItem(OWNER_PAYMENT_START_KEY);
 
       await fetchProperties();
 
     } catch (err) {
 
-      toast.error(err?.response?.data?.message || "Failed to submit premium request");
+      const message = getApiErrorMessage(err, "Failed to initiate premium payment");
+
+      if (message.toLowerCase().includes("already pending")) {
+
+        writeStoredPropertyPaymentStatus(pendingPropertyId, "PENDING");
+
+        setOwnerPremiumStatus("PENDING");
+
+        setOwnerApprovalStatus("PENDING");
+
+        toast.info(message);
+
+        await fetchProperties({ preserveCurrent: true, silent: true });
+
+        return;
+
+      }
+
+      toast.error(message);
+
+      sessionStorage.removeItem(OWNER_PAYMENT_START_KEY);
 
     } finally {
 
       setPremiumLoading(false);
 
+      premiumStartingRef.current = false;
+
     }
 
   };
+
+  const isFirstFreeOwner = Number(ownerId) > 0 && Number(ownerId) <= FIRST_FREE_OWNER_LIMIT;
+
+  const firstFreePropertyId = isFirstFreeOwner
+    ? properties
+        .map((property) => getDashboardPropertyId(property))
+        .filter((propertyId) => propertyId !== null && propertyId !== undefined)
+        .sort((a, b) => Number(a) - Number(b))[0] || null
+    : null;
 
 
 
@@ -3398,16 +3711,19 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
               {properties.map((property) => {
 
-                const approvalStatus = resolvePropertyApprovalStatus(property);
+                const approvalStatus = resolvePropertyApprovalStatus(property, firstFreePropertyId);
 
                 const shouldShowPaymentButton =
-                  approvalStatus !== "APPROVED" && approvalStatus !== "PENDING";
+                  approvalStatus !== "APPROVED" &&
+                  approvalStatus !== "FREE_ACTIVE" &&
+                  approvalStatus !== "PENDING" &&
+                  approvalStatus !== "SUCCESS";
 
                 return (
 
                 <div
 
-                  key={property.id || property.propertyId}
+                  key={getDashboardPropertyId(property)}
 
                   className="border border-[#d9c7b2] bg-[#f9f3ed] rounded-xl overflow-hidden hover:shadow-[0_14px_34px_rgba(249,115,22,0.16)] transition-shadow"
 
@@ -3445,13 +3761,19 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
                       >
 
-                        {approvalStatus === "PAYMENT_DUE" ? "PAYMENT DUE" : approvalStatus}
+                        {approvalStatus === "PAYMENT_DUE"
+                          ? "PAYMENT DUE"
+                          : approvalStatus === "FREE_ACTIVE"
+                            ? "FIRST FREE"
+                            : approvalStatus === "SUCCESS"
+                              ? "WAITING APPROVAL"
+                              : approvalStatus}
 
                       </span>
 
                     </div>
 
-                    <p className="text-xs text-[#8b8178] mb-1">ID: {property.id}</p>
+                    <p className="text-xs text-[#8b8178] mb-1">ID: {getDashboardPropertyId(property)}</p>
 
                     <p className="text-sm text-[#7d6c5c] mb-1">
 
@@ -3530,7 +3852,7 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
                       <button
 
-                        onClick={() => handleDeleteProperty(property.id)}
+                        onClick={() => handleDeleteProperty(getDashboardPropertyId(property))}
 
                         className="text-red-500 hover:text-red-700"
 
@@ -3601,7 +3923,7 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
             <p className="text-sm text-[#5d5145] text-center mt-2">
 
-              Scan this QR code, complete payment, then click Done to submit this property for admin approval.
+              Start the PhonePe payment for this property. Admin approval activates the promotion after successful payment.
 
             </p>
 
@@ -3617,17 +3939,31 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
 
 
-            <div className="mt-5">
+            <div className="mt-5 rounded-xl border border-[#d9c7b2] bg-[#fff7ed] p-4 text-sm text-[#5d5145]">
 
-              <img
+              <div className="flex items-center justify-between gap-3">
 
-                src={OWNER_PREMIUM_QR_IMAGE}
+                <span className="font-semibold text-[#1a1a1a]">Amount</span>
 
-                alt="Owner premium payment QR"
+                <span className="text-lg font-black text-[#1a1a1a]">Rs. 116.82</span>
 
-                className="w-full rounded-xl border border-[#d9c7b2]"
+              </div>
 
-              />
+              <p className="mt-1 text-xs text-[#7d6c5c]">Rs. 99 + GST</p>
+
+              {propertyPayment?.orderId && (
+
+                <div className="mt-4 rounded-xl border border-[#d9c7b2] bg-white p-3 text-xs">
+
+                  <p className="font-bold text-[#1a1a1a]">Order ID</p>
+
+                  <p className="mt-1 break-all">{propertyPayment.orderId}</p>
+
+                  <p className="mt-2">Status: {propertyPayment.status || propertyPayment.paymentStatus || "PENDING"}</p>
+
+                </div>
+
+              )}
 
             </div>
 
@@ -3635,7 +3971,7 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
             <div className="mt-5 bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-800">
 
-              After clicking Done, your request appears in admin dashboard for approval or rejection.
+              If the backend returns a PhonePe checkout URL, it opens automatically. Otherwise the order is saved as pending.
 
             </div>
 
@@ -3669,7 +4005,10 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
               >
 
-                {premiumLoading ? "Submitting..." : "Done"}
+                <span className="inline-flex items-center justify-center gap-2">
+                  <ExternalLink size={18} />
+                  {premiumLoading ? "Starting..." : "Pay with PhonePe"}
+                </span>
 
               </button>
 

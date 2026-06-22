@@ -19,6 +19,7 @@ import {
   API_BASE_URL,
   ownerApi,
   propertyApi,
+  userApi,
 } from "../services/api";
 
 import { getUserIdFromToken } from "../utlis/authSync";
@@ -146,22 +147,11 @@ const BrowseProperties = () => {
 
         if (!userId) return;
 
-        const response =
-          await fetch(
-            `${API_BASE_URL}/user/${userId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-        const result =
-          await response.json();
-setPremiumStatus(
+        const response = await userApi.getProfile(userId);
+        const result = response.data;
+        setPremiumStatus(
           getCurrentPremiumStatus(
-            result?.data
-              ?.premiumStatus
+            result?.data?.premiumStatus
           )
         );
       } catch (err) {

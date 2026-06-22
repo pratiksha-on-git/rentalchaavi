@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import ForgotPassword from "./pages/ForgotPassword";
 import LegalPage from "./pages/LegalPage";
 import LikedProperties from "./pages/LikedProperties";
+import PaymentResult from "./pages/PaymentResult";
 function App() {
   return (
     <BrowserRouter>
@@ -66,6 +67,7 @@ function App() {
         />
 
 <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/payment-result" element={<PaymentResult />} />
 
 
         <Route

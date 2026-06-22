@@ -1,128 +1,144 @@
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {
-  Crown,
-  ShieldCheck,
-} from "lucide-react";
-import qrImage from "../assets/QR.jpeg";
-import { API_BASE_URL } from "../services/api";
-import { getCurrentPremiumStatus } from "../utlis/premiumStatus";
+import { Crown, ExternalLink, ShieldCheck } from "lucide-react";
+import { paymentApi } from "../services/api";
 
 const BuyPremium = () => {
   const navigate = useNavigate();
+  const [payment, setPayment] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [mockLoading, setMockLoading] = useState(false);
+  const showMockPaymentTools = import.meta.env.DEV;
 
-  const handlePremiumRequest =
-    async () => {
-      try {
-        const token =
-          localStorage.getItem(
-            "userToken"
-          );
+  const getPaymentErrorMessage = (error) => {
+    const message = error.response?.data?.message || error.message || "";
 
-        if (!token) {
-          toast.error(
-            "Please login first"
-          );
-          return;
-        }
+    if (message && message !== "Something went wrong") {
+      return message;
+    }
 
-        const decoded =
-          jwtDecode(token);
+    if (error.response?.status >= 500) {
+      return "Payment gateway is not ready on the backend. Please try with the local backend or deploy the latest payment API.";
+    }
 
-        const userId =
-          decoded.id ||
-          decoded.userId ||
-          decoded.sub;
+    return "Failed to initiate payment";
+  };
 
-        // ✅ CHECK USER PREMIUM STATUS
-        const statusResponse =
-          await axios.get(
-            `${API_BASE_URL}/user/${userId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+  const getLoggedInUser = () => {
+    const token = localStorage.getItem("userToken");
 
-        const userData =
-          statusResponse.data?.data;
-        const premiumStatus =
-          getCurrentPremiumStatus(
-            userData?.premiumStatus
-          );
+    if (!token) {
+      toast.error("Please login first");
+      return null;
+    }
 
-        // ✅ IF ALREADY APPROVED
-        if (
-          premiumStatus === "APPROVED" ||
-          userData?.premiumActive ===
-            true
-        ) {
-          toast.info(
-            "Premium already activated"
-          );
+    const decoded = jwtDecode(token);
+    const userId =
+      decoded.userId ||
+      decoded.userID ||
+      decoded.user_id ||
+      decoded.id ||
+      decoded.sub;
 
-          navigate("/user");
-          return;
-        }
+    if (!userId) {
+      toast.error("User ID missing from session");
+      return null;
+    }
 
-        // ✅ SEND REQUEST
-        const response =
-          await axios.post(
-            `${API_BASE_URL}/user/buyPremium/${userId}`,
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-toast.success(
-          "Premium request sent successfully"
+    return { token, userId };
+  };
+
+  const handlePremiumRequest = async () => {
+    const session = getLoggedInUser();
+    if (!session) return;
+
+    try {
+      setLoading(true);
+
+      const response = await paymentApi.buyUserPremium(session.userId);
+      const paymentData = response?.data?.data || response?.data || {};
+
+      const normalizedPayment = {
+        status: "PENDING",
+        ...paymentData,
+      };
+
+      setPayment(normalizedPayment);
+
+      if (normalizedPayment?.paymentUrl) {
+        toast.success("Payment initiated");
+        localStorage.setItem(
+          "lastPaymentContext",
+          JSON.stringify({
+            type: "user",
+            userId: session.userId,
+            orderId: normalizedPayment.orderId,
+            timestamp: Date.now()
+          })
         );
-
-        navigate("/user");
-      } catch (error) {
-if (
-          error.response?.data
-            ?.message ===
-          "Payment already in process"
-        ) {
-toast.info(
-            "Your premium request is already pending"
-          );
-
-          navigate("/user");
-          return;
-        }
-
-        toast.error(
-          error.response?.data
-            ?.message ||
-            "Failed to send request"
+        window.open(normalizedPayment.paymentUrl, "_blank", "noopener,noreferrer");
+      } else {
+        toast.info(
+          "Premium request submitted, but the backend did not return a payment gateway URL."
         );
       }
-    };
+    } catch (error) {
+      const errorMessage = String(error.response?.data?.message || "");
+
+      if (
+        errorMessage === "Payment already in process" ||
+        errorMessage.toLowerCase().includes("already pending")
+      ) {
+        toast.info("Your premium payment is already pending");
+        navigate("/user");
+        return;
+      }
+
+      if (
+        errorMessage.toLowerCase().includes("already approved") ||
+        errorMessage.toLowerCase().includes("already active")
+      ) {
+        toast.info("Premium already activated");
+        navigate("/user");
+        return;
+      }
+
+      toast.error(getPaymentErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMockSuccess = async () => {
+    if (!payment?.orderId) {
+      toast.error("Start payment first");
+      return;
+    }
+
+    try {
+      setMockLoading(true);
+      const transactionId = `MOCK_TXN_${Date.now()}`;
+      await paymentApi.confirmUserPremiumPayment(payment.orderId, transactionId);
+      toast.success("Payment success recorded");
+      navigate("/user");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to confirm payment");
+    } finally {
+      setMockLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100 flex items-center justify-center px-4">
       <ToastContainer position="top-right" autoClose={3000} />
       <motion.div
-        initial={{
-          opacity: 0,
-          y: 35,
-        }}
-        animate={{
-          opacity: 1,
-          y: 0,
-        }}
-        transition={{
-          duration: 0.45,
-        }}
+        initial={{ opacity: 0, y: 35 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
         className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-5 sm:p-8 text-center border border-amber-100"
       >
         <div className="flex justify-center mb-4">
@@ -136,36 +152,63 @@ toast.info(
         </h1>
 
         <p className="text-amber-700 mt-2 mb-6 text-sm">
-          Unlock premium properties and
-          contact details instantly.
+          Unlock premium properties and contact details instantly.
         </p>
 
-        <div className="bg-amber-50 rounded-2xl p-5 border border-amber-100">
-          <img
-            src={qrImage}
-            alt="QR Code"
-            className="w-56 h-56 mx-auto rounded-xl shadow-md"
-          />
+        <div className="bg-amber-50 rounded-2xl p-5 border border-amber-100 text-left">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-amber-950">
+                Premium Access
+              </p>
+              <p className="text-xs text-amber-700 mt-1">
+                Pay Rs. 99 + GST through PhonePe gateway.
+              </p>
+            </div>
+
+            <div className="text-right">
+              <p className="text-2xl font-black text-amber-950">Rs. 116.82</p>
+              <p className="text-xs text-amber-700">inclusive of GST</p>
+            </div>
+          </div>
+
+          {payment?.orderId && (
+            <div className="mt-4 rounded-xl border border-amber-200 bg-white p-3 text-xs text-amber-900">
+              <p className="font-bold">Order ID</p>
+              <p className="break-all mt-1">{payment.orderId}</p>
+              <p className="mt-2">Status: {payment.status || "PENDING"}</p>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center justify-center gap-2 mt-4 text-sm text-amber-700">
           <ShieldCheck size={16} />
-          Secure payment via QR scan
+          Secure payment via PhonePe
         </div>
 
         <button
-          onClick={
-            handlePremiumRequest
-          }
-          className="w-full mt-6 py-3 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 transition duration-200 shadow-md"
+          onClick={handlePremiumRequest}
+          disabled={loading}
+          className="w-full mt-6 py-3 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 transition duration-200 shadow-md disabled:bg-amber-300"
         >
-          Send Premium Request
+          <span className="inline-flex items-center justify-center gap-2">
+            <ExternalLink size={18} />
+            {loading ? "Starting Payment..." : "Pay with PhonePe"}
+          </span>
         </button>
 
+        {showMockPaymentTools && payment?.orderId && (
+          <button
+            onClick={handleMockSuccess}
+            disabled={mockLoading}
+            className="w-full mt-3 py-3 border border-green-200 bg-green-50 rounded-xl text-green-800 hover:bg-green-100 transition duration-200 disabled:opacity-70"
+          >
+            {mockLoading ? "Confirming..." : "Mock Payment Success"}
+          </button>
+        )}
+
         <button
-          onClick={() =>
-            navigate("/user")
-          }
+          onClick={() => navigate("/user")}
           className="w-full mt-3 py-3 border border-amber-200 rounded-xl text-amber-800 hover:bg-amber-50 transition duration-200"
         >
           Back to Browse

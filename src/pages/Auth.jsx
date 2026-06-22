@@ -70,20 +70,22 @@ const [otp, setOtp] = useState("");
       return "Please enter full name";
     }
 
-    if (!/^[A-Za-z ]+$/.test(formData.fullName)) {
-      return "Full name should contain only letters";
+    if (formData.role === "PROPERTY_OWNER") {
+      if (!/^[A-Za-z .\-]+$/.test(formData.fullName)) {
+        return "Full name should contain only letters, spaces, dots, or hyphens";
+      }
+    } else {
+      if (!/^[A-Za-z ]+$/.test(formData.fullName)) {
+        return "Full name should contain only letters and spaces";
+      }
     }
 
     if (!formData.mobileNumber.trim()) {
       return "Please enter mobile number";
     }
 
-    if (!/^\d+$/.test(formData.mobileNumber)) {
-      return "Mobile number should contain only digits";
-    }
-
-    if (formData.mobileNumber.length !== 10) {
-      return "Mobile number must be 10 digits";
+    if (!/^[6-9]\d{9}$/.test(formData.mobileNumber)) {
+      return "Mobile number must start with 6, 7, 8, or 9 and be exactly 10 digits";
     }
 
     if (!formData.email.trim()) {
@@ -110,8 +112,16 @@ const [otp, setOtp] = useState("");
       return "Please enter email";
     }
 
+    if (!/^[A-Za-z0-9._%+-]+@gmail\.com$/.test(formData.email)) {
+      return "Only Gmail addresses are allowed";
+    }
+
     if (!formData.password.trim()) {
       return "Please enter password";
+    }
+
+    if (formData.password.length < 6) {
+      return "Password must be at least 6 characters";
     }
   }
 

@@ -1,3 +1,5 @@
+import { API_ORIGIN } from "../services/api";
+
 export const FALLBACK_PROPERTY_IMAGE = "/no-image.png";
 export const FALLBACK_PROPERTY_IMAGE_DATA_URL =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300' viewBox='0 0 400 300'><rect width='100%25' height='100%25' fill='%23E5E7EB'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%236B7280' font-family='Arial, sans-serif' font-size='22'>No database image</text></svg>";
@@ -38,7 +40,7 @@ export const getImageCandidates = (imageName) => {
     try {
       const m = v.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/api\/owner\/property\/image\/.+)$/i);
       if (m && m[1]) {
-        return `https://r1.rentalchaavi.com${m[1]}`;
+        return `${API_ORIGIN}${m[1]}`;
       }
     } catch (e) {
       // fallthrough

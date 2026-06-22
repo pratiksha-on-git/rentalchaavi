@@ -15,7 +15,7 @@ import {
   motion,
   AnimatePresence,
 } from "framer-motion";
-import { API_BASE_URL } from "../services/api";
+import { API_BASE_URL, userApi } from "../services/api";
 
 import {
   MapPin,
@@ -220,24 +220,13 @@ setNearbyProperties([]);
 setUserName(loggedInUserName);
 
         try {
-          const userResponse =
-            await fetch(
-              `${API_BASE_URL}/user/${userId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-
-          const userResult =
-            await userResponse.json();
+          const userResponse = await userApi.getProfile(userId);
+          const userResult = userResponse.data;
 
           if (!cancelled) {
             setPremiumStatus(
               getCurrentPremiumStatus(
-                userResult?.data
-                  ?.premiumStatus
+                userResult?.data?.premiumStatus
               )
             );
           }
@@ -247,26 +236,10 @@ setUserName(loggedInUserName);
           }
         }
 
-        const response =
-          await fetch(
-            `${API_BASE_URL}/user/properties/${userId}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type":
-                  "application/json",
-              },
-            }
-          );
+        const response = await userApi.getProperties(userId);
+        const result = response.data;
 
-        const result =
-          await response.json();
-
-        if (
-          !response.ok ||
-          result.status >= 400
-        ) {
+        if (result.status >= 400) {
           throw new Error(
             result.message ||
               "Failed to fetch properties"

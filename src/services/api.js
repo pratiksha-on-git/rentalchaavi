@@ -5,9 +5,29 @@ const ensureApiBasePath = (url) => {
   return trimmedUrl.endsWith('/api') ? trimmedUrl : `${trimmedUrl}/api`;
 };
 
+const isBrowserLocalhost = () => {
+  if (typeof window === "undefined") return true;
+  return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+};
+
+const isLocalBackendUrl = (url) =>
+  /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:\/|$)/i.test(String(url || ""));
+
+const resolveApiBaseUrl = () => {
+  const configuredUrl = import.meta.env.VITE_API_BASE_URL;
+
+  if (configuredUrl && !(isLocalBackendUrl(configuredUrl) && !isBrowserLocalhost())) {
+    return configuredUrl;
+  }
+
+  return isBrowserLocalhost()
+    ? "http://localhost:8081"
+    : "https://r1.rentalchaavi.com";
+};
+
 export const API_BASE_URL =
   ensureApiBasePath(
-    import.meta.env.VITE_API_BASE_URL || 'https://r1.rentalchaavi.com'
+    resolveApiBaseUrl()
   );
 
 export const CHAT_API_BASE_URL =
@@ -50,7 +70,7 @@ const rootApi = axios.create({
 });
 
 const resolveAuthTokenForPath = (path = "") => {
-  if (path.startsWith("/auth/")) return null;
+  if (path.startsWith("/auth/") && !path.endsWith("/logout")) return null;
   if (path.startsWith("/owner/")) return localStorage.getItem("ownerToken");
   if (path.startsWith("/admin/")) return localStorage.getItem("adminToken");
   if (path.startsWith("/user/")) return localStorage.getItem("userToken");
@@ -109,6 +129,20 @@ rootApi.interceptors.response.use(
   (error) => Promise.reject(error)
 );
 
+const authConfigFor = (tokenKey) => {
+  const tokenKeys = Array.isArray(tokenKey) ? tokenKey : [tokenKey];
+  const token = tokenKeys.map((key) => localStorage.getItem(key)).find(Boolean);
+  return token
+    ? {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    : {};
+};
+
+const ownerAuthConfig = () => authConfigFor(["ownerToken", "token"]);
+
 // Admin API calls
 export const adminApi = {
   // Add property by owner
@@ -154,21 +188,32 @@ export const ownerApi = {
   getPincode: (city, area) =>
     api.get("/owner/getPincode", { params: { city, area } }),
   addProperty: (ownerId, propertyData) =>
-    api.post(`/owner/addPropertyByOwner/${ownerId}`, propertyData),
+    api.post(`/owner/addPropertyByOwner/${ownerId}`, propertyData, ownerAuthConfig()),
   getOwnerProperties: (ownerId) =>
-    api.get(`/owner/getAllPropertiesByOwnerId/${ownerId}`),
-  getPropertyById: (id) => api.get(`/owner/getPropertyById/${id}`),
+    api.get(`/owner/getAllPropertiesByOwnerId/${ownerId}`, ownerAuthConfig()),
+  getPropertyById: (id) => api.get(`/owner/getPropertyById/${id}`, ownerAuthConfig()),
   updateProperty: (id, propertyData) =>
-    api.put(`/owner/updatePropertyById/${id}`, propertyData),
-  deleteProperty: (id) => api.delete(`/owner/deletePropertyById/${id}`),
+    api.put(`/owner/updatePropertyById/${id}`, propertyData, ownerAuthConfig()),
+  deleteProperty: (id) => api.delete(`/owner/deletePropertyById/${id}`, ownerAuthConfig()),
   uploadPropertyImages: (propertyId, formData) =>
-    uploadApi.post(`/owner/uploadPropertyImagesByPropertyId/${propertyId}`, formData),
+    uploadApi.post(`/owner/uploadPropertyImagesByPropertyId/${propertyId}`, formData, ownerAuthConfig()),
   buyPremium: (ownerId, propertyId) =>
-    api.post(`/owner/buyPremiumByOwner/${ownerId}`, null, { params: propertyId ? { propertyId } : {} }),
+    api.post(`/owner/buyPremiumByOwner/${ownerId}`, null, {
+      params: propertyId ? { propertyId } : {},
+      ...ownerAuthConfig(),
+    }),
+  confirmPropertyPayment: (orderId, transactionId) =>
+    api.post("/owner/property-payment-success", null, {
+      params: { orderId, transactionId },
+      ...authConfigFor("ownerToken"),
+    }),
   saveFacilities: (ownerId, propertyId, facilities) =>
-    api.post(`/owner/save-facilities`, { ownerId, propertyId, facilities }),
+    api.post(`/owner/save-facilities`, { ownerId, propertyId, facilities }, ownerAuthConfig()),
   getFacilities: (ownerId, propertyId) =>
-    api.get("/owner/get-facilities", { params: { ownerId, propertyId } }),
+    api.get("/owner/get-facilities", {
+      params: { ownerId, propertyId },
+      ...ownerAuthConfig(),
+    }),
 };
 
 export const propertyApi = {
@@ -219,14 +264,20 @@ export const authApi = {
   registerUser: (data) => api.post("/auth/register/user", data),
   registerAdmin: (data) => api.post("/auth/register/admin", data),
   registerOwner: (data) => api.post("/auth/register/POwner", data),
-   forgotPassword: (data) => api.post("/auth/forgot-password", data),
+  forgotPassword: (data) => api.post("/auth/forgot-password", data),
   verifyOtp: (data) => api.post("/auth/verify-otp", data),
-  resetPassword: (data) =>api.post("/auth/reset-password", data),
-   sendRegisterOtp: (data) =>
+  resetPassword: (data) => api.post("/auth/reset-password", data),
+  sendRegisterOtp: (data) =>
     api.post("/auth/send-email-otp", data),
- 
   verifyRegisterOtp: (data) =>
     api.post("/auth/verify-email-otp", data),
+  logout: () => api.post("/auth/logout"),
+};
+
+export const userApi = {
+  getProfile: (userId) => api.get(`/user/${userId}`),
+  getProperties: (userId) => api.get(`/user/properties/${userId}`),
+  filterProperties: (userId, filterData) => api.post(`/user/filter-properties/${userId}`, filterData),
 };
 
 const adminRootRequest = (path, method = "get", data) => {
@@ -238,6 +289,7 @@ const adminRootRequest = (path, method = "get", data) => {
 export const adminModerationApi = {
   getPendingUsers: () => adminRootRequest("/pending-users"),
   getPendingOwners: () => adminRootRequest("/pending-owner"),
+  getPendingPremiumProperties: () => rootApi.get("/admin/premium/pending"),
   approveUserPremium: (userId) =>
     adminRootRequest(`/approveUserPremium/${userId}`, "post"),
   rejectUserPremium: (userId) =>
@@ -252,6 +304,24 @@ export const adminModerationApi = {
     rootApi.post(`/admin/approveProperty/${propertyId}`),
   rejectProperty: (propertyId) =>
     rootApi.post(`/admin/rejectProperty/${propertyId}`),
+};
+
+export const paymentApi = {
+  buyUserPremium: (userId) =>
+    api.post(`/user/buyPremium/${userId}`, {}, authConfigFor("userToken")),
+  confirmUserPremiumPayment: (orderId, transactionId) =>
+    api.post("/user/payment-success", null, {
+      params: { orderId, transactionId },
+      ...authConfigFor("userToken"),
+    }),
+  buyPropertyPremium: (propertyId) =>
+    rootApi.post(`/premium/buy/${propertyId}`, {}, ownerAuthConfig()),
+  getPropertyPremiumStatus: (propertyId) =>
+    rootApi.get(`/premium/status/${propertyId}`, ownerAuthConfig()),
+  mockPropertyPremiumCallback: ({ orderId, transactionId, status = "SUCCESS" }) =>
+    rootApi.post("/premium/callback", { orderId, transactionId, status }, { skipAuth: true }),
+  approvePropertyPremium: (propertyId) =>
+    rootApi.put(`/admin/premium/approve/${propertyId}`, null, authConfigFor("adminToken")),
 };
 
 export const chatApi = {

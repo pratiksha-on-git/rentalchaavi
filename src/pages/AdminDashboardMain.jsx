@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { adminModerationApi } from "../services/api";
+import { adminModerationApi, authApi } from "../services/api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Building2, Clock, LogOut, ShieldCheck, Users } from "lucide-react";
@@ -31,6 +31,27 @@ const writeOwnerApprovalStatus = (owner, status) => {
   }));
 };
 
+const unwrapList = (response) =>
+  Array.isArray(response?.data) ? response.data : response?.data?.data || [];
+
+const getPendingPropertyId = (item) => item?.propertyId ?? item?.id;
+
+const mergePendingProperties = (...lists) => {
+  const merged = new Map();
+
+  lists.flat().forEach((item) => {
+    const propertyId = getPendingPropertyId(item);
+    if (!propertyId) return;
+    merged.set(String(propertyId), {
+      ...merged.get(String(propertyId)),
+      ...item,
+      propertyId,
+    });
+  });
+
+  return Array.from(merged.values());
+};
+
 const AdminDashboardMain = () => {
   const navigate = useNavigate();
   const [pendingUsers, setPendingUsers] = useState([]);
@@ -38,7 +59,12 @@ const AdminDashboardMain = () => {
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState("");
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authApi.logout();
+    } catch (e) {
+      console.error("Logout API failed", e);
+    }
     localStorage.removeItem("adminToken");
     localStorage.setItem("adminLogout", Date.now().toString());
     const channel = new BroadcastChannel("admin-auth");
@@ -50,12 +76,18 @@ const AdminDashboardMain = () => {
   const loadPendingData = async ({ silent = false } = {}) => {
     if (!silent) setLoading(true);
     try {
-      const [usersRes, ownersRes] = await Promise.all([
+      const [usersRes, ownersRes, premiumPropertiesRes] = await Promise.all([
         adminModerationApi.getPendingUsers(),
         adminModerationApi.getPendingOwners(),
+        adminModerationApi.getPendingPremiumProperties().catch(() => ({ data: [] })),
       ]);
-      setPendingUsers(Array.isArray(usersRes?.data) ? usersRes.data : usersRes?.data?.data || []);
-      setPendingOwners(Array.isArray(ownersRes?.data) ? ownersRes.data : ownersRes?.data?.data || []);
+      setPendingUsers(unwrapList(usersRes));
+      setPendingOwners(
+        mergePendingProperties(
+          unwrapList(ownersRes),
+          unwrapList(premiumPropertiesRes)
+        )
+      );
     } catch (error) {
       if (!silent) {
         toast.error(error?.response?.data?.message || "Failed to load admin data");
@@ -229,7 +261,7 @@ const AdminDashboardMain = () => {
               ) : (
                 <div className="space-y-3">
                   {pendingOwners.map((item) => {
-                    const propertyId = item?.propertyId;
+                    const propertyId = getPendingPropertyId(item);
                     const keyPrefix = `property-${propertyId}`;
                     return (
                       <div key={keyPrefix} className="rounded-2xl border border-[#d9c7b2] bg-[#f9f3ed] p-4">

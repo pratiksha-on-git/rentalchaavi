@@ -1,5 +1,6 @@
 import { Heart, LogOut, MessageCircle } from "lucide-react";
 import BrandLogo from "./BrandLogo";
+import { authApi } from "../services/api";
 
 const Navbar = ({
   onOpenChat,
@@ -7,7 +8,13 @@ const Navbar = ({
   userName = "",
   onOpenLikedProperties,
 }) => {
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (e) {
+      console.error("Logout API failed", e);
+    }
+
     const adminToken = localStorage.getItem("adminToken");
     const ownerToken = localStorage.getItem("ownerToken");
     const userToken = localStorage.getItem("userToken");

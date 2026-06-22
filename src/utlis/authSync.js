@@ -22,7 +22,14 @@ export const getUserIdFromToken = () => {
 
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.id;
+    return (
+      payload.userId ||
+      payload.userID ||
+      payload.user_id ||
+      payload.id ||
+      payload.sub ||
+      null
+    );
   } catch (err) {
 return null;
   }
