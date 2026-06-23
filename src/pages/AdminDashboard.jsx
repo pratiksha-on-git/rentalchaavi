@@ -51,6 +51,57 @@ const getDashboardPropertyId = (property) =>
   property?._raw?.propertyId ??
   property?._raw?.id;
 
+const getPropertyPaymentOrderId = (property) =>
+  property?.paymentOrderId ??
+  property?.payment_order_id ??
+  property?.phonePeOrderId ??
+  property?.phone_pe_order_id ??
+  property?.orderId ??
+  property?._raw?.paymentOrderId ??
+  property?._raw?.payment_order_id ??
+  property?._raw?.phonePeOrderId ??
+  property?._raw?.phone_pe_order_id ??
+  property?._raw?.orderId ??
+  "";
+
+const hasPropertyPaymentOrder = (property) =>
+  String(getPropertyPaymentOrderId(property) || "").trim().length > 0;
+
+const getPropertyCreatedTime = (property) => {
+  const rawValue =
+    property?.createdAt ??
+    property?.created_at ??
+    property?.createdDate ??
+    property?.created_date ??
+    property?.uploadedAt ??
+    property?.uploaded_at ??
+    property?._raw?.createdAt ??
+    property?._raw?.created_at ??
+    property?._raw?.createdDate ??
+    property?._raw?.created_date ??
+    property?._raw?.uploadedAt ??
+    property?._raw?.uploaded_at;
+
+  const parsed = rawValue ? Date.parse(rawValue) : NaN;
+  return Number.isNaN(parsed) ? Number.POSITIVE_INFINITY : parsed;
+};
+
+const getFirstFreePropertyId = (propertyList) => {
+  const eligibleProperties = propertyList
+    .map((property) => ({
+      id: getDashboardPropertyId(property),
+      createdTime: getPropertyCreatedTime(property),
+    }))
+    .filter((property) => property.id !== null && property.id !== undefined);
+
+  eligibleProperties.sort((a, b) => {
+    if (a.createdTime !== b.createdTime) return a.createdTime - b.createdTime;
+    return Number(a.id) - Number(b.id);
+  });
+
+  return eligibleProperties[0]?.id || null;
+};
+
 const findPaymentRedirectUrl = (value, seen = new Set()) => {
   if (!value) return "";
 
@@ -167,48 +218,6 @@ const writeStoredOwnerApprovalStatus = (ownerId, status) => {
   if (ownerEmail) approvalStatuses[`email:${ownerEmail}`] = status;
 
   localStorage.setItem(OWNER_APPROVAL_STATUS_KEY, JSON.stringify(approvalStatuses));
-
-};
-
-
-
-const readPropertyPaymentStatuses = () => {
-
-  try {
-
-    const parsed = JSON.parse(localStorage.getItem(PROPERTY_PAYMENT_STATUS_KEY) || "{}");
-
-    return parsed && typeof parsed === "object" ? parsed : {};
-
-  } catch {
-
-    return {};
-
-  }
-
-};
-
-
-
-const getStoredPropertyPaymentStatus = (propertyId) => {
-
-  if (!propertyId) return "";
-
-  return String(readPropertyPaymentStatuses()[String(propertyId)] || "").toUpperCase();
-
-};
-
-
-
-const writeStoredPropertyPaymentStatus = (propertyId, status) => {
-
-  if (!propertyId) return;
-
-  const paymentStatuses = readPropertyPaymentStatuses();
-
-  paymentStatuses[String(propertyId)] = status;
-
-  localStorage.setItem(PROPERTY_PAYMENT_STATUS_KEY, JSON.stringify(paymentStatuses));
 
 };
 
@@ -1102,15 +1111,6 @@ const handleManualOwnerIdSubmit = () => {
 
     const backendPaymentStatus = String(property?.paymentStatus || "").toUpperCase();
 
-    if (
-      propertyId &&
-      (backendPaymentStatus === "APPROVED" ||
-        backendPaymentStatus === "REJECTED" ||
-        backendPaymentStatus === "PENDING")
-    ) {
-      writeStoredPropertyPaymentStatus(propertyId, backendPaymentStatus);
-    }
-
     return {
 
       ...property,
@@ -1250,6 +1250,14 @@ if (!preserveCurrent) {
 
           setOwnerPremiumStatus("PENDING");
 
+        } else if (status === "FREE_ACTIVE" || status.includes("FREE_ACTIVE")) {
+
+          writeStoredOwnerApprovalStatus(ownerId, "FREE_ACTIVE");
+
+          setOwnerApprovalStatus("FREE_ACTIVE");
+
+          setOwnerPremiumStatus("FREE_ACTIVE");
+
         }
 
       }
@@ -1364,7 +1372,6 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
     // Backend property payment status takes precedence over local cache.
     const propertyPaymentStatus = String(property?.paymentStatus || "").toUpperCase();
-
     const isResolvedFirstFreeProperty =
       firstFreePropertyId && String(propertyId) === String(firstFreePropertyId);
 
@@ -1376,22 +1383,31 @@ setFacilities(mergeFacilitiesWithBackendOptions());
       return "PAYMENT_DUE";
     }
 
+    if (propertyPaymentStatus === "PAYMENT_PENDING") return "PENDING";
+
+    if (propertyPaymentStatus === "PENDING_APPROVAL") return "SUCCESS";
+
     if (
       propertyPaymentStatus === "APPROVED" ||
       propertyPaymentStatus === "SUCCESS" ||
-      propertyPaymentStatus === "REJECTED" ||
-      propertyPaymentStatus === "PENDING"
+      propertyPaymentStatus === "REJECTED"
     ) {
       return propertyPaymentStatus;
     }
 
-    const storedPropertyStatus = getStoredPropertyPaymentStatus(propertyId);
-
-    if (storedPropertyStatus === "PENDING" || storedPropertyStatus === "SUCCESS" || storedPropertyStatus === "REJECTED") {
-
-      return storedPropertyStatus;
-
+    if (propertyPaymentStatus === "PENDING") {
+      return "PENDING";
     }
+
+    const propertyPremiumStatus = String(property?.premiumStatus || "").toUpperCase();
+
+    if (propertyPremiumStatus === "PAYMENT_PENDING") return "PENDING";
+
+    if (propertyPremiumStatus === "PENDING_APPROVAL") return "SUCCESS";
+
+    if (propertyPremiumStatus === "ACTIVE") return "APPROVED";
+
+    if (propertyPremiumStatus === "REJECTED") return "REJECTED";
 
     // Do not use property.premiumStatus here. Backend may copy owner-level
     // premium state into this field, which can incorrectly mark new properties
@@ -2124,7 +2140,16 @@ toast.error(
 
         setPropertyFetchMessage("");
 
-        toast.info("Property uploaded. You can complete payment anytime from this property card.");
+        const willBeFirstFree =
+          Number(activeOwnerId) > 0 &&
+          Number(activeOwnerId) <= FIRST_FREE_OWNER_LIMIT &&
+          properties.length === 0;
+
+        if (willBeFirstFree) {
+          toast.info("First property uploaded free. Later properties require payment and admin approval.");
+        } else {
+          toast.info("Property uploaded. Complete payment from this property card to send it for admin approval.");
+        }
 
 
 
@@ -2620,8 +2645,6 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
       if (ownerId) writeStoredOwnerApprovalStatus(ownerId, nextStatus);
 
-      writeStoredPropertyPaymentStatus(pendingPropertyId, nextStatus);
-
       setOwnerPremiumStatus(nextStatus);
 
       setOwnerApprovalStatus(nextStatus);
@@ -2630,6 +2653,15 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
       const paymentUrl = findPaymentRedirectUrl(response?.data);
       localStorage.setItem(
         "lastPaymentContext",
+        JSON.stringify({
+          type: "property",
+          propertyId: pendingPropertyId,
+          orderId: paymentData?.orderId || "",
+          timestamp: Date.now(),
+        })
+      );
+      localStorage.setItem(
+        "lastPropertyPaymentContext",
         JSON.stringify({
           type: "property",
           propertyId: pendingPropertyId,
@@ -2660,8 +2692,6 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
       if (message.toLowerCase().includes("already pending")) {
 
-        writeStoredPropertyPaymentStatus(pendingPropertyId, "PENDING");
-
         setOwnerPremiumStatus("PENDING");
 
         setOwnerApprovalStatus("PENDING");
@@ -2688,13 +2718,11 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
   };
 
-  const isFirstFreeOwner = Number(ownerId) > 0 && Number(ownerId) <= FIRST_FREE_OWNER_LIMIT;
+  const isFirstFreeOwner =
+    Number(ownerId) > 0 && Number(ownerId) <= FIRST_FREE_OWNER_LIMIT;
 
   const firstFreePropertyId = isFirstFreeOwner
-    ? properties
-        .map((property) => getDashboardPropertyId(property))
-        .filter((propertyId) => propertyId !== null && propertyId !== undefined)
-        .sort((a, b) => Number(a) - Number(b))[0] || null
+    ? getFirstFreePropertyId(properties)
     : null;
 
 
@@ -3971,7 +3999,7 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
             <div className="mt-5 bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-sm text-yellow-800">
 
-              If the backend returns a PhonePe checkout URL, it opens automatically. Otherwise the order is saved as pending.
+              You will be redirected to PhonePe. If the gateway URL is missing, the payment will not start.
 
             </div>
 

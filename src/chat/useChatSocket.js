@@ -7,7 +7,16 @@ import {
   getSocketQuery,
 } from "./chatModel";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:9092";
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL ||
+  import.meta.env.VITE_CHAT_API_BASE_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  "http://localhost:8081";
+
+const SOCKET_ENABLED = import.meta.env.VITE_ENABLE_SOCKET === "true";
+
+const getRoleTokenKey = (role) =>
+  role === "PROPERTY_OWNER" ? "ownerToken" : "userToken";
 
 const parseRoomId = (roomId) => {
   if (!roomId || typeof roomId !== "string") return null;
@@ -53,13 +62,47 @@ export const useChatSocket = ({
     async (online) => {
       if (!Number.isFinite(activeUserId) || activeUserId <= 0) return;
       try {
-        await chatApi.updateStatus({ userId: activeUserId, online: !!online });
+        await chatApi.updateStatus(
+          { userId: activeUserId, online: !!online },
+          getRoleTokenKey(currentRole)
+        );
       } catch {
         // Presence is best-effort; don't break chat.
       }
     },
     [activeUserId]
   );
+
+  const loadHistory = useCallback(async () => {
+    if (!roomId) return;
+    try {
+      const historyRes = await chatApi.getHistory(String(roomId), getRoleTokenKey(currentRole));
+      const historyList = normalizeHistory(historyRes);
+      setMessages(historyList);
+    } catch {
+      // History polling is best-effort; sending still reports its own errors.
+    }
+  }, [currentRole, roomId]);
+
+  useEffect(() => {
+    if (!shouldConnect) {
+      setMessages([]);
+      return;
+    }
+
+    setMessages([]);
+    setTypingByUserId({});
+    setPresenceByUserId({});
+    loadHistory();
+  }, [loadHistory, shouldConnect]);
+
+  useEffect(() => {
+    if (!shouldConnect || socketConnected) return;
+    const interval = window.setInterval(() => {
+      loadHistory();
+    }, 3000);
+    return () => window.clearInterval(interval);
+  }, [loadHistory, shouldConnect, socketConnected]);
 
   useEffect(() => {
     if (!shouldConnect) {
@@ -75,13 +118,7 @@ export const useChatSocket = ({
       return;
     }
 
-    // Clear stale room state.
-    // Do it async to avoid react-hooks/set-state-in-effect warnings.
-    setTimeout(() => {
-      setMessages([]);
-      setTypingByUserId({});
-      setPresenceByUserId({});
-    }, 0);
+    if (!SOCKET_ENABLED) return;
 
     const socket = io(socketUrl, {
       transports: ["websocket"],
@@ -96,15 +133,7 @@ export const useChatSocket = ({
       socket.emit("join_room", String(roomId));
       await setOnline(true);
 
-      // Load existing messages from REST to match backend contract.
-      // (Backend provides GET /chat/history/{roomId}).
-      try {
-        const historyRes = await chatApi.getHistory(String(roomId));
-        const historyList = normalizeHistory(historyRes);
-        setMessages(historyList);
-      } catch {
-        // History is best-effort; new messages will still stream via socket.
-      }
+      loadHistory();
     });
 
     socket.on("disconnect", () => {
@@ -177,6 +206,7 @@ export const useChatSocket = ({
     currentRole,
     currentUserId,
     activeUserId,
+    loadHistory,
     setOnline,
     onAccepted,
     onRejected,
@@ -205,9 +235,14 @@ export const useChatSocket = ({
       }
 
       // Fallback to REST (also works for the first message).
-      await chatApi.sendMessage(outgoingPayload);
+      const response = await chatApi.sendMessage(outgoingPayload, getRoleTokenKey(currentRole));
+      const payload = response?.data?.data || response?.data;
+      if (payload) {
+        setMessages((prev) => mergeUniqueById(prev, payload));
+      }
+      await loadHistory();
     },
-    [currentRole, parsedIds]
+    [currentRole, loadHistory, parsedIds]
   );
 
   const sendTyping = useCallback(

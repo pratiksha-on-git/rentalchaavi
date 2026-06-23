@@ -68,6 +68,7 @@ function App() {
 
 <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/payment-result" element={<PaymentResult />} />
+        <Route path="/payment-result/*" element={<PaymentResult />} />
 
 
         <Route

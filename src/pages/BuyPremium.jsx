@@ -11,8 +11,41 @@ const BuyPremium = () => {
   const navigate = useNavigate();
   const [payment, setPayment] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [mockLoading, setMockLoading] = useState(false);
-  const showMockPaymentTools = import.meta.env.DEV;
+
+  const findPaymentRedirectUrl = (value, seen = new Set()) => {
+    if (!value) return "";
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      return /^https?:\/\//i.test(trimmed) ? trimmed : "";
+    }
+    if (typeof value !== "object" || seen.has(value)) return "";
+    seen.add(value);
+
+    const preferredKeys = [
+      "paymentUrl",
+      "paymentURL",
+      "checkoutUrl",
+      "checkoutURL",
+      "redirectUrl",
+      "redirectURL",
+      "redirect_url",
+      "payUrl",
+      "payURL",
+      "url",
+    ];
+
+    for (const key of preferredKeys) {
+      const found = findPaymentRedirectUrl(value[key], seen);
+      if (found) return found;
+    }
+
+    for (const item of Object.values(value)) {
+      const found = findPaymentRedirectUrl(item, seen);
+      if (found) return found;
+    }
+
+    return "";
+  };
 
   const getPaymentErrorMessage = (error) => {
     const message = error.response?.data?.message || error.message || "";
@@ -69,7 +102,9 @@ const BuyPremium = () => {
 
       setPayment(normalizedPayment);
 
-      if (normalizedPayment?.paymentUrl) {
+      const paymentUrl = findPaymentRedirectUrl(response?.data);
+
+      if (paymentUrl) {
         toast.success("Payment initiated");
         localStorage.setItem(
           "lastPaymentContext",
@@ -80,11 +115,19 @@ const BuyPremium = () => {
             timestamp: Date.now()
           })
         );
-        window.open(normalizedPayment.paymentUrl, "_blank", "noopener,noreferrer");
-      } else {
-        toast.info(
-          "Premium request submitted, but the backend did not return a payment gateway URL."
+        localStorage.setItem(
+          "lastUserPaymentContext",
+          JSON.stringify({
+            type: "user",
+            userId: session.userId,
+            orderId: normalizedPayment.orderId,
+            timestamp: Date.now()
+          })
         );
+        window.location.href = paymentUrl;
+        return;
+      } else {
+        throw new Error("Invalid response payload from gateway");
       }
     } catch (error) {
       const errorMessage = String(error.response?.data?.message || "");
@@ -108,27 +151,9 @@ const BuyPremium = () => {
       }
 
       toast.error(getPaymentErrorMessage(error));
+      navigate("/user");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleMockSuccess = async () => {
-    if (!payment?.orderId) {
-      toast.error("Start payment first");
-      return;
-    }
-
-    try {
-      setMockLoading(true);
-      const transactionId = `MOCK_TXN_${Date.now()}`;
-      await paymentApi.confirmUserPremiumPayment(payment.orderId, transactionId);
-      toast.success("Payment success recorded");
-      navigate("/user");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to confirm payment");
-    } finally {
-      setMockLoading(false);
     }
   };
 
@@ -196,16 +221,6 @@ const BuyPremium = () => {
             {loading ? "Starting Payment..." : "Pay with PhonePe"}
           </span>
         </button>
-
-        {showMockPaymentTools && payment?.orderId && (
-          <button
-            onClick={handleMockSuccess}
-            disabled={mockLoading}
-            className="w-full mt-3 py-3 border border-green-200 bg-green-50 rounded-xl text-green-800 hover:bg-green-100 transition duration-200 disabled:opacity-70"
-          >
-            {mockLoading ? "Confirming..." : "Mock Payment Success"}
-          </button>
-        )}
 
         <button
           onClick={() => navigate("/user")}

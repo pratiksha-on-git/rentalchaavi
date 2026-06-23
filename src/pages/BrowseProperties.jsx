@@ -18,8 +18,8 @@ import BrandLogo from "../components/BrandLogo";
 import {
   API_BASE_URL,
   ownerApi,
+  paymentApi,
   propertyApi,
-  userApi,
 } from "../services/api";
 
 import { getUserIdFromToken } from "../utlis/authSync";
@@ -27,7 +27,7 @@ import {
   FALLBACK_PROPERTY_IMAGE_DATA_URL,
   getPropertyImageCandidates,
 } from "../utlis/propertyImages";
-import { getCurrentPremiumStatus } from "../utlis/premiumStatus";
+import { resolveUserPremiumStatus } from "../utlis/premiumStatus";
 
 const USER_NAME_KEY = "userName";
 const USER_NAME_BY_EMAIL_KEY = "userNameByEmail";
@@ -132,31 +132,35 @@ const BrowseProperties = () => {
   // =========================================
   // FETCH USER PREMIUM STATUS
   // =========================================
-  const fetchPremiumStatus =
-    async () => {
-      try {
-        const token =
-          localStorage.getItem(
-            "userToken"
-          );
+  const fetchPremiumStatus = async () => {
+    try {
+      const token = localStorage.getItem("userToken");
+      if (!token) return;
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      const userId =
+        payload?.id ||
+        payload?.userId ||
+        payload?.user_id ||
+        payload?.sub;
 
-        if (!token) return;
+      if (userId) {
+        try {
+          const response = await paymentApi.getUserPremiumStatus(userId);
+          const data = response?.data?.data || response?.data || {};
+          const freshStatus = resolveUserPremiumStatus(data);
+          if (freshStatus) {
+            setPremiumStatus(freshStatus);
+            return;
+          }
+        } catch (error) {
+          console.warn("Failed to fetch fresh premium status", error);
+        }
+      }
 
-        const userId =
-          getUserIdFromToken();
-
-        if (!userId) return;
-
-        const response = await userApi.getProfile(userId);
-        const result = response.data;
-        setPremiumStatus(
-          getCurrentPremiumStatus(
-            result?.data?.premiumStatus
-          )
-        );
-      } catch (err) {
-}
-    };
+      setPremiumStatus(resolveUserPremiumStatus(payload));
+    } catch {
+    }
+  };
 
   // =========================================
   // TYPE MAPPER

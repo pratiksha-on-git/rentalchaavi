@@ -15,7 +15,7 @@ import {
   motion,
   AnimatePresence,
 } from "framer-motion";
-import { API_BASE_URL, userApi } from "../services/api";
+import { API_BASE_URL, paymentApi, propertyApi } from "../services/api";
 
 import {
   MapPin,
@@ -47,7 +47,7 @@ import {
   getImageCandidates,
   getPropertyImageNames,
 } from "../utlis/propertyImages";
-import { getCurrentPremiumStatus } from "../utlis/premiumStatus";
+import { resolveUserPremiumStatus } from "../utlis/premiumStatus";
 
 const FALLBACK_IMAGE = FALLBACK_PROPERTY_IMAGE_DATA_URL;
 
@@ -220,23 +220,16 @@ setNearbyProperties([]);
 setUserName(loggedInUserName);
 
         try {
-          const userResponse = await userApi.getProfile(userId);
-          const userResult = userResponse.data;
-
+          const statusResponse = await paymentApi.getUserPremiumStatus(userId);
+          const statusData = statusResponse?.data?.data || statusResponse?.data || {};
           if (!cancelled) {
-            setPremiumStatus(
-              getCurrentPremiumStatus(
-                userResult?.data?.premiumStatus
-              )
-            );
+            setPremiumStatus(resolveUserPremiumStatus(statusData) || resolveUserPremiumStatus(payload));
           }
         } catch {
-          if (!cancelled) {
-            setPremiumStatus("");
-          }
+          if (!cancelled) setPremiumStatus(resolveUserPremiumStatus(payload));
         }
 
-        const response = await userApi.getProperties(userId);
+        const response = await propertyApi.getAll();
         const result = response.data;
 
         if (result.status >= 400) {

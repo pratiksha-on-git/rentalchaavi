@@ -5,29 +5,9 @@ const ensureApiBasePath = (url) => {
   return trimmedUrl.endsWith('/api') ? trimmedUrl : `${trimmedUrl}/api`;
 };
 
-const isBrowserLocalhost = () => {
-  if (typeof window === "undefined") return true;
-  return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
-};
-
-const isLocalBackendUrl = (url) =>
-  /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:\/|$)/i.test(String(url || ""));
-
-const resolveApiBaseUrl = () => {
-  const configuredUrl = import.meta.env.VITE_API_BASE_URL;
-
-  if (configuredUrl && !(isLocalBackendUrl(configuredUrl) && !isBrowserLocalhost())) {
-    return configuredUrl;
-  }
-
-  return isBrowserLocalhost()
-    ? "http://localhost:8081"
-    : "https://r1.rentalchaavi.com";
-};
-
 export const API_BASE_URL =
   ensureApiBasePath(
-    resolveApiBaseUrl()
+    import.meta.env.VITE_API_BASE_URL || 'https://r1.rentalchaavi.com'
   );
 
 export const CHAT_API_BASE_URL =
@@ -70,7 +50,7 @@ const rootApi = axios.create({
 });
 
 const resolveAuthTokenForPath = (path = "") => {
-  if (path.startsWith("/auth/") && !path.endsWith("/logout")) return null;
+  if (path.startsWith("/auth/")) return null;
   if (path.startsWith("/owner/")) return localStorage.getItem("ownerToken");
   if (path.startsWith("/admin/")) return localStorage.getItem("adminToken");
   if (path.startsWith("/user/")) return localStorage.getItem("userToken");
@@ -82,6 +62,10 @@ const resolveAuthTokenForPath = (path = "") => {
 };
 
 const attachAuthHeader = (config) => {
+  if (config?.skipAuth) {
+    return config;
+  }
+
   if (config?.headers?.Authorization) {
     return config;
   }
@@ -188,32 +172,21 @@ export const ownerApi = {
   getPincode: (city, area) =>
     api.get("/owner/getPincode", { params: { city, area } }),
   addProperty: (ownerId, propertyData) =>
-    api.post(`/owner/addPropertyByOwner/${ownerId}`, propertyData, ownerAuthConfig()),
+    api.post(`/owner/addPropertyByOwner/${ownerId}`, propertyData),
   getOwnerProperties: (ownerId) =>
-    api.get(`/owner/getAllPropertiesByOwnerId/${ownerId}`, ownerAuthConfig()),
-  getPropertyById: (id) => api.get(`/owner/getPropertyById/${id}`, ownerAuthConfig()),
+    api.get(`/owner/getAllPropertiesByOwnerId/${ownerId}`),
+  getPropertyById: (id) => api.get(`/owner/getPropertyById/${id}`),
   updateProperty: (id, propertyData) =>
-    api.put(`/owner/updatePropertyById/${id}`, propertyData, ownerAuthConfig()),
-  deleteProperty: (id) => api.delete(`/owner/deletePropertyById/${id}`, ownerAuthConfig()),
+    api.put(`/owner/updatePropertyById/${id}`, propertyData),
+  deleteProperty: (id) => api.delete(`/owner/deletePropertyById/${id}`),
   uploadPropertyImages: (propertyId, formData) =>
-    uploadApi.post(`/owner/uploadPropertyImagesByPropertyId/${propertyId}`, formData, ownerAuthConfig()),
+    uploadApi.post(`/owner/uploadPropertyImagesByPropertyId/${propertyId}`, formData),
   buyPremium: (ownerId, propertyId) =>
-    api.post(`/owner/buyPremiumByOwner/${ownerId}`, null, {
-      params: propertyId ? { propertyId } : {},
-      ...ownerAuthConfig(),
-    }),
-  confirmPropertyPayment: (orderId, transactionId) =>
-    api.post("/owner/property-payment-success", null, {
-      params: { orderId, transactionId },
-      ...authConfigFor("ownerToken"),
-    }),
+    api.post(`/owner/buyPremiumByOwner/${ownerId}`, null, { params: propertyId ? { propertyId } : {} }),
   saveFacilities: (ownerId, propertyId, facilities) =>
-    api.post(`/owner/save-facilities`, { ownerId, propertyId, facilities }, ownerAuthConfig()),
+    api.post(`/owner/save-facilities`, { ownerId, propertyId, facilities }),
   getFacilities: (ownerId, propertyId) =>
-    api.get("/owner/get-facilities", {
-      params: { ownerId, propertyId },
-      ...ownerAuthConfig(),
-    }),
+    api.get("/owner/get-facilities", { params: { ownerId, propertyId } }),
 };
 
 export const propertyApi = {
@@ -225,7 +198,12 @@ export const propertyApi = {
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split(".")[1]));
-        userId = payload.id; 
+        userId =
+          payload.userId ||
+          payload.userID ||
+          payload.user_id ||
+          payload.id ||
+          payload.sub;
       } catch {
 }
     }
@@ -257,39 +235,36 @@ return api.post(`/user/filter-properties/${userId}`, filterData);
   getLikedProperties: () => api.get("/user/likedProperties"),
 
   getLikedPropertiesCount: () => api.get("/user/likedPropertiesCount"),
+  getUserProfile: (userId) => api.get(`/user/getProfile/${userId}`, authConfigFor("userToken")),
 
 };
 export const authApi = {
   login: (data) => api.post("/auth/login", data),
+  logout: () => Promise.resolve(),
   registerUser: (data) => api.post("/auth/register/user", data),
   registerAdmin: (data) => api.post("/auth/register/admin", data),
   registerOwner: (data) => api.post("/auth/register/POwner", data),
-  forgotPassword: (data) => api.post("/auth/forgot-password", data),
+   forgotPassword: (data) => api.post("/auth/forgot-password", data),
   verifyOtp: (data) => api.post("/auth/verify-otp", data),
-  resetPassword: (data) => api.post("/auth/reset-password", data),
-  sendRegisterOtp: (data) =>
+  resetPassword: (data) =>api.post("/auth/reset-password", data),
+   sendRegisterOtp: (data) =>
     api.post("/auth/send-email-otp", data),
+ 
   verifyRegisterOtp: (data) =>
     api.post("/auth/verify-email-otp", data),
-  logout: () => api.post("/auth/logout"),
-};
-
-export const userApi = {
-  getProfile: (userId) => api.get(`/user/${userId}`),
-  getProperties: (userId) => api.get(`/user/properties/${userId}`),
-  filterProperties: (userId, filterData) => api.post(`/user/filter-properties/${userId}`, filterData),
 };
 
 const adminRootRequest = (path, method = "get", data) => {
   const rootPath = path.startsWith("/admin/") ? path : `/admin${path}`;
   if (method === "get") return rootApi.get(rootPath);
+  if (method === "put") return rootApi.put(rootPath, data);
   return rootApi.post(rootPath, data);
 };
 
 export const adminModerationApi = {
   getPendingUsers: () => adminRootRequest("/pending-users"),
   getPendingOwners: () => adminRootRequest("/pending-owner"),
-  getPendingPremiumProperties: () => rootApi.get("/admin/premium/pending"),
+  getPendingPremiumProperties: () => rootApi.get("/admin/premium/pending", authConfigFor("adminToken")),
   approveUserPremium: (userId) =>
     adminRootRequest(`/approveUserPremium/${userId}`, "post"),
   rejectUserPremium: (userId) =>
@@ -301,39 +276,43 @@ export const adminModerationApi = {
   getOwnerProperties: (ownerId) => rootApi.get(`/admin/owner/${ownerId}/properties`),
   getPropertyById: (propertyId) => api.get(`/admin/getPropertyById/${propertyId}`),
   approveProperty: (propertyId) =>
-    rootApi.post(`/admin/approveProperty/${propertyId}`),
+    rootApi.put(`/admin/premium/approve/${propertyId}`, null, authConfigFor("adminToken")),
   rejectProperty: (propertyId) =>
-    rootApi.post(`/admin/rejectProperty/${propertyId}`),
+    rootApi.put(`/admin/premium/reject/${propertyId}`, null, authConfigFor("adminToken")),
 };
 
 export const paymentApi = {
   buyUserPremium: (userId) =>
     api.post(`/user/buyPremium/${userId}`, {}, authConfigFor("userToken")),
-  confirmUserPremiumPayment: (orderId, transactionId) =>
-    api.post("/user/payment-success", null, {
-      params: { orderId, transactionId },
-      ...authConfigFor("userToken"),
-    }),
+  getUserPremiumStatus: (userId) =>
+    api.get(`/user/premium-status/${userId}`, authConfigFor("userToken")),
   buyPropertyPremium: (propertyId) =>
     rootApi.post(`/premium/buy/${propertyId}`, {}, ownerAuthConfig()),
   getPropertyPremiumStatus: (propertyId) =>
     rootApi.get(`/premium/status/${propertyId}`, ownerAuthConfig()),
-  mockPropertyPremiumCallback: ({ orderId, transactionId, status = "SUCCESS" }) =>
-    rootApi.post("/premium/callback", { orderId, transactionId, status }, { skipAuth: true }),
+  verifyPayment: (orderId, tokenKey = ["ownerToken", "userToken", "token"]) =>
+    rootApi.get(`/premium/verify/${orderId}`, authConfigFor(tokenKey)),
   approvePropertyPremium: (propertyId) =>
     rootApi.put(`/admin/premium/approve/${propertyId}`, null, authConfigFor("adminToken")),
 };
 
 export const chatApi = {
-  sendMessage: (payload) => chatRequestApi.post("/chat/send", payload),
-  acceptChat: (payload) => chatRequestApi.post("/chat/accept", payload),
-  rejectChat: (payload) => chatRequestApi.post("/chat/reject", payload),
-  sendTyping: (payload) => chatRequestApi.post("/chat/typing", payload),
-  updateStatus: (payload) => chatRequestApi.post("/chat/status", payload),
-  getHistory: (roomId) => chatRequestApi.get(`/chat/history/${roomId}`),
-  getPendingChats: (ownerId) => chatRequestApi.get(`/chat/pending/${ownerId}`),
-  getAcceptedChats: (ownerId) => chatRequestApi.get(`/chat/accepted/${ownerId}`),
-  getRejectedChats: (ownerId) => chatRequestApi.get(`/chat/rejected/${ownerId}`),
+  sendMessage: (payload, tokenKey = payload?.senderRole === "PROPERTY_OWNER" ? "ownerToken" : "userToken") =>
+    chatRequestApi.post("/chat/send", payload, authConfigFor(tokenKey)),
+  acceptChat: (payload) => chatRequestApi.post("/chat/accept", payload, authConfigFor("ownerToken")),
+  rejectChat: (payload) => chatRequestApi.post("/chat/reject", payload, authConfigFor("ownerToken")),
+  sendTyping: (payload, tokenKey = "userToken") =>
+    chatRequestApi.post("/chat/typing", payload, authConfigFor(tokenKey)),
+  updateStatus: (payload, tokenKey = "userToken") =>
+    chatRequestApi.post("/chat/status", payload, authConfigFor(tokenKey)),
+  getHistory: (roomId, tokenKey = "userToken") =>
+    chatRequestApi.get(`/chat/history/${roomId}`, authConfigFor(tokenKey)),
+  getPendingChats: (id, tokenKey = "ownerToken") =>
+    chatRequestApi.get(`/chat/pending/${id}`, authConfigFor(tokenKey)),
+  getAcceptedChats: (id, tokenKey = "ownerToken") =>
+    chatRequestApi.get(`/chat/accepted/${id}`, authConfigFor(tokenKey)),
+  getRejectedChats: (id, tokenKey = "ownerToken") =>
+    chatRequestApi.get(`/chat/rejected/${id}`, authConfigFor(tokenKey)),
 };
 
 export default api;

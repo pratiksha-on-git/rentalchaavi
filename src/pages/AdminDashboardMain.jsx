@@ -31,15 +31,70 @@ const writeOwnerApprovalStatus = (owner, status) => {
   }));
 };
 
-const unwrapList = (response) =>
-  Array.isArray(response?.data) ? response.data : response?.data?.data || [];
+const unwrapList = (response) => {
+  const payload = response?.data?.data ?? response?.data ?? response;
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.properties)) return payload.properties;
+  if (Array.isArray(payload?.content)) return payload.content;
+  if (Array.isArray(payload?.data)) return payload.data;
+  return [];
+};
 
-const getPendingPropertyId = (item) => item?.propertyId ?? item?.id;
+const normalizeStatus = (value) =>
+  String(value || "").trim().toUpperCase().replace(/[\s-]+/g, "_");
+
+const getPendingPropertyId = (item) =>
+  item?.propertyId ?? item?.id ?? item?.property_id ?? item?._raw?.propertyId ?? item?._raw?.id;
+
+const getVerifiedStatus = (item) =>
+  normalizeStatus(
+    item?.paymentStatus ||
+      item?.transactionStatus ||
+      item?.paymentTransactionStatus ||
+      item?.status ||
+      item?.code
+  );
+
+const isVerifiedPayment = (item) => {
+  const status = getVerifiedStatus(item);
+  return status === "SUCCESS" || status === "PAYMENT_SUCCESS" || status.includes("SUCCESS");
+};
+
+const isVisiblePropertyRequest = (item) => {
+  const premiumStatus = normalizeStatus(item?.premiumStatus);
+  return isVerifiedPayment(item) || premiumStatus === "PENDING_APPROVAL";
+};
+
+const isVisibleUserRequest = (item) => {
+  const premiumStatus = normalizeStatus(item?.premiumStatus || item?.status);
+  return (
+    isVerifiedPayment(item) ||
+    premiumStatus === "PENDING" ||
+    premiumStatus === "PENDING_APPROVAL" ||
+    premiumStatus === "PAYMENT_SUCCESS_WAITING_FOR_APPROVAL" ||
+    premiumStatus.includes("WAITING_FOR_APPROVAL")
+  );
+};
+
+const getPaymentBadge = (status) => {
+  const normalizedStatus = normalizeStatus(status);
+  if (normalizedStatus.includes("SUCCESS")) {
+    return { className: "bg-green-100 text-green-800", label: "Payment Verified" };
+  }
+  if (
+    normalizedStatus.includes("FAILED") ||
+    normalizedStatus.includes("REJECTED") ||
+    normalizedStatus.includes("CANCEL")
+  ) {
+    return { className: "bg-red-100 text-red-800", label: "Payment Failed" };
+  }
+  return { className: "bg-yellow-100 text-yellow-800", label: "Payment Pending" };
+};
 
 const mergePendingProperties = (...lists) => {
   const merged = new Map();
 
-  lists.flat().forEach((item) => {
+  lists.flat().filter(isVisiblePropertyRequest).forEach((item) => {
     const propertyId = getPendingPropertyId(item);
     if (!propertyId) return;
     merged.set(String(propertyId), {
@@ -81,13 +136,20 @@ const AdminDashboardMain = () => {
         adminModerationApi.getPendingOwners(),
         adminModerationApi.getPendingPremiumProperties().catch(() => ({ data: [] })),
       ]);
-      setPendingUsers(unwrapList(usersRes));
-      setPendingOwners(
-        mergePendingProperties(
-          unwrapList(ownersRes),
-          unwrapList(premiumPropertiesRes)
-        )
-      );
+      const rawUsers = unwrapList(usersRes);
+      const rawOwnerProperties = unwrapList(ownersRes);
+      const rawPremiumProperties = unwrapList(premiumPropertiesRes);
+      const verifiedUsers = rawUsers.filter(isVisibleUserRequest);
+      const verifiedProperties = mergePendingProperties(rawOwnerProperties, rawPremiumProperties);
+
+      console.log("[Admin] pending users raw", usersRes?.data);
+      console.log("[Admin] pending-owner raw", ownersRes?.data);
+      console.log("[Admin] premium pending raw", premiumPropertiesRes?.data);
+      console.log("[Admin] verified pending users", verifiedUsers);
+      console.log("[Admin] verified pending properties", verifiedProperties);
+
+      setPendingUsers(verifiedUsers);
+      setPendingOwners(verifiedProperties);
     } catch (error) {
       if (!silent) {
         toast.error(error?.response?.data?.message || "Failed to load admin data");
@@ -263,6 +325,7 @@ const AdminDashboardMain = () => {
                   {pendingOwners.map((item) => {
                     const propertyId = getPendingPropertyId(item);
                     const keyPrefix = `property-${propertyId}`;
+                    const paymentBadge = getPaymentBadge(item?.paymentStatus);
                     return (
                       <div key={keyPrefix} className="rounded-2xl border border-[#d9c7b2] bg-[#f9f3ed] p-4">
                         <div className="flex justify-between items-start mb-3">
@@ -270,12 +333,8 @@ const AdminDashboardMain = () => {
                             <p className="font-semibold text-[#1a1a1a]">{item?.title || "Untitled Property"}</p>
                             <p className="text-xs text-[#7d6c5c] mt-1">Property ID: {propertyId || "-"}</p>
                           </div>
-                          <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${
-                            item?.paymentStatus?.toUpperCase() === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                            item?.paymentStatus?.toUpperCase() === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                            'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {item?.paymentStatus?.toUpperCase() || "PENDING"}
+                          <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${paymentBadge.className}`}>
+                            {paymentBadge.label}
                           </span>
                         </div>
 

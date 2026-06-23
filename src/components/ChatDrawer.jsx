@@ -5,7 +5,7 @@ import { useChatSocket } from "../chat/useChatSocket";
 import { buildRoomId } from "../chat/chatModel";
 
 const USER_CHAT_MEMBERS_KEY = "userChatMembers";
-const DEFAULT_FIRST_MESSAGE = "I am intersting your propery";
+const DEFAULT_FIRST_MESSAGE = "I am interested in your property";
 
 const safeParse = (value, fallback) => {
   try {
@@ -172,7 +172,22 @@ const normalizeList = (response) => {
   const payload = response?.data;
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.data?.content)) return payload.data.content;
+  if (Array.isArray(payload?.content)) return payload.content;
   return [];
+};
+
+const normalizeChatItem = ({ item, fallbackUserId, fallbackOwnerId, fallbackStatus, fallbackName }) => {
+  const userId = Number(item?.userId ?? item?.user?.id ?? fallbackUserId);
+  const ownerId = Number(item?.ownerId ?? item?.owner?.id ?? fallbackOwnerId);
+  return {
+    roomId: item?.roomId || buildRoomId(userId, ownerId),
+    userId,
+    ownerId,
+    name: fallbackName || getUserFullNameFromChatItem(item),
+    propertyTitle: item?.propertyTitle || item?.title || item?.property?.title || "Property",
+    status: item?.status || fallbackStatus || "PENDING",
+  };
 };
 
 const ChatDrawer = ({
@@ -207,40 +222,42 @@ const ChatDrawer = ({
     try {
       if (isOwner) {
         const [pendingRes, acceptedRes, rejectedRes] = await Promise.all([
-          chatApi.getPendingChats(currentUserId),
-          chatApi.getAcceptedChats(currentUserId),
-          chatApi.getRejectedChats(currentUserId),
+          chatApi.getPendingChats(currentUserId, "ownerToken"),
+          chatApi.getAcceptedChats(currentUserId, "ownerToken"),
+          chatApi.getRejectedChats(currentUserId, "ownerToken"),
         ]);
-        const pending = normalizeList(pendingRes).map((item) => ({
-          roomId: item?.roomId || buildRoomId(item?.userId, currentUserId),
-          userId: item?.userId,
-          ownerId: currentUserId,
-          name: getUserFullNameFromChatItem(item),
-          propertyTitle: item?.propertyTitle || "Property",
-          status: "PENDING",
-        }));
-        const accepted = normalizeList(acceptedRes).map((item) => ({
-          roomId: item?.roomId || buildRoomId(item?.userId, currentUserId),
-          userId: item?.userId,
-          ownerId: currentUserId,
-          name: getUserFullNameFromChatItem(item),
-          propertyTitle: item?.propertyTitle || "Property",
-          status: "ACCEPTED",
-        }));
-        const rejected = normalizeList(rejectedRes).map((item) => ({
-          roomId: item?.roomId || buildRoomId(item?.userId, currentUserId),
-          userId: item?.userId,
-          ownerId: currentUserId,
-          name: getUserFullNameFromChatItem(item),
-          propertyTitle: item?.propertyTitle || "Property",
-          status: "REJECTED",
-        }));
+        const pending = normalizeList(pendingRes).map((item) =>
+          normalizeChatItem({ item, fallbackOwnerId: currentUserId, fallbackStatus: "PENDING" })
+        );
+        const accepted = normalizeList(acceptedRes).map((item) =>
+          normalizeChatItem({ item, fallbackOwnerId: currentUserId, fallbackStatus: "ACCEPTED" })
+        );
+        const rejected = normalizeList(rejectedRes).map((item) =>
+          normalizeChatItem({ item, fallbackOwnerId: currentUserId, fallbackStatus: "REJECTED" })
+        );
 
         const combined = [...pending, ...accepted, ...rejected];
         setMembers(combined);
         onCountChange?.(combined.length);
       } else {
-        const userChats = readUserChats()
+        const [pendingRes, acceptedRes, rejectedRes] = await Promise.all([
+          chatApi.getPendingChats(currentUserId, "userToken").catch(() => ({ data: [] })),
+          chatApi.getAcceptedChats(currentUserId, "userToken").catch(() => ({ data: [] })),
+          chatApi.getRejectedChats(currentUserId, "userToken").catch(() => ({ data: [] })),
+        ]);
+        const dbChats = [
+          ...normalizeList(pendingRes).map((item) =>
+            normalizeChatItem({ item, fallbackUserId: currentUserId, fallbackStatus: "PENDING" })
+          ),
+          ...normalizeList(acceptedRes).map((item) =>
+            normalizeChatItem({ item, fallbackUserId: currentUserId, fallbackStatus: "ACCEPTED" })
+          ),
+          ...normalizeList(rejectedRes).map((item) =>
+            normalizeChatItem({ item, fallbackUserId: currentUserId, fallbackStatus: "REJECTED" })
+          ),
+        ].filter((item) => item.roomId);
+
+        const localChats = readUserChats()
           .map((item) => {
             const normalizedUserId = Number(item?.userId);
             const normalizedOwnerId = Number(item?.ownerId);
@@ -259,6 +276,11 @@ const ChatDrawer = ({
           .filter(
           (item) => Number(item?.userId) === Number(currentUserId)
           );
+        const mergedChats = new Map();
+        [...localChats, ...dbChats].forEach((item) => {
+          if (item?.roomId) mergedChats.set(String(item.roomId), item);
+        });
+        const userChats = Array.from(mergedChats.values());
         setMembers(userChats);
         onCountChange?.(userChats.length);
       }
@@ -341,7 +363,7 @@ const ChatDrawer = ({
             ownerId: Number(ownerId),
             senderRole: "USER",
             message: DEFAULT_FIRST_MESSAGE,
-          });
+          }, "userToken");
           const payload = res?.data?.data || {};
           const created = {
             roomId:
@@ -784,7 +806,7 @@ const ChatDrawer = ({
                                 socketConnected ? "bg-emerald-500" : "bg-amber-500"
                               }`}
                             />
-                            {socketConnected ? "Live" : "Connecting..."}
+                            {socketConnected ? "Live" : "Syncing"}
                           </p>
                         )}
                         {typeof otherOnline === "boolean" && (
