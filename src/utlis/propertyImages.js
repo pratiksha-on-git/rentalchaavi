@@ -38,7 +38,7 @@ export const getImageCandidates = (imageName) => {
     try {
       const m = v.match(/^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?(\/api\/owner\/property\/image\/.+)$/i);
       if (m && m[1]) {
-        return `https://r1.rentalchaavi.com${m[1]}`;
+        return `1${m[1]}`;
       }
     } catch (e) {
       // fallthrough
