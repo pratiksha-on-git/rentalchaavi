@@ -237,7 +237,7 @@ const AdminDashboardMain = () => {
         <div className="mb-5">
        
           <h2 className="mt-2 text-2xl sm:text-3xl font-black text-[#1a1a1a]">Admin Dashboard</h2>
-          <p className="text-[#f97316] mt-1">Approve or reject premium users and property requests.</p>
+          <p className="text-[#f97316] mt-1">Approve premium users and property payment requests.</p>
         </div>
 
         <div className="mb-8 rounded-[20px] sm:rounded-[24px] border border-white/10 bg-black/90 p-4 sm:p-6 shadow-[0_25px_80px_rgba(0,0,0,0.28)]">
@@ -295,13 +295,6 @@ const AdminDashboardMain = () => {
                             className="px-4 py-2 text-sm bg-[#198754] text-white rounded-xl hover:bg-[#157347] disabled:bg-[#c9af91] font-semibold transition-colors"
                           >
                             Approve
-                          </button>
-                          <button
-                            onClick={() => handleDecision({ id, type: "user", approve: false })}
-                            disabled={actionLoading === `${keyPrefix}-reject`}
-                            className="px-4 py-2 text-sm bg-[#dc3545] text-white rounded-xl hover:bg-[#bb2d3b] disabled:bg-[#c9af91] font-semibold transition-colors"
-                          >
-                            Reject
                           </button>
                         </div>
                       </div>
@@ -366,13 +359,6 @@ const AdminDashboardMain = () => {
                             className="flex-1 px-3 py-2 text-sm bg-[#198754] text-white rounded-xl hover:bg-[#157347] disabled:bg-[#c9af91] font-semibold transition-colors"
                           >
                             {actionLoading === `${keyPrefix}-approve` ? "Approving..." : "Approve"}
-                          </button>
-                          <button
-                            onClick={() => handleDecision({ id: propertyId, type: "property", approve: false, owner: item })}
-                            disabled={actionLoading === `${keyPrefix}-reject`}
-                            className="flex-1 px-3 py-2 text-sm bg-[#dc3545] text-white rounded-xl hover:bg-[#bb2d3b] disabled:bg-[#c9af91] font-semibold transition-colors"
-                          >
-                            {actionLoading === `${keyPrefix}-reject` ? "Rejecting..." : "Reject"}
                           </button>
                         </div>
                       </div>
