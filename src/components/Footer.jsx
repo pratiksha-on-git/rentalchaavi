@@ -58,6 +58,11 @@ const Footer = ({ id, className = "" }) => {
                   Terms & Conditions
                 </Link>
               </li>
+              <li>
+                <Link to="/delete-account" className="hover:text-[#ff7438] transition-colors">
+                  Delete Your Account
+                </Link>
+              </li>
             </ul>
           </div>
 

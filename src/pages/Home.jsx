@@ -678,6 +678,14 @@ const Home = () => {
                     Terms & Conditions
                   </button>
                 </li>
+                <li>
+                  <button
+                    onClick={() => navigate("/delete-account")}
+                    className="hover:text-[#ff7438] transition-colors"
+                  >
+                    Delete Your Account
+                  </button>
+                </li>
 
               </ul>
             </div>

@@ -12,6 +12,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import LegalPage from "./pages/LegalPage";
 import LikedProperties from "./pages/LikedProperties";
 import PaymentResult from "./pages/PaymentResult";
+import DeleteAccount from "./pages/DeleteAccount";
 function App() {
   return (
     <BrowserRouter>
@@ -26,6 +27,7 @@ function App() {
         <Route path="/privacy-policy" element={<LegalPage />} />
         <Route path="/refund-policy" element={<LegalPage />} />
         <Route path="/terms-and-conditions" element={<LegalPage />} />
+        <Route path="/delete-account" element={<DeleteAccount />} />
 
         {/* USER PROTECTED */}
         <Route
