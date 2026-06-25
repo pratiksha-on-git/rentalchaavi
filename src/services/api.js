@@ -242,7 +242,8 @@ export const authApi = {
   login: (data) => api.post("/auth/login", data),
   logout: () => Promise.resolve(),
   deleteAccount: (data) =>
-    api.post("/user/delete-account", data, { skipAuth: true }),
+    api.post("/auth/delete-account", data, { skipAuth: true }),
+  
   registerUser: (data) => api.post("/auth/register/user", data),
   registerAdmin: (data) => api.post("/auth/register/admin", data),
   registerOwner: (data) => api.post("/auth/register/POwner", data),
