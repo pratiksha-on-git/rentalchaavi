@@ -11,6 +11,7 @@ import {
   FALLBACK_PROPERTY_IMAGE_DATA_URL,
   getPropertyImageCandidates,
 } from "../utlis/propertyImages";
+import { isPropertyRented } from "../utlis/propertyAvailability";
 
 const getPropertyId = (property) =>
   property?.id ||
@@ -91,7 +92,9 @@ const LikedProperties = () => {
           : response?.data?.data || [];
 
       const mapped =
-        list.map(mapBackendToUi);
+        list
+          .filter((property) => !isPropertyRented(property))
+          .map(mapBackendToUi);
 
       setProperties(mapped);
       setLikedPropertyIds(

@@ -28,6 +28,8 @@ import {
   Ruler,
   Upload,
   Users,
+  CheckCircle2,
+  RotateCcw,
 } from "lucide-react";
 
 import ChatDrawer from "../components/ChatDrawer";
@@ -37,6 +39,7 @@ import {
   getImageCandidates,
   parseImageList,
 } from "../utlis/propertyImages";
+import { isPropertyRented } from "../utlis/propertyAvailability";
 
 
 
@@ -480,6 +483,7 @@ const PropertyOwnerDashboard = () => {
   const [pendingPropertyId, setPendingPropertyId] = useState(null);
 
   const [propertyPayment, setPropertyPayment] = useState(null);
+  const [availabilityLoadingId, setAvailabilityLoadingId] = useState(null);
 
   const [ownerPremiumStatus, setOwnerPremiumStatus] = useState("NONE");
 
@@ -1163,7 +1167,11 @@ const handleManualOwnerIdSubmit = () => {
 
       const fetchedProperties = apiProperties
 
-        .filter((property) => String(property?.status || "").toUpperCase() !== "INACTIVE")
+        .filter(
+          (property) =>
+            String(property?.status || "").toUpperCase() !== "INACTIVE" ||
+            isPropertyRented(property)
+        )
 
         .map(normalizePropertyForDashboard);
 
@@ -1372,12 +1380,11 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
     // Backend property payment status takes precedence over local cache.
     const propertyPaymentStatus = String(property?.paymentStatus || "").toUpperCase();
+    const propertyPremiumStatus = String(property?.premiumStatus || "").toUpperCase();
     const isResolvedFirstFreeProperty =
       firstFreePropertyId && String(propertyId) === String(firstFreePropertyId);
 
-    if (isResolvedFirstFreeProperty) {
-      return "FREE_ACTIVE";
-    }
+    if (isPropertyRented(property)) return "RENTED";
 
     if (propertyPaymentStatus === "FREE_ACTIVE") {
       return "PAYMENT_DUE";
@@ -1399,8 +1406,6 @@ setFacilities(mergeFacilitiesWithBackendOptions());
       return "PENDING";
     }
 
-    const propertyPremiumStatus = String(property?.premiumStatus || "").toUpperCase();
-
     if (propertyPremiumStatus === "PAYMENT_PENDING") return "PENDING";
 
     if (propertyPremiumStatus === "PENDING_APPROVAL") return "SUCCESS";
@@ -1408,6 +1413,10 @@ setFacilities(mergeFacilitiesWithBackendOptions());
     if (propertyPremiumStatus === "ACTIVE") return "APPROVED";
 
     if (propertyPremiumStatus === "REJECTED") return "REJECTED";
+
+    if (isResolvedFirstFreeProperty) {
+      return "FREE_ACTIVE";
+    }
 
     // Do not use property.premiumStatus here. Backend may copy owner-level
     // premium state into this field, which can incorrectly mark new properties
@@ -1442,6 +1451,12 @@ setFacilities(mergeFacilitiesWithBackendOptions());
     }
 
     if (status === "REJECTED") {
+
+      return "bg-red-100 text-red-700 border border-red-200";
+
+    }
+
+    if (status === "RENTED") {
 
       return "bg-red-100 text-red-700 border border-red-200";
 
@@ -2259,6 +2274,63 @@ toast.error(err.response?.data?.message || err.message || "Failed to delete prop
 
     }
 
+  };
+
+  const handleMarkPropertyRented = async (property) => {
+    const propertyId = getDashboardPropertyId(property);
+
+    if (!propertyId) {
+      toast.error("Property ID is missing for this listing.");
+      return;
+    }
+
+    if (
+      !window.confirm(
+        "Mark this property as rented? It will no longer be visible to tenants."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setAvailabilityLoadingId(propertyId);
+      const response = await ownerApi.markPropertyRented(propertyId);
+      toast.success(response?.data?.message || "Property marked as rented");
+      await fetchProperties({ preserveCurrent: true });
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to mark property as rented"));
+    } finally {
+      setAvailabilityLoadingId(null);
+    }
+  };
+
+  const handleMakePropertyAvailable = async (property) => {
+    const propertyId = getDashboardPropertyId(property);
+
+    if (!propertyId) {
+      toast.error("Property ID is missing for this listing.");
+      return;
+    }
+
+    if (
+      !window.confirm(
+        "Make this property available again? A new payment will be required before it is published."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setAvailabilityLoadingId(propertyId);
+      const response = await ownerApi.markPropertyAvailable(propertyId);
+      toast.success(response?.data?.message || "Property is ready for a new payment");
+      await fetchProperties({ preserveCurrent: true });
+      handleOpenPropertyPayment({ ...property, propertyId, rented: false });
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to make property available"));
+    } finally {
+      setAvailabilityLoadingId(null);
+    }
   };
 
 
@@ -3740,8 +3812,13 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
               {properties.map((property) => {
 
                 const approvalStatus = resolvePropertyApprovalStatus(property, firstFreePropertyId);
+                const propertyId = getDashboardPropertyId(property);
+                const rented = approvalStatus === "RENTED";
+                const availabilityLoading =
+                  String(availabilityLoadingId || "") === String(propertyId || "");
 
                 const shouldShowPaymentButton =
+                  !rented &&
                   approvalStatus !== "APPROVED" &&
                   approvalStatus !== "FREE_ACTIVE" &&
                   approvalStatus !== "PENDING" &&
@@ -3791,6 +3868,8 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
                         {approvalStatus === "PAYMENT_DUE"
                           ? "PAYMENT DUE"
+                          : approvalStatus === "RENTED"
+                            ? "RENTED"
                           : approvalStatus === "FREE_ACTIVE"
                             ? "FIRST FREE"
                             : approvalStatus === "SUCCESS"
@@ -3822,6 +3901,52 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
                 </p>
 
                     <div className="flex flex-wrap gap-3">
+
+                      {rented ? (
+
+                        <button
+
+                          type="button"
+
+                          onClick={() => handleMakePropertyAvailable(property)}
+
+                          disabled={availabilityLoading}
+
+                          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#f97316] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(249,115,22,0.25)] transition-colors hover:bg-[#ea6a0a] disabled:cursor-not-allowed disabled:bg-[#c9af91]"
+
+                        >
+
+                          <RotateCcw size={17} />
+
+                          {availabilityLoading ? "Updating..." : "Make Available Again"}
+
+                        </button>
+
+                      ) : (
+
+                        (approvalStatus === "APPROVED" || approvalStatus === "FREE_ACTIVE") && (
+
+                          <button
+
+                            type="button"
+
+                            onClick={() => handleMarkPropertyRented(property)}
+
+                            disabled={availabilityLoading}
+
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#198754] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#157347] disabled:cursor-not-allowed disabled:bg-[#c9af91]"
+
+                          >
+
+                            <CheckCircle2 size={17} />
+
+                            {availabilityLoading ? "Updating..." : "Mark as Rented"}
+
+                          </button>
+
+                        )
+
+                      )}
 
                       {shouldShowPaymentButton && (
 

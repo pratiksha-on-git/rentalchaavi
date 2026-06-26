@@ -27,6 +27,7 @@ import {
   FALLBACK_PROPERTY_IMAGE_DATA_URL,
   getPropertyImageCandidates,
 } from "../utlis/propertyImages";
+import { isPropertyRented } from "../utlis/propertyAvailability";
 import { resolveUserPremiumStatus } from "../utlis/premiumStatus";
 
 const USER_NAME_KEY = "userName";
@@ -286,7 +287,7 @@ const list =
           : res?.data?.data || [];
 
       setProperties(
-        list.map(
+        list.filter((property) => !isPropertyRented(property)).map(
           mapBackendToUi
         )
       );
@@ -574,7 +575,7 @@ if (
                 ?.data || [];
 
         setProperties(
-          list.map(
+          list.filter((property) => !isPropertyRented(property)).map(
             mapBackendToUi
           )
         );

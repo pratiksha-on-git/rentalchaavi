@@ -48,6 +48,7 @@ import {
   getPropertyImageNames,
 } from "../utlis/propertyImages";
 import { resolveUserPremiumStatus } from "../utlis/premiumStatus";
+import { isPropertyRented } from "../utlis/propertyAvailability";
 
 const FALLBACK_IMAGE = FALLBACK_PROPERTY_IMAGE_DATA_URL;
 
@@ -245,11 +246,14 @@ setUserName(loggedInUserName);
         const selectedProperty =
           propertyList.find(
             (item) =>
-              String(item.id) ===
-                String(id) ||
-              String(
-                item.propertyId
-              ) === String(id)
+              !isPropertyRented(item) &&
+              (
+                String(item.id) ===
+                  String(id) ||
+                String(
+                  item.propertyId
+                ) === String(id)
+              )
           );
 
         if (

@@ -178,6 +178,10 @@ export const ownerApi = {
   getPropertyById: (id) => api.get(`/owner/getPropertyById/${id}`),
   updateProperty: (id, propertyData) =>
     api.put(`/owner/updatePropertyById/${id}`, propertyData),
+  markPropertyRented: (propertyId) =>
+    api.put(`/owner/mark-property-rented/${propertyId}`),
+  markPropertyAvailable: (propertyId) =>
+    api.put(`/owner/mark-property-available/${propertyId}`),
   deleteProperty: (id) => api.delete(`/owner/deletePropertyById/${id}`),
   uploadPropertyImages: (propertyId, formData) =>
     uploadApi.post(`/owner/uploadPropertyImagesByPropertyId/${propertyId}`, formData),
