@@ -385,48 +385,28 @@ if (!cancelled) {
       currentImageCandidateIndex
     ] || FALLBACK_IMAGE;
 
-  const nextSlide =
+  const handlePreviousImage =
     useCallback(() => {
-      if (
-        imageUrls.length <= 1
-      )
-        return;
-
-      setCurrentIndex(
-        (prev) =>
-          prev ===
-          imageUrls.length - 1
-            ? 0
-            : prev + 1
+      setCurrentIndex((prev) =>
+        Math.max(prev - 1, 0)
       );
-    }, [imageUrls]);
+    }, []);
+
+  const handleNextImage =
+    useCallback(() => {
+      setCurrentIndex((prev) =>
+        Math.min(
+          prev + 1,
+          imageUrls.length - 1
+        )
+      );
+    }, [imageUrls.length]);
 
   useEffect(() => {
     setCurrentImageCandidateIndex(0);
   }, [
     currentIndex,
     imageCandidatesList,
-  ]);
-
-  useEffect(() => {
-    if (
-      imageUrls.length <= 1
-    )
-      return;
-
-    const interval =
-      setInterval(
-        nextSlide,
-        4000
-      );
-
-    return () =>
-      clearInterval(
-        interval
-      );
-  }, [
-    imageUrls,
-    nextSlide,
   ]);
 
   if (loading) {
@@ -546,32 +526,34 @@ if (!cancelled) {
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent z-10"></div>
 
-                {imageUrls.length >
-                  1 && (
-                  <div className="absolute bottom-7 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-                    {imageUrls.map(
-                      (
-                        _,
-                        index
-                      ) => (
-                        <button
-                          key={
-                            index
-                          }
-                          onClick={() =>
-                            setCurrentIndex(
-                              index
-                            )
-                          }
-                          className={`rounded-full transition-all duration-300 ${
-                            currentIndex ===
-                            index
-                              ? "w-8 h-3 bg-white"
-                              : "w-3 h-3 bg-white/50"
-                          }`}
-                        />
-                      )
-                    )}
+                {imageUrls.length > 1 &&
+                  currentIndex > 0 && (
+                    <button
+                      type="button"
+                      className="absolute left-2.5 sm:left-4 top-1/2 z-30 flex h-9 w-9 sm:h-12 sm:w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/45 text-[26px] sm:text-[32px] leading-none text-white shadow-lg transition-all duration-200 hover:scale-[1.08] hover:bg-black/65"
+                      onClick={handlePreviousImage}
+                      aria-label="Previous property image"
+                    >
+                      ‹
+                    </button>
+                  )}
+
+                {imageUrls.length > 1 &&
+                  currentIndex <
+                    imageUrls.length - 1 && (
+                    <button
+                      type="button"
+                      className="absolute right-2.5 sm:right-4 top-1/2 z-30 flex h-9 w-9 sm:h-12 sm:w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/45 text-[26px] sm:text-[32px] leading-none text-white shadow-lg transition-all duration-200 hover:scale-[1.08] hover:bg-black/65"
+                      onClick={handleNextImage}
+                      aria-label="Next property image"
+                    >
+                      ›
+                    </button>
+                  )}
+
+                {imageUrls.length > 1 && (
+                  <div className="absolute bottom-3 sm:bottom-4 left-1/2 z-30 -translate-x-1/2 rounded-full bg-black/55 px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-white shadow-lg">
+                    {currentIndex + 1} / {imageUrls.length}
                   </div>
                 )}
 

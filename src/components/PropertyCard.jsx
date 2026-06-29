@@ -35,7 +35,7 @@ const PropertyCard = ({
   const navigate = useNavigate();
   const [showPremiumChatPopup, setShowPremiumChatPopup] =
     useState(false);
-  const [imageCandidateIndex, setImageCandidateIndex] =
+  const [currentImageIndex, setCurrentImageIndex] =
     useState(0);
 
   const effectivePremiumStatus =
@@ -70,12 +70,24 @@ const PropertyCard = ({
   }, [property]);
 
   useEffect(() => {
-    setImageCandidateIndex(0);
+    setCurrentImageIndex(0);
   }, [imageCandidates]);
 
   const imageSrc =
-    imageCandidates[imageCandidateIndex] ||
+    imageCandidates[currentImageIndex] ||
     FALLBACK_PROPERTY_IMAGE_DATA_URL;
+
+  const handlePreviousImage = (event) => {
+    event.stopPropagation();
+    setCurrentImageIndex((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleNextImage = (event) => {
+    event.stopPropagation();
+    setCurrentImageIndex((prev) =>
+      Math.min(prev + 1, imageCandidates.length - 1)
+    );
+  };
 
   // IMAGE CLICK
   const handleImageClick = () => {
@@ -146,7 +158,7 @@ const PropertyCard = ({
       <div className="relative z-10 m-[2px] bg-white rounded-[22px] overflow-hidden">
         {/* IMAGE */}
         <div
-          className="relative overflow-hidden cursor-pointer"
+          className="relative overflow-hidden cursor-pointer rounded-t-[20px]"
           onClick={handleImageClick}
         >
           <motion.img
@@ -162,8 +174,8 @@ const PropertyCard = ({
             alt={property.title}
             loading="lazy"
             onError={(e) => {
-              if (imageCandidateIndex < imageCandidates.length - 1) {
-                setImageCandidateIndex((current) => current + 1);
+              if (currentImageIndex < imageCandidates.length - 1) {
+                setCurrentImageIndex((current) => current + 1);
                 return;
               }
 
@@ -171,6 +183,35 @@ const PropertyCard = ({
                 FALLBACK_PROPERTY_IMAGE_DATA_URL;
             }}
           />
+
+          {imageCandidates.length > 1 && currentImageIndex > 0 && (
+            <button
+              type="button"
+              className="absolute left-2.5 sm:left-4 top-1/2 z-30 flex h-9 w-9 sm:h-11 sm:w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/45 text-[26px] sm:text-[30px] leading-none text-white shadow-lg transition-all duration-200 hover:scale-[1.08] hover:bg-black/65"
+              onClick={handlePreviousImage}
+              aria-label="Previous property image"
+            >
+              ‹
+            </button>
+          )}
+
+          {imageCandidates.length > 1 &&
+            currentImageIndex < imageCandidates.length - 1 && (
+              <button
+                type="button"
+                className="absolute right-2.5 sm:right-4 top-1/2 z-30 flex h-9 w-9 sm:h-11 sm:w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/80 bg-black/45 text-[26px] sm:text-[30px] leading-none text-white shadow-lg transition-all duration-200 hover:scale-[1.08] hover:bg-black/65"
+                onClick={handleNextImage}
+                aria-label="Next property image"
+              >
+                ›
+              </button>
+            )}
+
+          {imageCandidates.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 z-30 -translate-x-1/2 rounded-full bg-black/55 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-white shadow-lg">
+              {currentImageIndex + 1} / {imageCandidates.length}
+            </div>
+          )}
 
           {/* PREMIUM STATUS */}
           {effectivePremiumStatus && (
