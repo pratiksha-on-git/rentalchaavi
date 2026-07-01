@@ -227,6 +227,8 @@ return api.post(`/user/filter-properties/${userId}`, filterData);
   return api.get(`/owner/getPropertyById/${id}`);
   
 },
+  getByIdForUser: (id) =>
+    api.get(`/owner/getPropertyById/${id}`, authConfigFor("userToken")),
   getNearbyProperties: (propertyId) => {
     return api.get(`/user/nearby-properties`, {
       params: { propertyId },

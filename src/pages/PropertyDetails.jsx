@@ -52,6 +52,52 @@ import { isPropertyRented } from "../utlis/propertyAvailability";
 
 const FALLBACK_IMAGE = FALLBACK_PROPERTY_IMAGE_DATA_URL;
 
+const resolveTenantPropertyType = (...sources) => {
+  const keys = [
+    "propertyType",
+    "type",
+    "property_type",
+    "propertyCategory",
+    "property_category",
+    "category",
+    "propertySubType",
+    "property_sub_type",
+    "propertyTypeName",
+    "property_type_name",
+    "buildingType",
+    "building_type",
+    "typeOfProperty",
+    "type_of_property",
+    "listingType",
+    "listing_type",
+  ];
+
+  for (const source of sources) {
+    if (!source || typeof source !== "object") continue;
+
+    for (const key of keys) {
+      const value = source[key];
+      if (value !== undefined && value !== null && String(value).trim()) {
+        return String(value).trim();
+      }
+    }
+
+    const nestedSources = [
+      source.property,
+      source.propertyDetails,
+      source.propertyDetail,
+      source.details,
+    ];
+
+    for (const nested of nestedSources) {
+      const nestedValue = resolveTenantPropertyType(nested);
+      if (nestedValue) return nestedValue;
+    }
+  }
+
+  return "";
+};
+
 const facilityIcons = {
   LANDSCAPE_GARDEN: Trees,
   GATED_COMMUNITY: Shield,
@@ -271,12 +317,32 @@ const propertyId =
           selectedProperty.ownerId ||
           selectedProperty.userId;
 
+        let propertyType =
+          resolveTenantPropertyType(selectedProperty);
+
+        if (!propertyType && propertyId) {
+          try {
+            const detailResponse =
+              await propertyApi.getByIdForUser(propertyId);
+            const detailData =
+              detailResponse?.data?.data ||
+              detailResponse?.data ||
+              {};
+
+            propertyType = resolveTenantPropertyType(detailData);
+          } catch {
+            propertyType = "";
+          }
+        }
+
           const areaPincode =
   selectedProperty.pincode ||
   selectedProperty.pinCode ||
   selectedProperty.areaPincode;
 const normalizedProperty = {
   ...selectedProperty,
+  propertyType,
+  type: propertyType,
   ownerName:
     selectedProperty.ownerName ||
     selectedProperty.fullName ||
