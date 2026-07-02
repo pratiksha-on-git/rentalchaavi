@@ -492,7 +492,7 @@ const Home = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => window.open(
-                    "https://github.com/Valmik-kolte/rentalchaavi./releases/download/v1.0.4/RentalChaavi.apk",
+                    "https://github.com/Valmik-kolte/rentalchaavi./releases/latest/download/app-release.apk",
                     "_blank",
                     "noopener noreferrer"
                   )}
@@ -711,10 +711,16 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="border-t border-slate-800 pt-8 text-center text-slate-400 text-sm">
-                   <p>&copy; 2026 Caryanam. All rights reserved. TOSIF KASIM AATTAR</p>
+          <div className="border-t border-slate-800 pt-8 text-center text-slate-400 text-sm relative">
+  <p className="absolute left-0 bottom-0 text-left">
+    Developed by{" "}
+    <span className="text-[#ff7438] font-semibold">
+      Caryanamindia Pvt Ltd
+    </span>
+  </p>
 
-          </div>
+  <p>&copy; 2026 Caryanam. All rights reserved. TOSIF KASIM AATTAR</p>
+</div>
         </div>
       </footer>
 
