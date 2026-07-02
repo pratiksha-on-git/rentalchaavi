@@ -86,10 +86,24 @@ const Footer = ({ id, className = "" }) => {
           </div>
         </div>
 
-        <div className="border-t border-slate-800 pt-8 text-center text-slate-400 text-sm">
-                    <p>&copy; 2026 Caryanam. All rights reserved. TOSIF KASIM AATTAR</p>
+        <div className="border-t border-slate-800 pt-8 text-slate-400 text-sm">
+  <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+    
+    {/* Left bottom corner */}
+    <p>
+      Developed by{" "}
+      <span className="text-[#ff7438] font-semibold">
+        Caryanam India
+      </span>
+    </p>
 
-        </div>
+    {/* Same line, right side */}
+    <p>
+      &copy; 2026 Caryanam. All rights reserved.
+    </p>
+
+  </div>
+</div>
       </div>
     </footer>
   );
