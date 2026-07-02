@@ -99,7 +99,7 @@ const Footer = ({ id, className = "" }) => {
 
     {/* Same line, right side */}
     <p>
-      &copy; 2026 Caryanam. All rights reserved.
+      &copy; 2026 Caryanam. All rights.
     </p>
 
   </div>
