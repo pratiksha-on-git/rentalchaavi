@@ -492,7 +492,7 @@ const Home = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => window.open(
-                    "https://github.com/Valmik-kolte/rentalchaavi./releases/latest/download/app-release.apk",
+                    "https://github.com/Valmik-kolte/rentalchaavi./releases/download/v1.0.4/RentalChaavi.apk",
                     "_blank",
                     "noopener noreferrer"
                   )}
