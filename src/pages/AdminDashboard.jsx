@@ -1869,6 +1869,8 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
     if (Number(formData.price) <= 0) return "Price must be greater than 0";
 
+    if (Number(formData.price) > 200000) return "Price cannot exceed 2 Lakhs (200,000)";
+
     if (!formData.location.trim()) return "Location is required";
 
     if (!formData.address.trim()) return "Address is required";
