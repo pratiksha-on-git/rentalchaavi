@@ -65,13 +65,7 @@ const Home = () => {
     const fetchFeaturedProperties = async () => {
       try {
         setLoadingProperties(true);
-        let res;
-        try {
-          res = await propertyApi.getPublicFeaturedProperties();
-        } catch {
-          res = await propertyApi.getAll();
-        }
-
+        const res = await propertyApi.getPublicFeaturedProperties();
         const rawList = res?.data?.data || res?.data || [];
         const list = Array.isArray(rawList) ? rawList : [];
 
