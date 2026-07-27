@@ -242,7 +242,7 @@ return api.post(`/user/filter-properties/${userId}`, filterData);
 
   getLikedPropertiesCount: () => api.get("/user/likedPropertiesCount"),
   getUserProfile: (userId) => api.get(`/user/getProfile/${userId}`, authConfigFor("userToken")),
-
+  getPublicFeaturedProperties: () => api.get("/public/featured-properties"),
 };
 export const authApi = {
   login: (data) => api.post("/auth/login", data),

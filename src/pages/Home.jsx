@@ -12,10 +12,45 @@ import {
   Handshake,
   HousePlus,
   UserRound,
+  Lock,
+  Sparkles,
 } from "lucide-react";
 
 import homeBgVideo from "../assets/Home_Bg_video.mp4";
 import BrandLogo from "../components/BrandLogo";
+import { propertyApi } from "../services/api";
+import {
+  FALLBACK_PROPERTY_IMAGE_DATA_URL,
+  getPropertyImageCandidates,
+} from "../utlis/propertyImages";
+
+const sampleProperties = [
+  {
+    id: "sample-1",
+    title: "Luxury 2 BHK Apartment in Kothrud",
+    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    id: "sample-2",
+    title: "Modern 3 BHK Villa in Baner",
+    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    id: "sample-3",
+    title: "Cozy Studio Flat in Wakad",
+    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    id: "sample-4",
+    title: "Spacious 2 BHK Row House in Viman Nagar",
+    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    id: "sample-5",
+    title: "Premium 1 BHK Flat in Hinjewadi",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
+  },
+];
 
 const Home = () => {
   const navigate = useNavigate();
@@ -23,6 +58,45 @@ const Home = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+  const [featuredProperties, setFeaturedProperties] = useState([]);
+  const [loadingProperties, setLoadingProperties] = useState(true);
+
+  useEffect(() => {
+    const fetchFeaturedProperties = async () => {
+      try {
+        setLoadingProperties(true);
+        let res;
+        try {
+          res = await propertyApi.getPublicFeaturedProperties();
+        } catch {
+          res = await propertyApi.getAll();
+        }
+
+        const rawList = res?.data?.data || res?.data || [];
+        const list = Array.isArray(rawList) ? rawList : [];
+
+        if (list.length > 0) {
+          const sliced = list.slice(0, 5).map((item) => {
+            const candidates = getPropertyImageCandidates(item._raw || item);
+            return {
+              id: item.id || item.propertyId || Math.random(),
+              title: item.title || item.propertyTitle || "Featured Property",
+              image: candidates[0] || item.coverImageData || item.image || item.coverImage || FALLBACK_PROPERTY_IMAGE_DATA_URL,
+            };
+          });
+          setFeaturedProperties(sliced);
+        } else {
+          setFeaturedProperties(sampleProperties);
+        }
+      } catch {
+        setFeaturedProperties(sampleProperties);
+      } finally {
+        setLoadingProperties(false);
+      }
+    };
+
+    fetchFeaturedProperties();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -354,6 +428,82 @@ const Home = () => {
     ))}
   </div>
 </div>
+        </div>
+      </section>
+
+      {/* FEATURED PROPERTIES PREVIEW SECTION */}
+      <section id="properties" className="py-16 px-4 md:px-6 bg-slate-50 border-y border-slate-100">
+        <div className="max-w-[1510px] mx-auto">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#ffe7db] px-4 py-1.5 text-[#ff7438] font-bold text-xs sm:text-sm mb-3">
+              <Sparkles size={16} /> Live Deals & Properties
+            </div>
+
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-3">
+              Featured Property Deals
+            </h2>
+
+            <p className="text-sm sm:text-base text-slate-600 max-w-xl mx-auto">
+              Hover & click on any property card below to log in and unlock full details, pricing, and direct owner contacts.
+            </p>
+          </div>
+
+          {/* 5 CARDS IN ONE ROW */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+            {featuredProperties.map((property) => (
+              <motion.div
+                key={property.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                viewport={{ once: true }}
+                onClick={() => navigate("/login")}
+                className="group relative cursor-pointer overflow-hidden rounded-[24px] bg-white shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200/80 flex flex-col justify-between"
+              >
+                {/* COVER IMAGE */}
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
+                  <img
+                    src={property.image || FALLBACK_PROPERTY_IMAGE_DATA_URL}
+                    alt={property.title}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = FALLBACK_PROPERTY_IMAGE_DATA_URL;
+                    }}
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+
+                  {/* OVERLAY LOCK BADGE */}
+                  <div className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
+                    <Lock size={11} className="text-[#ff7438]" />
+                    Login
+                  </div>
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3.5">
+                    <span className="text-[11px] font-extrabold text-white bg-[#ff7438] px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-md">
+                      Click to Login <ArrowRight size={12} />
+                    </span>
+                  </div>
+                </div>
+
+                {/* PROPERTY TITLE ONLY */}
+                <div className="p-4 bg-white flex-grow flex items-center min-h-[64px]">
+                  <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 line-clamp-2 group-hover:text-[#ff7438] transition-colors leading-snug">
+                    {property.title}
+                  </h3>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center">
+            <button
+              onClick={() => navigate("/login")}
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#ff7438] text-white font-black text-sm rounded-xl hover:bg-[#f05f24] hover:shadow-xl hover:shadow-[#ff7438]/20 transition-all duration-300"
+            >
+              Log in to view all properties
+              <ArrowRight size={18} />
+            </button>
+          </div>
         </div>
       </section>
 
