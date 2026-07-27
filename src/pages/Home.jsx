@@ -53,7 +53,7 @@ const Home = () => {
 
         // 2. Fallback probe: getPropertyById (permitted in Spring Security)
         if (list.length === 0) {
-          const ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+          const ids = Array.from({ length: 30 }, (_, i) => 30 - i);
           const results = await Promise.allSettled(
             ids.map((id) => ownerApi.getPropertyById(id))
           );
@@ -63,6 +63,13 @@ const Home = () => {
         }
 
         if (list.length > 0) {
+          // Sort list descending by ID so newest properties appear first
+          list.sort((a, b) => {
+            const bId = Number(b.id || b.propertyId || 0);
+            const aId = Number(a.id || a.propertyId || 0);
+            return bId - aId;
+          });
+
           const sliced = list.slice(0, 5).map((item) => {
             const candidates = getPropertyImageCandidates(item._raw || item);
             return {
