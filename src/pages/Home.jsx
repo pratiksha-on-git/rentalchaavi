@@ -459,18 +459,6 @@ const Home = () => {
                       }}
                       className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-
-                    {/* OVERLAY LOCK BADGE */}
-                    <div className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
-                      <Lock size={11} className="text-[#ff7438]" />
-                      Login
-                    </div>
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3.5">
-                      <span className="text-[11px] font-extrabold text-white bg-[#ff7438] px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-md">
-                        Click to Login <ArrowRight size={12} />
-                      </span>
-                    </div>
                   </div>
 
                   {/* PROPERTY TITLE ONLY */}
