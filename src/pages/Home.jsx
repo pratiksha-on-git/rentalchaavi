@@ -14,43 +14,16 @@ import {
   UserRound,
   Lock,
   Sparkles,
+  Building2,
 } from "lucide-react";
 
 import homeBgVideo from "../assets/Home_Bg_video.mp4";
 import BrandLogo from "../components/BrandLogo";
-import { propertyApi } from "../services/api";
+import { propertyApi, ownerApi } from "../services/api";
 import {
   FALLBACK_PROPERTY_IMAGE_DATA_URL,
   getPropertyImageCandidates,
 } from "../utlis/propertyImages";
-
-const sampleProperties = [
-  {
-    id: "sample-1",
-    title: "Luxury 2 BHK Apartment in Kothrud",
-    image: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "sample-2",
-    title: "Modern 3 BHK Villa in Baner",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "sample-3",
-    title: "Cozy Studio Flat in Wakad",
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "sample-4",
-    title: "Spacious 2 BHK Row House in Viman Nagar",
-    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: "sample-5",
-    title: "Premium 1 BHK Flat in Hinjewadi",
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-  },
-];
 
 const Home = () => {
   const navigate = useNavigate();
@@ -65,9 +38,29 @@ const Home = () => {
     const fetchFeaturedProperties = async () => {
       try {
         setLoadingProperties(true);
-        const res = await propertyApi.getPublicFeaturedProperties();
-        const rawList = res?.data?.data || res?.data || [];
-        const list = Array.isArray(rawList) ? rawList : [];
+        let list = [];
+
+        // 1. Try public featured properties endpoint
+        try {
+          const res = await propertyApi.getPublicFeaturedProperties();
+          const rawList = res?.data?.data || res?.data || [];
+          if (Array.isArray(rawList) && rawList.length > 0) {
+            list = rawList;
+          }
+        } catch {
+          // Ignore error and try public getPropertyById probing
+        }
+
+        // 2. Fallback probe: getPropertyById (permitted in Spring Security)
+        if (list.length === 0) {
+          const ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+          const results = await Promise.allSettled(
+            ids.map((id) => ownerApi.getPropertyById(id))
+          );
+          list = results
+            .filter((r) => r.status === "fulfilled" && r.value?.data?.data)
+            .map((r) => r.value.data.data);
+        }
 
         if (list.length > 0) {
           const sliced = list.slice(0, 5).map((item) => {
@@ -75,15 +68,15 @@ const Home = () => {
             return {
               id: item.id || item.propertyId || Math.random(),
               title: item.title || item.propertyTitle || "Featured Property",
-              image: candidates[0] || item.coverImageData || item.image || item.coverImage || FALLBACK_PROPERTY_IMAGE_DATA_URL,
+              image: candidates[0] || item.coverImageData || item.coverImage || item.image || FALLBACK_PROPERTY_IMAGE_DATA_URL,
             };
           });
           setFeaturedProperties(sliced);
         } else {
-          setFeaturedProperties(sampleProperties);
+          setFeaturedProperties([]);
         }
       } catch {
-        setFeaturedProperties(sampleProperties);
+        setFeaturedProperties([]);
       } finally {
         setLoadingProperties(false);
       }
@@ -443,51 +436,67 @@ const Home = () => {
           </div>
 
           {/* 5 CARDS IN ONE ROW */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
-            {featuredProperties.map((property) => (
-              <motion.div
-                key={property.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                viewport={{ once: true }}
-                onClick={() => navigate("/login")}
-                className="group relative cursor-pointer overflow-hidden rounded-[24px] bg-white shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200/80 flex flex-col justify-between"
-              >
-                {/* COVER IMAGE */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
-                  <img
-                    src={property.image || FALLBACK_PROPERTY_IMAGE_DATA_URL}
-                    alt={property.title}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = FALLBACK_PROPERTY_IMAGE_DATA_URL;
-                    }}
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+          {featuredProperties.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+              {featuredProperties.map((property) => (
+                <motion.div
+                  key={property.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  viewport={{ once: true }}
+                  onClick={() => navigate("/login")}
+                  className="group relative cursor-pointer overflow-hidden rounded-[24px] bg-white shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200/80 flex flex-col justify-between"
+                >
+                  {/* COVER IMAGE */}
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
+                    <img
+                      src={property.image || FALLBACK_PROPERTY_IMAGE_DATA_URL}
+                      alt={property.title}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = FALLBACK_PROPERTY_IMAGE_DATA_URL;
+                      }}
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
 
-                  {/* OVERLAY LOCK BADGE */}
-                  <div className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
-                    <Lock size={11} className="text-[#ff7438]" />
-                    Login
+                    {/* OVERLAY LOCK BADGE */}
+                    <div className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
+                      <Lock size={11} className="text-[#ff7438]" />
+                      Login
+                    </div>
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3.5">
+                      <span className="text-[11px] font-extrabold text-white bg-[#ff7438] px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-md">
+                        Click to Login <ArrowRight size={12} />
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3.5">
-                    <span className="text-[11px] font-extrabold text-white bg-[#ff7438] px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-md">
-                      Click to Login <ArrowRight size={12} />
-                    </span>
+                  {/* PROPERTY TITLE ONLY */}
+                  <div className="p-4 bg-white flex-grow flex items-center min-h-[64px]">
+                    <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 line-clamp-2 group-hover:text-[#ff7438] transition-colors leading-snug">
+                      {property.title}
+                    </h3>
                   </div>
-                </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl p-10 text-center max-w-md mx-auto shadow-md border border-slate-200/80">
+              <div className="w-16 h-16 rounded-2xl bg-[#ffe7db] flex items-center justify-center text-[#ff7438] mx-auto mb-4">
+                <Building2 size={32} />
+              </div>
 
-                {/* PROPERTY TITLE ONLY */}
-                <div className="p-4 bg-white flex-grow flex items-center min-h-[64px]">
-                  <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 line-clamp-2 group-hover:text-[#ff7438] transition-colors leading-snug">
-                    {property.title}
-                  </h3>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+              <h3 className="text-xl font-black text-slate-900 mb-2">
+                No properties registered yet
+              </h3>
+
+              <p className="text-slate-500 text-sm font-medium">
+                Check back soon for new property deals and listings!
+              </p>
+            </div>
+          )}
 
           <div className="mt-10 text-center">
             <button
