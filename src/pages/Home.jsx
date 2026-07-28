@@ -75,12 +75,18 @@ const Home = () => {
 
           const sliced = list.slice(0, 5).map((item) => {
             const candidates = getPropertyImageCandidates(item._raw || item);
+            const loc =
+              item.location ||
+              item.city ||
+              item.address ||
+              (item.city && item.state ? `${item.city}, ${item.state}` : null) ||
+              null;
             return {
               id: item.id || item.propertyId || Math.random(),
               title: item.title || item.propertyTitle || "Featured Property",
               image: candidates[0] || item.coverImageData || item.coverImage || item.image || FALLBACK_PROPERTY_IMAGE_DATA_URL,
-              price: item.price || item.rent || null,
-              location: item.location || item.address || item.city || null,
+              price: item.price || item.rent || item.amount || null,
+              location: loc,
             };
           });
           setFeaturedProperties(sliced);

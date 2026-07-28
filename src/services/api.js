@@ -50,7 +50,7 @@ const rootApi = axios.create({
 });
 
 const resolveAuthTokenForPath = (path = "") => {
-  if (path.startsWith("/auth/")) return null;
+  if (path.startsWith("/auth/") || path.startsWith("/public/")) return null;
   if (
     path.startsWith("/owner/getPropertyById/") ||
     path.startsWith("/owner/property/image/")
@@ -181,7 +181,7 @@ export const ownerApi = {
     api.post(`/owner/addPropertyByOwner/${ownerId}`, propertyData),
   getOwnerProperties: (ownerId) =>
     api.get(`/owner/getAllPropertiesByOwnerId/${ownerId}`),
-  getPropertyById: (id) => api.get(`/owner/getPropertyById/${id}`),
+  getPropertyById: (id) => api.get(`/public/getPropertyById/${id}`),
   updateProperty: (id, propertyData) =>
     api.put(`/owner/updatePropertyById/${id}`, propertyData),
   markPropertyRented: (propertyId) =>
@@ -231,9 +231,8 @@ return api.post(`/user/filter-properties/${userId}`, filterData);
 },
 
   getById: (id) => {
-  return api.get(`/owner/getPropertyById/${id}`);
-  
-},
+    return api.get(`/public/getPropertyById/${id}`);
+  },
   getByIdForUser: (id) =>
     api.get(`/owner/getPropertyById/${id}`, authConfigFor("userToken")),
   getNearbyProperties: (propertyId) => {
