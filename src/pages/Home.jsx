@@ -12,6 +12,9 @@ import {
   Handshake,
   HousePlus,
   UserRound,
+  MapPin,
+  Info,
+  Crown,
   Lock,
   Sparkles,
   Building2,
@@ -38,29 +41,13 @@ const Home = () => {
     const fetchFeaturedProperties = async () => {
       try {
         setLoadingProperties(true);
-        let list = [];
-
-        // 1. Try public featured properties endpoint
-        try {
-          const res = await propertyApi.getPublicFeaturedProperties();
-          const rawList = res?.data?.data || res?.data || [];
-          if (Array.isArray(rawList) && rawList.length > 0) {
-            list = rawList;
-          }
-        } catch {
-          // Ignore error and try public getPropertyById probing
-        }
-
-        // 2. Fallback probe: getPropertyById (permitted in Spring Security)
-        if (list.length === 0) {
-          const ids = Array.from({ length: 30 }, (_, i) => 30 - i);
-          const results = await Promise.allSettled(
-            ids.map((id) => ownerApi.getPropertyById(id))
-          );
-          list = results
-            .filter((r) => r.status === "fulfilled" && r.value?.data?.data)
-            .map((r) => r.value.data.data);
-        }
+        const ids = [5, 4, 3, 2, 1];
+        const results = await Promise.allSettled(
+          ids.map((id) => ownerApi.getPropertyById(id))
+        );
+        const list = results
+          .filter((r) => r.status === "fulfilled" && r.value?.data?.data)
+          .map((r) => r.value.data.data);
 
         if (list.length > 0) {
           // Sort list descending by ID so newest properties appear first
@@ -76,6 +63,8 @@ const Home = () => {
               id: item.id || item.propertyId || Math.random(),
               title: item.title || item.propertyTitle || "Featured Property",
               image: candidates[0] || item.coverImageData || item.coverImage || item.image || FALLBACK_PROPERTY_IMAGE_DATA_URL,
+              price: item.price || item.rent || null,
+              location: item.location || item.address || item.city || null,
             };
           });
           setFeaturedProperties(sliced);
@@ -453,10 +442,10 @@ const Home = () => {
                   transition={{ duration: 0.4 }}
                   viewport={{ once: true }}
                   onClick={() => navigate("/login")}
-                  className="group relative cursor-pointer overflow-hidden rounded-[24px] bg-white shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200/80 flex flex-col justify-between"
+                  className="group relative cursor-pointer bg-[#fffaf4] rounded-3xl shadow-[0_6px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_14px_40px_rgba(249,115,22,0.16)] overflow-hidden border border-[#f3e7da] transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between"
                 >
-                  {/* COVER IMAGE */}
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
+                  {/* COVER IMAGE - FIRST UPLOADED IMAGE */}
+                  <div className="relative overflow-hidden rounded-t-[22px] aspect-[4/3] w-full bg-slate-100">
                     <img
                       src={property.image || FALLBACK_PROPERTY_IMAGE_DATA_URL}
                       alt={property.title}
@@ -464,15 +453,41 @@ const Home = () => {
                         e.target.onerror = null;
                         e.target.src = FALLBACK_PROPERTY_IMAGE_DATA_URL;
                       }}
-                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="h-full w-full object-cover group-hover:scale-108 transition-transform duration-500"
                     />
                   </div>
 
-                  {/* PROPERTY TITLE ONLY */}
-                  <div className="p-4 bg-white flex-grow flex items-center min-h-[64px]">
-                    <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 line-clamp-2 group-hover:text-[#ff7438] transition-colors leading-snug">
-                      {property.title}
-                    </h3>
+                  {/* CONTENT SECTION - CLEAN SANS-SERIF TYPOGRAPHY WITHOUT MOBILE NUMBER */}
+                  <div className="p-4 sm:p-5 bg-[#fffaf4] flex-grow flex flex-col justify-between">
+                    <div className="space-y-1">
+                      {/* TITLE */}
+                      <h3 className="text-base sm:text-lg font-bold text-slate-900 truncate leading-snug">
+                        {property.title}
+                      </h3>
+
+                      {/* LOCATION */}
+                      <p className="text-xs sm:text-sm text-slate-700 font-medium truncate">
+                        {property.location || "Location Not Available"}
+                      </p>
+
+                      {/* PRICE */}
+                      <p className="text-base sm:text-lg font-bold text-[#f97316]">
+                        ₹{Number(property.price || 0).toLocaleString()}
+                      </p>
+                    </div>
+
+                    {/* UNLOCK DETAILS BUTTON */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate("/login");
+                      }}
+                      className="w-full mt-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-[#F97316] to-[#EA580C] hover:opacity-95 text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all duration-200 flex items-center justify-center gap-1.5"
+                    >
+                      <Crown size={15} />
+                      Unlock Details
+                    </button>
                   </div>
                 </motion.div>
               ))}

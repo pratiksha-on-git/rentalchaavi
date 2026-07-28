@@ -194,6 +194,7 @@ export const ownerApi = {
 };
 
 export const propertyApi = {
+  getPublicFeaturedProperties: () => api.get("/public/featured-properties"),
   getAll: () => {
     const token = localStorage.getItem("userToken");
 
