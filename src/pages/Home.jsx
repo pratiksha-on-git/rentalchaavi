@@ -41,13 +41,29 @@ const Home = () => {
     const fetchFeaturedProperties = async () => {
       try {
         setLoadingProperties(true);
-        const ids = [5, 4, 3, 2, 1];
-        const results = await Promise.allSettled(
-          ids.map((id) => ownerApi.getPropertyById(id))
-        );
-        const list = results
-          .filter((r) => r.status === "fulfilled" && r.value?.data?.data)
-          .map((r) => r.value.data.data);
+        let list = [];
+
+        // 1. Try public featured properties endpoint
+        try {
+          const res = await propertyApi.getPublicFeaturedProperties();
+          const rawList = res?.data?.data || res?.data || [];
+          if (Array.isArray(rawList) && rawList.length > 0) {
+            list = rawList;
+          }
+        } catch {
+          // Ignore error and fallback
+        }
+
+        // 2. Fallback probe: getPropertyById
+        if (list.length === 0) {
+          const ids = [5, 4, 3, 2, 1];
+          const results = await Promise.allSettled(
+            ids.map((id) => ownerApi.getPropertyById(id))
+          );
+          list = results
+            .filter((r) => r.status === "fulfilled" && r.value?.data?.data)
+            .map((r) => r.value.data.data);
+        }
 
         if (list.length > 0) {
           // Sort list descending by ID so newest properties appear first

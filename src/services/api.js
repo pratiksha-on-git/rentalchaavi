@@ -51,6 +51,12 @@ const rootApi = axios.create({
 
 const resolveAuthTokenForPath = (path = "") => {
   if (path.startsWith("/auth/")) return null;
+  if (
+    path.startsWith("/owner/getPropertyById/") ||
+    path.startsWith("/owner/property/image/")
+  ) {
+    return localStorage.getItem("ownerToken") || localStorage.getItem("userToken") || null;
+  }
   if (path.startsWith("/owner/")) return localStorage.getItem("ownerToken");
   if (path.startsWith("/admin/")) return localStorage.getItem("adminToken");
   if (path.startsWith("/user/")) return localStorage.getItem("userToken");
