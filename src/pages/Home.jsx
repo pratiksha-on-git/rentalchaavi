@@ -75,18 +75,24 @@ const Home = () => {
 
           const sliced = list.slice(0, 5).map((item) => {
             const candidates = getPropertyImageCandidates(item._raw || item);
-            const loc =
+            const addrCity = [item.address, item.city].filter(Boolean).join(", ").trim();
+            const aptCity = [item.apartmentName, item.city].filter(Boolean).join(", ").trim();
+            
+            const actualLocation =
               item.location ||
-              item.city ||
+              addrCity ||
+              aptCity ||
               item.address ||
-              (item.city && item.state ? `${item.city}, ${item.state}` : null) ||
-              null;
+              item.city ||
+              item.apartmentName ||
+              "Location Not Available";
+
             return {
               id: item.id || item.propertyId || Math.random(),
               title: item.title || item.propertyTitle || "Featured Property",
               image: candidates[0] || item.coverImageData || item.coverImage || item.image || FALLBACK_PROPERTY_IMAGE_DATA_URL,
-              price: item.price || item.rent || item.amount || null,
-              location: loc,
+              price: Number(item.price || item.rent || 0),
+              location: actualLocation,
             };
           });
           setFeaturedProperties(sliced);
@@ -494,7 +500,7 @@ const Home = () => {
 
                       {/* PRICE */}
                       <p className="text-base sm:text-lg font-bold text-[#f97316]">
-                        ₹{Number(property.price || 0).toLocaleString()}
+                        ₹{Number(property.price || 0).toLocaleString("en-IN")}
                       </p>
                     </div>
 

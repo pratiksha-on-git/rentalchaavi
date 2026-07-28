@@ -666,8 +666,9 @@ if (!cancelled) {
 
                   <h2 className="text-3xl sm:text-4xl font-black text-[#f3ede7] break-words">
                     ₹
-                    {property?.price ||
-                      "25,000"}
+                    {property?.price != null
+                      ? Number(property.price).toLocaleString("en-IN")
+                      : "N/A"}
                   </h2>
                 </div>
               </div>

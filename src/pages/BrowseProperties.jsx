@@ -533,19 +533,17 @@ setAddressOptions(
           delete payload.address;
 
         if (
-          !payload.minPrice ||
-          Number.isNaN(
-            payload.minPrice
-          )
+          payload.minPrice === null ||
+          payload.minPrice === undefined ||
+          Number.isNaN(payload.minPrice)
         ) {
           delete payload.minPrice;
         }
 
         if (
-          !payload.maxPrice ||
-          Number.isNaN(
-            payload.maxPrice
-          )
+          payload.maxPrice === null ||
+          payload.maxPrice === undefined ||
+          Number.isNaN(payload.maxPrice)
         ) {
           delete payload.maxPrice;
         }
