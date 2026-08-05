@@ -721,6 +721,20 @@ if (!cancelled) {
                     property?.carpetArea
                   }
                 />
+
+                {property?.sittingCapacity && (
+                  <OverviewCard
+                    icon={
+                      <Users
+                        size={24}
+                      />
+                    }
+                    title="Sitting Capacity"
+                    value={
+                      property?.sittingCapacity
+                    }
+                  />
+                )}
               </div>
 
               <div className="mt-12">

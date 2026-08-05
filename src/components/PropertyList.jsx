@@ -47,6 +47,8 @@ const PropertyList = ({
   title = "Available Listings",
   emptyTitle = "No properties match your current filters.",
   emptySubtitle = "Try changing filters or search again",
+  selectedCategory = "",
+  onCategoryToggle,
 }) => {
 const likedIdSet = new Set(likedPropertyIds.map((id) => String(id)));
 
@@ -54,7 +56,7 @@ return (
     <div className="w-full">
 
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-8 px-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 px-1">
 
         <div className="flex items-center gap-3">
 
@@ -88,6 +90,45 @@ return (
           </div>
 
         </div>
+
+        {/* RESIDENTIAL / COMMERCIAL FILTER BUTTONS BESIDE LISTINGS HEADER */}
+        {typeof onCategoryToggle === "function" && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => onCategoryToggle("")}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
+                !selectedCategory || selectedCategory === ""
+                  ? "bg-[#F97316] text-white shadow-[0_4px_14px_rgba(249,115,22,0.35)]"
+                  : "bg-white text-[#374151] border border-[#E5E7EB] hover:bg-[#F9FAFB]"
+              }`}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              onClick={() => onCategoryToggle("RESIDENTIAL")}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
+                selectedCategory === "RESIDENTIAL"
+                  ? "bg-[#F97316] text-white shadow-[0_4px_14px_rgba(249,115,22,0.35)]"
+                  : "bg-white text-[#374151] border border-[#E5E7EB] hover:bg-[#F9FAFB]"
+              }`}
+            >
+              Residential
+            </button>
+            <button
+              type="button"
+              onClick={() => onCategoryToggle("COMMERCIAL")}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
+                selectedCategory === "COMMERCIAL"
+                  ? "bg-[#F97316] text-white shadow-[0_4px_14px_rgba(249,115,22,0.35)]"
+                  : "bg-white text-[#374151] border border-[#E5E7EB] hover:bg-[#F9FAFB]"
+              }`}
+            >
+              Commercial
+            </button>
+          </div>
+        )}
 
       </div>
 

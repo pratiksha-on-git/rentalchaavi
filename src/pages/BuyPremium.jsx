@@ -1,6 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -9,8 +9,18 @@ import { paymentApi } from "../services/api";
 
 const BuyPremium = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [payment, setPayment] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const category = location.state?.propertyCategory || "RESIDENTIAL";
+  const isCommercial = String(category).toUpperCase() === "COMMERCIAL";
+
+  const basePrice = isCommercial ? 999 : 99;
+  const totalPriceFormatted = isCommercial ? "Rs. 1,178.82" : "Rs. 116.82";
+  const priceNotice = isCommercial
+    ? "Pay Rs. 999 + GST through PhonePe gateway."
+    : "Pay Rs. 99 + GST through PhonePe gateway.";
 
   const findPaymentRedirectUrl = (value, seen = new Set()) => {
     if (!value) return "";
@@ -92,7 +102,7 @@ const BuyPremium = () => {
     try {
       setLoading(true);
 
-      const response = await paymentApi.buyUserPremium(session.userId);
+      const response = await paymentApi.buyUserPremium(session.userId, isCommercial ? "COMMERCIAL" : "RESIDENTIAL");
       const paymentData = response?.data?.data || response?.data || {};
 
       const normalizedPayment = {
@@ -173,26 +183,28 @@ const BuyPremium = () => {
         </div>
 
         <h1 className="text-3xl font-bold text-amber-900">
-          Get Direct Owner Access
+          {isCommercial ? "Commercial Owner Access" : "Get Direct Owner Access"}
         </h1>
 
         <p className="text-amber-700 mt-2 mb-6 text-sm">
-          Unlock premium properties and contact details instantly.
+          {isCommercial
+            ? "Unlock commercial properties and contact details instantly."
+            : "Unlock premium properties and contact details instantly."}
         </p>
 
         <div className="bg-amber-50 rounded-2xl p-5 border border-amber-100 text-left">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-bold text-amber-950">
-                Premium Access
+                {isCommercial ? "Commercial Premium Access" : "Premium Access"}
               </p>
               <p className="text-xs text-amber-700 mt-1">
-                Pay Rs. 99 + GST through PhonePe gateway.
+                {priceNotice}
               </p>
             </div>
 
             <div className="text-right">
-              <p className="text-2xl font-black text-amber-950">Rs. 116.82</p>
+              <p className="text-2xl font-black text-amber-950">{totalPriceFormatted}</p>
               <p className="text-xs text-amber-700">inclusive of GST</p>
             </div>
           </div>

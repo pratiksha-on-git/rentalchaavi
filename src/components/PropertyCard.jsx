@@ -38,6 +38,40 @@ const PropertyCard = ({
   const [currentImageIndex, setCurrentImageIndex] =
     useState(0);
 
+  const categoryRaw = String(
+    property.propertyCategory ||
+    property.category ||
+    property._raw?.propertyCategory ||
+    property._raw?.category ||
+    ""
+  ).trim().toUpperCase();
+
+  const typeRaw = String(
+    property.propertyType ||
+    property.type ||
+    property._raw?.propertyType ||
+    property._raw?.type ||
+    ""
+  ).trim().toUpperCase();
+
+  const commercialTypes = [
+    "OFFICE",
+    "OFFICE_SPACE",
+    "BUSINESS_CENTER",
+    "COMMERCIAL_BUILDING",
+    "CO_WORKING_SPACE",
+    "CO_WORK_SPACE",
+    "SHOP",
+    "SHOWROOM",
+    "RETAIL_SPACE",
+    "FOOD_COURT_SPACE",
+    "WAREHOUSE",
+    "INDUSTRIAL_SHED",
+    "COMMERCIAL_LAND",
+  ];
+
+  const isCommercial = categoryRaw === "COMMERCIAL" || commercialTypes.includes(typeRaw);
+
   const effectivePremiumStatus =
     getCurrentPremiumStatus(
       premiumStatus ??
@@ -122,7 +156,12 @@ const PropertyCard = ({
       return;
     }
 
-    navigate("/buy-premium");
+    navigate("/buy-premium", {
+      state: {
+        propertyCategory: isCommercial ? "COMMERCIAL" : "RESIDENTIAL",
+        propertyId: property.id,
+      },
+    });
   };
 
   const handleChatClick = () => {
@@ -260,10 +299,10 @@ const PropertyCard = ({
           )}
 
           {/* PROPERTY TYPE */}
-          <div className="absolute top-4 left-4 bg-gradient-to-r from-[#F97316] to-[#EA580C] backdrop-blur-sm text-white text-[10px] font-bold px-3 py-1.5 rounded-lg shadow-lg">
-            {property.propertyType ||
-              property.type ||
-              "PROPERTY"}
+          <div className="absolute top-4 left-4 flex gap-1.5 flex-wrap">
+            <div className="bg-[#111827]/75 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-lg uppercase">
+              {(property.propertyType || property.type || "PROPERTY").replace(/_/g, ' ')}
+            </div>
           </div>
 
           {/* PRICE */}
@@ -278,10 +317,11 @@ const PropertyCard = ({
         {/* CONTENT */}
         <div className="p-6 bg-[#FFFFFF]">
           {/* TITLE */}
-          <h2 className="text-xl font-black text-[#111827] truncate">
-            {property.title ||
-              "Untitled Property"}
-          </h2>
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-xl font-black text-[#111827] truncate flex-1">
+              {property.title || "Untitled Property"}
+            </h2>
+          </div>
 
           <div className="mt-4 space-y-3">
             {/* LOCATION */}
@@ -312,7 +352,7 @@ const PropertyCard = ({
               </span>
             </div>
 
-            {/* BHK TYPE */}
+            {/* BHK TYPE / SITTING CAPACITY */}
             <div className="flex items-center text-[#6B7280] text-sm">
               <Info
                 size={16}
@@ -320,9 +360,9 @@ const PropertyCard = ({
               />
 
               <span className="font-medium">
-                {property.bhkType ||
-                  property.bhk ||
-                  "BHK Not Available"}
+                {isCommercial
+                  ? (property.sittingCapacity ? `Capacity: ${property.sittingCapacity}` : (property.bhkType || "Commercial Space"))
+                  : (property.bhkType || property.bhk || "BHK Not Available")}
               </span>
             </div>
           </div>
@@ -354,7 +394,7 @@ const PropertyCard = ({
                     size={18}
                     className="inline mr-2"
                   />
-                  Unlock Now @ ₹99
+                  Unlock Now @ {isCommercial ? "₹999 + GST" : "₹99 + GST"}
                 </>
               )}
             </button>

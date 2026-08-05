@@ -30,6 +30,9 @@ import {
   Users,
   CheckCircle2,
   RotateCcw,
+  Calendar,
+  User,
+  Info,
 } from "lucide-react";
 
 import ChatDrawer from "../components/ChatDrawer";
@@ -454,6 +457,32 @@ const PropertyOwnerDashboard = () => {
 
     carpetArea: "",
 
+    // Commercial Fields
+    propertyCategory: "RESIDENTIAL",
+    listedBy: "",
+    superBuiltUpArea: "",
+    washrooms: "",
+    carParking: "",
+    floorNumber: "",
+    totalFloors: "",
+    availableFrom: "",
+    cabinCount: "",
+    meetingRooms: "",
+    receptionArea: "",
+    conferenceRoom: "",
+    pantry: "",
+    serverRoom: "",
+    frontageWidth: "",
+    cornerShop: "",
+    mainRoadFacing: "",
+    groundFloor: "",
+    loadingDock: "",
+    truckAccess: "",
+    ceilingHeight: "",
+    powerLoad: "",
+    fireNocAvailable: "",
+    sittingCapacity: "",
+
   });
 
 
@@ -481,6 +510,7 @@ const PropertyOwnerDashboard = () => {
   const premiumStartingRef = useRef(false);
 
   const [pendingPropertyId, setPendingPropertyId] = useState(null);
+  const [pendingProperty, setPendingProperty] = useState(null);
 
   const [propertyPayment, setPropertyPayment] = useState(null);
   const [availabilityLoadingId, setAvailabilityLoadingId] = useState(null);
@@ -834,6 +864,21 @@ const handleManualOwnerIdSubmit = () => {
     "Society Image 2",
 
   ];
+
+  const commercialImageLabels = [
+    "Front Exterior",
+    "Reception Area",
+    "Workspace / Hall",
+    "Cabin Area",
+    "Meeting / Conference Room",
+    "Pantry",
+    "Washroom",
+    "Parking Area",
+    "Building Entrance / Lobby",
+    "Road Facing View",
+  ];
+
+  const activeImageLabels = formData.propertyCategory === "COMMERCIAL" ? commercialImageLabels : imageLabels;
 
 
 
@@ -1386,8 +1431,13 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
     if (isPropertyRented(property)) return "RENTED";
 
-    if (propertyPaymentStatus === "FREE_ACTIVE") {
-      return "PAYMENT_DUE";
+    // FREE / FREE_ACTIVE = first free listing — show as FIRST FREE, not payment due
+    if (propertyPaymentStatus === "FREE" || propertyPaymentStatus === "FREE_ACTIVE") {
+      return "FREE_ACTIVE";
+    }
+
+    if (propertyPremiumStatus === "FREE_ACTIVE") {
+      return "FREE_ACTIVE";
     }
 
     if (propertyPaymentStatus === "PAYMENT_PENDING") return "PENDING";
@@ -1428,7 +1478,13 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
     if (backendStatus === "INACTIVE") return "REJECTED";
 
-    if (backendStatus === "ACTIVE") return "PAYMENT_DUE";
+    // If backend status is ACTIVE but it's a free property, show FIRST FREE
+    if (backendStatus === "ACTIVE") {
+      if (property?.isFirstFreeProperty || propertyPremiumStatus === "FREE_ACTIVE") {
+        return "FREE_ACTIVE";
+      }
+      return "PAYMENT_DUE";
+    }
 
     return "PAYMENT_DUE";
 
@@ -1562,13 +1618,21 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
 
 
-    const originalName = file.name.toLowerCase();
-
-    const baseName = originalName.replace(/\.[^/.]+$/, "").replace(/[^a-z0-9-_]/g, "-");
+    let baseName = "";
+    if (file.name && file.name.includes("-")) {
+      const parts = file.name.split("-");
+      if (parts.length > 3) {
+        baseName = parts.slice(0, parts.length - 3).join("-");
+      }
+    }
+    if (!baseName) {
+      const labelName = activeImageLabels[index] || "property-image";
+      baseName = labelName.toLowerCase().replace(/[^a-z0-9-_]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    }
 
     const uniqueSuffix = `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}${suffix}`;
 
-    return new File([blob], `${baseName || "property-image"}-${uniqueSuffix}.jpg`, {
+    return new File([blob], `${baseName}-${uniqueSuffix}.jpg`, {
 
       type: "image/jpeg",
 
@@ -1859,9 +1923,13 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
     const mobileNumber = formData.mobileNumber.trim();
 
+    const isCommercial = formData.propertyCategory === "COMMERCIAL";
+
     if (!title) return "Title is required";
 
     if (/\d/.test(title)) return "Title should not contain numbers";
+
+    if (isCommercial && title.length > 70) return "Title cannot exceed 70 characters";
 
     if (!formData.price) return "Price is required";
 
@@ -1889,9 +1957,11 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
     if (!formData.description.trim()) return "Description is required";
 
+    if (isCommercial && formData.description.trim().length > 4096) return "Description cannot exceed 4096 characters";
+
     if (!formData.propertyType) return "Property type is required";
 
-    if (!formData.bhkType) return "BHK type is required";
+    if (!isCommercial && !formData.bhkType) return "BHK type is required";
 
     if (!formData.furnishing) return "Furnishing is required";
 
@@ -1901,9 +1971,32 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
     if (!/^\d{10}$/.test(mobileNumber)) return "Mobile number must be 10 digits";
 
-    if (!formData.apartmentName.trim()) return "Apartment name is required";
+    if (!isCommercial && !formData.apartmentName.trim()) return "Apartment name is required";
 
+    // Commercial Specific validations
+    if (isCommercial) {
+      if (!formData.listedBy) return "Listed By option is required";
+      
+      if (!formData.superBuiltUpArea) return "Super Built-up Area is required";
+      if (!Number.isFinite(Number(formData.superBuiltUpArea)) || Number(formData.superBuiltUpArea) <= 0) {
+        return "Super Built-up Area must be a valid number greater than 0";
+      }
 
+      if (!Number.isFinite(Number(formData.carpetArea)) || Number(formData.carpetArea) <= 0) {
+        return "Carpet Area must be a valid number greater than 0";
+      }
+      if (Number(formData.carpetArea) > Number(formData.superBuiltUpArea)) {
+        return "Carpet Area must be less than or equal to Super Built-up Area";
+      }
+
+      if (!formData.washrooms) return "Washrooms count is required";
+      if (!formData.carParking) return "Car Parking count is required";
+      if (!formData.floorNumber) return "Floor Number is required";
+      if (!Number.isInteger(Number(formData.floorNumber))) return "Floor Number must be a valid integer";
+      if (!formData.totalFloors) return "Total Floors is required";
+      if (!Number.isInteger(Number(formData.totalFloors))) return "Total Floors must be a valid integer";
+      if (!formData.availableFrom) return "Available From date is required";
+    }
 
     if (requireImages) {
 
@@ -1911,11 +2004,13 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
       if (uploadedImages.length < 4) return "Minimum 4 images are required";
 
-      if (!images[0]) return "Door image is required and will be used as the cover photo";
+      if (isCommercial) {
+        if (!images[0]) return "Front Exterior image is required and will be used as the cover photo";
+      } else {
+        if (!images[0]) return "Door image is required and will be used as the cover photo";
+      }
 
     }
-
-
 
     return "";
 
@@ -1997,7 +2092,7 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
         propertyType: formData.propertyType,
 
-        pgType: formData.pgType || null,
+        pgType: formData.propertyCategory === "COMMERCIAL" ? null : (formData.pgType || null),
 
         location: formData.location,
 
@@ -2013,13 +2108,40 @@ setFacilities(mergeFacilitiesWithBackendOptions());
 
         description: formData.description,
 
-        bhkType: formData.bhkType,
+        bhkType: formData.propertyCategory === "COMMERCIAL" ? null : formData.bhkType,
 
         furnishing: formData.furnishing,
 
         carpetArea: String(formData.carpetArea),
 
-        apartmentName: formData.apartmentName,
+        apartmentName: formData.propertyCategory === "COMMERCIAL" ? null : formData.apartmentName,
+
+        propertyCategory: formData.propertyCategory,
+
+        // Commercial fields
+        listedBy: formData.propertyCategory === "COMMERCIAL" ? formData.listedBy : null,
+        superBuiltUpArea: formData.propertyCategory === "COMMERCIAL" ? String(formData.superBuiltUpArea) : null,
+        washrooms: formData.propertyCategory === "COMMERCIAL" ? formData.washrooms : null,
+        carParking: formData.propertyCategory === "COMMERCIAL" ? formData.carParking : null,
+        floorNumber: formData.propertyCategory === "COMMERCIAL" ? (formData.floorNumber ? parseInt(formData.floorNumber) : null) : null,
+        totalFloors: formData.propertyCategory === "COMMERCIAL" ? (formData.totalFloors ? parseInt(formData.totalFloors) : null) : null,
+        availableFrom: formData.propertyCategory === "COMMERCIAL" ? formData.availableFrom : null,
+        cabinCount: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.cabinCount ? parseInt(formData.cabinCount) : null) : null,
+        meetingRooms: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.meetingRooms ? parseInt(formData.meetingRooms) : null) : null,
+        receptionArea: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.receptionArea === "YES" ? true : formData.receptionArea === "NO" ? false : null) : null,
+        conferenceRoom: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.conferenceRoom === "YES" ? true : formData.conferenceRoom === "NO" ? false : null) : null,
+        pantry: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.pantry === "YES" ? true : formData.pantry === "NO" ? false : null) : null,
+        serverRoom: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.serverRoom === "YES" ? true : formData.serverRoom === "NO" ? false : null) : null,
+        frontageWidth: formData.propertyCategory === "COMMERCIAL" && ["SHOP", "SHOWROOM", "RETAIL_SPACE", "FOOD_COURT_SPACE"].includes(formData.propertyType) ? (formData.frontageWidth ? parseInt(formData.frontageWidth) : null) : null,
+        cornerShop: formData.propertyCategory === "COMMERCIAL" && ["SHOP", "SHOWROOM", "RETAIL_SPACE", "FOOD_COURT_SPACE"].includes(formData.propertyType) ? (formData.cornerShop === "YES" ? true : formData.cornerShop === "NO" ? false : null) : null,
+        mainRoadFacing: formData.propertyCategory === "COMMERCIAL" && ["SHOP", "SHOWROOM", "RETAIL_SPACE", "FOOD_COURT_SPACE"].includes(formData.propertyType) ? (formData.mainRoadFacing === "YES" ? true : formData.mainRoadFacing === "NO" ? false : null) : null,
+        groundFloor: formData.propertyCategory === "COMMERCIAL" && ["SHOP", "SHOWROOM", "RETAIL_SPACE", "FOOD_COURT_SPACE"].includes(formData.propertyType) ? (formData.groundFloor === "YES" ? true : formData.groundFloor === "NO" ? false : null) : null,
+        loadingDock: formData.propertyCategory === "COMMERCIAL" && ["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) ? (formData.loadingDock === "YES" ? true : formData.loadingDock === "NO" ? false : null) : null,
+        truckAccess: formData.propertyCategory === "COMMERCIAL" && ["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) ? (formData.truckAccess === "YES" ? true : formData.truckAccess === "NO" ? false : null) : null,
+        ceilingHeight: formData.propertyCategory === "COMMERCIAL" && ["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) ? (formData.ceilingHeight ? parseInt(formData.ceilingHeight) : null) : null,
+        powerLoad: formData.propertyCategory === "COMMERCIAL" && ["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) ? (formData.powerLoad ? parseInt(formData.powerLoad) : null) : null,
+        fireNocAvailable: formData.propertyCategory === "COMMERCIAL" && ["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) ? (formData.fireNocAvailable === "YES" ? true : formData.fireNocAvailable === "NO" ? false : null) : null,
+        sittingCapacity: formData.propertyCategory === "COMMERCIAL" ? formData.sittingCapacity : null,
 
       };
 
@@ -2350,6 +2472,7 @@ toast.error(err.response?.data?.message || err.message || "Failed to delete prop
     }
 
     setPendingPropertyId(propertyId);
+    setPendingProperty(property);
     setPropertyPayment(null);
 
     setShowPremiumModal(true);
@@ -2363,6 +2486,7 @@ toast.error(err.response?.data?.message || err.message || "Failed to delete prop
     setShowPremiumModal(false);
 
     setPendingPropertyId(null);
+    setPendingProperty(null);
     setPropertyPayment(null);
 
   };
@@ -2408,6 +2532,32 @@ toast.error(err.response?.data?.message || err.message || "Failed to delete prop
       furnishing: property.furnishing || "",
 
       carpetArea: property.carpetArea || "",
+
+      // Commercial Fields
+      propertyCategory: property.propertyCategory || "RESIDENTIAL",
+      listedBy: property.listedBy || "",
+      superBuiltUpArea: property.superBuiltUpArea || "",
+      washrooms: property.washrooms || "",
+      carParking: property.carParking || "",
+      floorNumber: property.floorNumber || "",
+      totalFloors: property.totalFloors || "",
+      availableFrom: property.availableFrom || "",
+      cabinCount: property.cabinCount || "",
+      meetingRooms: property.meetingRooms || "",
+      receptionArea: property.receptionArea === true ? "YES" : property.receptionArea === false ? "NO" : "",
+      conferenceRoom: property.conferenceRoom === true ? "YES" : property.conferenceRoom === false ? "NO" : "",
+      pantry: property.pantry === true ? "YES" : property.pantry === false ? "NO" : "",
+      serverRoom: property.serverRoom === true ? "YES" : property.serverRoom === false ? "NO" : "",
+      frontageWidth: property.frontageWidth || "",
+      cornerShop: property.cornerShop === true ? "YES" : property.cornerShop === false ? "NO" : "",
+      mainRoadFacing: property.mainRoadFacing === true ? "YES" : property.mainRoadFacing === false ? "NO" : "",
+      groundFloor: property.groundFloor === true ? "YES" : property.groundFloor === false ? "NO" : "",
+      loadingDock: property.loadingDock === true ? "YES" : property.loadingDock === false ? "NO" : "",
+      truckAccess: property.truckAccess === true ? "YES" : property.truckAccess === false ? "NO" : "",
+      ceilingHeight: property.ceilingHeight || "",
+      powerLoad: property.powerLoad || "",
+      fireNocAvailable: property.fireNocAvailable === true ? "YES" : property.fireNocAvailable === false ? "NO" : "",
+      sittingCapacity: property.sittingCapacity || "",
 
     });
 
@@ -2491,7 +2641,7 @@ toast.error(err.response?.data?.message || err.message || "Failed to delete prop
 
         propertyType: formData.propertyType,
 
-        pgType: formData.pgType || null,
+        pgType: formData.propertyCategory === "COMMERCIAL" ? null : (formData.pgType || null),
 
         location: formData.location,
 
@@ -2507,13 +2657,40 @@ toast.error(err.response?.data?.message || err.message || "Failed to delete prop
 
         description: formData.description,
 
-        bhkType: formData.bhkType,
+        bhkType: formData.propertyCategory === "COMMERCIAL" ? null : formData.bhkType,
 
         furnishing: formData.furnishing,
 
         carpetArea: String(formData.carpetArea),
 
-        apartmentName: formData.apartmentName,
+        apartmentName: formData.propertyCategory === "COMMERCIAL" ? null : formData.apartmentName,
+
+        propertyCategory: formData.propertyCategory,
+
+        // Commercial fields
+        listedBy: formData.propertyCategory === "COMMERCIAL" ? formData.listedBy : null,
+        superBuiltUpArea: formData.propertyCategory === "COMMERCIAL" ? String(formData.superBuiltUpArea) : null,
+        washrooms: formData.propertyCategory === "COMMERCIAL" ? formData.washrooms : null,
+        carParking: formData.propertyCategory === "COMMERCIAL" ? formData.carParking : null,
+        floorNumber: formData.propertyCategory === "COMMERCIAL" ? (formData.floorNumber ? parseInt(formData.floorNumber) : null) : null,
+        totalFloors: formData.propertyCategory === "COMMERCIAL" ? (formData.totalFloors ? parseInt(formData.totalFloors) : null) : null,
+        availableFrom: formData.propertyCategory === "COMMERCIAL" ? formData.availableFrom : null,
+        cabinCount: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.cabinCount ? parseInt(formData.cabinCount) : null) : null,
+        meetingRooms: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.meetingRooms ? parseInt(formData.meetingRooms) : null) : null,
+        receptionArea: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.receptionArea === "YES" ? true : formData.receptionArea === "NO" ? false : null) : null,
+        conferenceRoom: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.conferenceRoom === "YES" ? true : formData.conferenceRoom === "NO" ? false : null) : null,
+        pantry: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.pantry === "YES" ? true : formData.pantry === "NO" ? false : null) : null,
+        serverRoom: formData.propertyCategory === "COMMERCIAL" && ["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) ? (formData.serverRoom === "YES" ? true : formData.serverRoom === "NO" ? false : null) : null,
+        frontageWidth: formData.propertyCategory === "COMMERCIAL" && ["SHOP", "SHOWROOM", "RETAIL_SPACE", "FOOD_COURT_SPACE"].includes(formData.propertyType) ? (formData.frontageWidth ? parseInt(formData.frontageWidth) : null) : null,
+        cornerShop: formData.propertyCategory === "COMMERCIAL" && ["SHOP", "SHOWROOM", "RETAIL_SPACE", "FOOD_COURT_SPACE"].includes(formData.propertyType) ? (formData.cornerShop === "YES" ? true : formData.cornerShop === "NO" ? false : null) : null,
+        mainRoadFacing: formData.propertyCategory === "COMMERCIAL" && ["SHOP", "SHOWROOM", "RETAIL_SPACE", "FOOD_COURT_SPACE"].includes(formData.propertyType) ? (formData.mainRoadFacing === "YES" ? true : formData.mainRoadFacing === "NO" ? false : null) : null,
+        groundFloor: formData.propertyCategory === "COMMERCIAL" && ["SHOP", "SHOWROOM", "RETAIL_SPACE", "FOOD_COURT_SPACE"].includes(formData.propertyType) ? (formData.groundFloor === "YES" ? true : formData.groundFloor === "NO" ? false : null) : null,
+        loadingDock: formData.propertyCategory === "COMMERCIAL" && ["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) ? (formData.loadingDock === "YES" ? true : formData.loadingDock === "NO" ? false : null) : null,
+        truckAccess: formData.propertyCategory === "COMMERCIAL" && ["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) ? (formData.truckAccess === "YES" ? true : formData.truckAccess === "NO" ? false : null) : null,
+        ceilingHeight: formData.propertyCategory === "COMMERCIAL" && ["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) ? (formData.ceilingHeight ? parseInt(formData.ceilingHeight) : null) : null,
+        powerLoad: formData.propertyCategory === "COMMERCIAL" && ["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) ? (formData.powerLoad ? parseInt(formData.powerLoad) : null) : null,
+        fireNocAvailable: formData.propertyCategory === "COMMERCIAL" && ["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) ? (formData.fireNocAvailable === "YES" ? true : formData.fireNocAvailable === "NO" ? false : null) : null,
+        sittingCapacity: formData.propertyCategory === "COMMERCIAL" ? formData.sittingCapacity : null,
 
       };
 
@@ -2987,7 +3164,780 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
           <div className="space-y-6">
 
-            {/* First Row: Property Title, Price, Property Type, PG Type */}
+            {/* Property Category Selector */}
+            <div className="bg-[#efe4d7]/20 p-4 rounded-xl border border-[#d9c7b2]/40 mb-6">
+              <label className="block text-sm font-semibold text-[#1a1a1a] mb-3">
+                Property Category <span className="text-red-500">*</span>
+              </label>
+              <div className="flex flex-wrap gap-4">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ 
+                    ...formData, 
+                    propertyCategory: "RESIDENTIAL", 
+                    propertyType: "", 
+                    pgType: "", 
+                    bhkType: "", 
+                    furnishing: "", 
+                    carpetArea: "",
+                    apartmentName: ""
+                  })}
+                  className={`px-6 py-2.5 rounded-xl font-bold border-2 transition-all duration-200 ${
+                    formData.propertyCategory === "RESIDENTIAL"
+                      ? "bg-[#ff7a00] border-[#ff7a00] text-white shadow-md shadow-[#ff7a00]/20"
+                      : "bg-[#f9f3ed] border-[#d9c7b2] text-[#3d3127] hover:bg-[#efe4d7]"
+                  }`}
+                >
+                  Residential
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ 
+                    ...formData, 
+                    propertyCategory: "COMMERCIAL", 
+                    propertyType: "", 
+                    pgType: "", 
+                    bhkType: "", 
+                    furnishing: "", 
+                    carpetArea: "",
+                    apartmentName: ""
+                  })}
+                  className={`px-6 py-2.5 rounded-xl font-bold border-2 transition-all duration-200 ${
+                    formData.propertyCategory === "COMMERCIAL"
+                      ? "bg-[#ff7a00] border-[#ff7a00] text-white shadow-md shadow-[#ff7a00]/20"
+                      : "bg-[#f9f3ed] border-[#d9c7b2] text-[#3d3127] hover:bg-[#efe4d7]"
+                  }`}
+                >
+                  Commercial
+                </button>
+              </div>
+            </div>
+
+            {formData.propertyCategory === "COMMERCIAL" ? (
+              <>
+                {/* COMMERCIAL FORM */}
+                
+                {/* Basic Info Header */}
+                <div className="border-b border-[#d9c7b2]/40 pb-2">
+                  <h3 className="text-lg font-bold text-[#ff7a00]">Basic Information</h3>
+                </div>
+
+                {/* First Row: Title, Price, Property Type, Listed By */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Property Title <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <FileText className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={uploadFieldClass}
+                        placeholder="Office Space in Hinjewadi"
+                        value={formData.propertyTitle}
+                        onChange={(e) =>
+                          setFormData({ ...formData, propertyTitle: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Monthly Rent (₹) <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <IndianRupee className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={uploadFieldClass}
+                        placeholder="Enter price"
+                        value={formData.price}
+                        onChange={(e) =>
+                          setFormData({ ...formData, price: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Commercial Property Type <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Building2 className={uploadIconClass} aria-hidden="true" />
+                      <select
+                        className={uploadSelectClass}
+                        value={formData.propertyType}
+                        onChange={(e) => {
+                          setFormData({ ...formData, propertyType: e.target.value });
+                        }}
+                      >
+                        <option value="">Select type</option>
+                        <option value="OFFICE">Office</option>
+                        <option value="SHOP">Shop</option>
+                        <option value="SHOWROOM">Showroom</option>
+                        <option value="WAREHOUSE">Warehouse</option>
+                        <option value="INDUSTRIAL_SHED">Industrial Shed</option>
+                        <option value="CO_WORKING_SPACE">Co-working Space</option>
+                        <option value="COMMERCIAL_LAND">Commercial Land</option>
+                        <option value="BUSINESS_CENTER">Business Center</option>
+                        <option value="FOOD_COURT_SPACE">Food Court Space</option>
+                        <option value="RETAIL_SPACE">Retail Space</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Listed By <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <User className={uploadIconClass} aria-hidden="true" />
+                      <select
+                        className={uploadSelectClass}
+                        value={formData.listedBy}
+                        onChange={(e) =>
+                          setFormData({ ...formData, listedBy: e.target.value })
+                        }
+                      >
+                        <option value="">Select option</option>
+                        <option value="OWNER">Owner</option>
+                        <option value="BUILDER">Builder</option>
+                        <option value="COMPANY">Company</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Second Row: City, Location, Mobile */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      City <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <MapPinned className={uploadIconClass} aria-hidden="true" />
+                      <select
+                        className={uploadSelectClass}
+                        value={formData.city}
+                        onChange={(e) => handleCityChange(e.target.value)}
+                      >
+                        <option value="">Select city</option>
+                        {CITY_OPTIONS.map((city) => (
+                          <option key={city.value} value={city.value}>
+                            {city.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Location <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <MapPin className={uploadIconClass} aria-hidden="true" />
+                      <select
+                        className={uploadSelectClass}
+                        value={formData.location}
+                        onChange={(e) => handleLocationChange(e.target.value)}
+                        disabled={!formData.city || areaLoading}
+                      >
+                        <option value="">{areaLoading ? "Loading areas..." : "Select location"}</option>
+                        {areaOptions.map((location) => (
+                          <option key={location} value={location}>
+                            {location}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {areaMessage && (
+                      <p className="text-xs text-amber-600 mt-2">{areaMessage}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Mobile Number <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Phone className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={uploadFieldClass}
+                        placeholder="Enter mobile number"
+                        value={formData.mobileNumber}
+                        onChange={(e) =>
+                          setFormData({ ...formData, mobileNumber: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Third Row: Address, State, Pincode, Project/Building Name */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      State <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <MapPinned className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={uploadReadonlyFieldClass}
+                        placeholder="Auto-filled from city"
+                        value={formData.state}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Pincode <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <MapPin className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={uploadReadonlyFieldClass}
+                        placeholder="Auto-filled based on location"
+                        value={formData.pincode}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Project / Building Name
+                    </label>
+                    <div className="relative">
+                      <Landmark className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={uploadFieldClass}
+                        placeholder="Enter building name"
+                        value={formData.apartmentName}
+                        onChange={(e) =>
+                          setFormData({ ...formData, apartmentName: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                    Address <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Navigation className={uploadIconClass} aria-hidden="true" />
+                    <textarea
+                      className={`${uploadFieldClass} min-h-[80px] resize-y`}
+                      placeholder="Enter address"
+                      rows="2"
+                      value={formData.address}
+                      onChange={(e) =>
+                        setFormData({ ...formData, address: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Specs Header */}
+                <div className="border-b border-[#d9c7b2]/40 pb-2 pt-2">
+                  <h3 className="text-lg font-bold text-[#ff7a00]">Commercial Specifications</h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Furnishing <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Armchair className={uploadIconClass} aria-hidden="true" />
+                      <select
+                        className={uploadSelectClass}
+                        value={formData.furnishing}
+                        onChange={(e) =>
+                          setFormData({ ...formData, furnishing: e.target.value })
+                        }
+                      >
+                        <option value="">Select furnishing</option>
+                        <option value="FULLY_FURNISHED">Fully Furnished</option>
+                        <option value="SEMI_FURNISHED">Semi Furnished</option>
+                        <option value="UNFURNISHED">Unfurnished</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Super Built-up Area (sqft) <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Ruler className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={uploadFieldClass}
+                        placeholder="e.g. 1500"
+                        value={formData.superBuiltUpArea}
+                        onChange={(e) =>
+                          setFormData({ ...formData, superBuiltUpArea: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Carpet Area (sqft) <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Ruler className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={uploadFieldClass}
+                        placeholder="e.g. 1200"
+                        value={formData.carpetArea}
+                        onChange={(e) =>
+                          setFormData({ ...formData, carpetArea: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Available From <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Calendar className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="date"
+                        className={`${uploadFieldClass} !pr-4`}
+                        value={formData.availableFrom}
+                        onChange={(e) =>
+                          setFormData({ ...formData, availableFrom: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Washrooms <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Info className={uploadIconClass} aria-hidden="true" />
+                      <select
+                        className={uploadSelectClass}
+                        value={formData.washrooms}
+                        onChange={(e) =>
+                          setFormData({ ...formData, washrooms: e.target.value })
+                        }
+                      >
+                        <option value="">Select washrooms</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5+">5+</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Car Parking <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Info className={uploadIconClass} aria-hidden="true" />
+                      <select
+                        className={uploadSelectClass}
+                        value={formData.carParking}
+                        onChange={(e) =>
+                          setFormData({ ...formData, carParking: e.target.value })
+                        }
+                      >
+                        <option value="">Select parking</option>
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5+">5+</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Floor Number <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Info className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={uploadFieldClass}
+                        placeholder="e.g. 3"
+                        value={formData.floorNumber}
+                        onChange={(e) =>
+                          setFormData({ ...formData, floorNumber: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Total Floors <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Info className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={uploadFieldClass}
+                        placeholder="e.g. 10"
+                        value={formData.totalFloors}
+                        onChange={(e) =>
+                          setFormData({ ...formData, totalFloors: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Sitting Capacity
+                    </label>
+                    <div className="relative">
+                      <Users className={uploadIconClass} aria-hidden="true" />
+                      <input
+                        type="text"
+                        className={uploadFieldClass}
+                        placeholder="e.g. 25 Seats"
+                        value={formData.sittingCapacity}
+                        onChange={(e) =>
+                          setFormData({ ...formData, sittingCapacity: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Conditional Office Section */}
+                {["OFFICE", "OFFICE_SPACE", "BUSINESS_CENTER", "COMMERCIAL_BUILDING", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) && (
+                  <div className="bg-[#efe4d7]/40 rounded-2xl p-4 sm:p-6 border border-[#efe4d7]/60 space-y-4">
+                    <h3 className="text-base font-semibold text-[#1a1a1a] border-b border-[#d9c7b2]/60 pb-1">Office Specific Details</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Cabin Count</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <input
+                            type="text"
+                            className={uploadFieldClass}
+                            placeholder="e.g. 5"
+                            value={formData.cabinCount}
+                            onChange={(e) =>
+                              setFormData({ ...formData, cabinCount: e.target.value })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Meeting Rooms</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <input
+                            type="text"
+                            className={uploadFieldClass}
+                            placeholder="e.g. 2"
+                            value={formData.meetingRooms}
+                            onChange={(e) =>
+                              setFormData({ ...formData, meetingRooms: e.target.value })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Reception Area</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <select
+                            className={uploadSelectClass}
+                            value={formData.receptionArea}
+                            onChange={(e) =>
+                              setFormData({ ...formData, receptionArea: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Conference Room</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <select
+                            className={uploadSelectClass}
+                            value={formData.conferenceRoom}
+                            onChange={(e) =>
+                              setFormData({ ...formData, conferenceRoom: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Pantry</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <select
+                            className={uploadSelectClass}
+                            value={formData.pantry}
+                            onChange={(e) =>
+                              setFormData({ ...formData, pantry: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Server Room</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <select
+                            className={uploadSelectClass}
+                            value={formData.serverRoom}
+                            onChange={(e) =>
+                              setFormData({ ...formData, serverRoom: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Conditional Shop/Showroom Section */}
+                {["SHOP", "SHOWROOM", "RETAIL_SPACE", "FOOD_COURT_SPACE"].includes(formData.propertyType) && (
+                  <div className="bg-[#efe4d7]/40 rounded-2xl p-4 sm:p-6 border border-[#efe4d7]/60 space-y-4">
+                    <h3 className="text-base font-semibold text-[#1a1a1a] border-b border-[#d9c7b2]/60 pb-1">Shop / Showroom Details</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Frontage Width (Feet)</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <input
+                            type="text"
+                            className={uploadFieldClass}
+                            placeholder="e.g. 25"
+                            value={formData.frontageWidth}
+                            onChange={(e) =>
+                              setFormData({ ...formData, frontageWidth: e.target.value })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Corner Shop</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <select
+                            className={uploadSelectClass}
+                            value={formData.cornerShop}
+                            onChange={(e) =>
+                              setFormData({ ...formData, cornerShop: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Main Road Facing</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <select
+                            className={uploadSelectClass}
+                            value={formData.mainRoadFacing}
+                            onChange={(e) =>
+                              setFormData({ ...formData, mainRoadFacing: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Ground Floor</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <select
+                            className={uploadSelectClass}
+                            value={formData.groundFloor}
+                            onChange={(e) =>
+                              setFormData({ ...formData, groundFloor: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Conditional Warehouse Section */}
+                {["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) && (
+                  <div className="bg-[#efe4d7]/40 rounded-2xl p-4 sm:p-6 border border-[#efe4d7]/60 space-y-4">
+                    <h3 className="text-base font-semibold text-[#1a1a1a] border-b border-[#d9c7b2]/60 pb-1">Warehouse Details</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Loading Dock</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <select
+                            className={uploadSelectClass}
+                            value={formData.loadingDock}
+                            onChange={(e) =>
+                              setFormData({ ...formData, loadingDock: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Truck Access</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <select
+                            className={uploadSelectClass}
+                            value={formData.truckAccess}
+                            onChange={(e) =>
+                              setFormData({ ...formData, truckAccess: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Ceiling Height (Feet)</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <input
+                            type="text"
+                            className={uploadFieldClass}
+                            placeholder="e.g. 30"
+                            value={formData.ceilingHeight}
+                            onChange={(e) =>
+                              setFormData({ ...formData, ceilingHeight: e.target.value })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Power Load (KW)</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <input
+                            type="text"
+                            className={uploadFieldClass}
+                            placeholder="e.g. 50"
+                            value={formData.powerLoad}
+                            onChange={(e) =>
+                              setFormData({ ...formData, powerLoad: e.target.value })
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">Fire NOC Available</label>
+                        <div className="relative">
+                          <Info className={uploadIconClass} aria-hidden="true" />
+                          <select
+                            className={uploadSelectClass}
+                            value={formData.fireNocAvailable}
+                            onChange={(e) =>
+                              setFormData({ ...formData, fireNocAvailable: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                    Description <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <AlignLeft className={uploadTextareaIconClass} aria-hidden="true" />
+                    <textarea
+                      className={`${uploadFieldClass} min-h-[120px] resize-y`}
+                      placeholder="Describe your commercial property, location advantages, business suitability, facilities, connectivity and nearby landmarks (Max 4096 characters)."
+                      maxLength={4096}
+                      rows="4"
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({ ...formData, description: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* First Row: Property Title, Price, Property Type, PG Type */}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
 
@@ -3414,10 +4364,12 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
               </div>
 
             </div>
+          </>
+        )}
 
 
 
-            {/* Property Images */}
+        {/* Property Images */}
 
             <div>
 
@@ -3451,7 +4403,7 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
                 <label className="text-sm font-medium text-[#3d3127]">
 
-                  Property Images <span className="text-red-500">(Minimum 4 images required, Door image mandatory)</span>
+                  Property Images <span className="text-red-500">(Minimum 4 images required, {formData.propertyCategory === "COMMERCIAL" ? "Front Exterior" : "Door"} image mandatory)</span>
 
                 </label>
 
@@ -3459,7 +4411,7 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
               <div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
 
-                {imageLabels.map((label, index) => (
+                {activeImageLabels.map((label, index) => (
 
                   <div key={index} className="relative">
 
@@ -3657,7 +4609,12 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
                   <div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
 
-                    {facilities.map((facility) => (
+                    {facilities
+                      .filter((facility) =>
+                        formData.propertyCategory !== "COMMERCIAL" ||
+                        !["LANDSCAPE_GARDEN", "GYMNASIUM", "SWIMMING_POOL"].includes(facility.facilityName)
+                      )
+                      .map((facility) => (
 
                       <label
 
@@ -3882,7 +4839,9 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
                     </div>
 
-                    <p className="text-xs text-[#8b8178] mb-1">ID: {getDashboardPropertyId(property)}</p>
+                    <p className="text-xs text-[#8b8178] mb-1">
+                      ID: {property.propertyCategory === "COMMERCIAL" ? "com-" + getDashboardPropertyId(property) : getDashboardPropertyId(property)}
+                    </p>
 
                     <p className="text-sm text-[#7d6c5c] mb-1">
 
@@ -4086,7 +5045,7 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
               <p className="text-xs text-[#ff7a00] text-center mt-1 font-medium">
 
-                Property ID: {pendingPropertyId}
+                Property ID: {pendingProperty?.propertyCategory === "COMMERCIAL" ? `com-${pendingPropertyId}` : pendingPropertyId}
 
               </p>
 
@@ -4100,11 +5059,15 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
                 <span className="font-semibold text-[#1a1a1a]">Amount</span>
 
-                <span className="text-lg font-black text-[#1a1a1a]">Rs. 116.82</span>
+                <span className="text-lg font-black text-[#1a1a1a]">
+                  {pendingProperty?.propertyCategory === "COMMERCIAL" ? "Rs. 1178.82" : "Rs. 116.82"}
+                </span>
 
               </div>
 
-              <p className="mt-1 text-xs text-[#7d6c5c]">Rs. 99 + GST</p>
+              <p className="mt-1 text-xs text-[#7d6c5c]">
+                {pendingProperty?.propertyCategory === "COMMERCIAL" ? "Rs. 999 + GST" : "Rs. 99 + GST"}
+              </p>
 
               {propertyPayment?.orderId && (
 
@@ -4261,23 +5224,73 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
             <div className="p-4 sm:p-6">
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-[#efe4d7]/30 p-4 rounded-2xl border border-[#d9c7b2]/40">
 
-                <div><span className="font-semibold text-[#3d3127]">Title:</span> {formData.propertyTitle}</div>
+                {formData.propertyCategory === "COMMERCIAL" ? (
+                  <>
+                    <div><span className="font-semibold text-[#3d3127]">Category:</span> Commercial</div>
+                    <div><span className="font-semibold text-[#3d3127]">Title:</span> {formData.propertyTitle}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Monthly Rent:</span> ₹{Number(formData.price || 0).toLocaleString()}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Property Type:</span> {formData.propertyType}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Listed By:</span> {formData.listedBy}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Furnishing:</span> {formData.furnishing}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Super Built Area:</span> {formData.superBuiltUpArea} sqft</div>
+                    <div><span className="font-semibold text-[#3d3127]">Carpet Area:</span> {formData.carpetArea} sqft</div>
+                    <div><span className="font-semibold text-[#3d3127]">Washrooms:</span> {formData.washrooms}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Car Parking:</span> {formData.carParking}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Floor Number:</span> {formData.floorNumber} (Out of {formData.totalFloors})</div>
+                    <div><span className="font-semibold text-[#3d3127]">Available From:</span> {formData.availableFrom}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Mobile:</span> {formData.mobileNumber}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Project / Building Name:</span> {formData.apartmentName || "N/A"}</div>
+                    
+                    {["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) && (
+                      <>
+                        <div><span className="font-semibold text-[#3d3127]">Cabins:</span> {formData.cabinCount || "0"}</div>
+                        <div><span className="font-semibold text-[#3d3127]">Meeting Rooms:</span> {formData.meetingRooms || "0"}</div>
+                        <div><span className="font-semibold text-[#3d3127]">Reception Area:</span> {formData.receptionArea || "NO"}</div>
+                        <div><span className="font-semibold text-[#3d3127]">Conference Room:</span> {formData.conferenceRoom || "NO"}</div>
+                        <div><span className="font-semibold text-[#3d3127]">Pantry:</span> {formData.pantry || "NO"}</div>
+                        <div><span className="font-semibold text-[#3d3127]">Server Room:</span> {formData.serverRoom || "NO"}</div>
+                      </>
+                    )}
 
-                <div><span className="font-semibold text-[#3d3127]">Price:</span> ₹{Number(formData.price || 0).toLocaleString()}</div>
+                    {["SHOP", "SHOWROOM", "RETAIL_SPACE", "FOOD_COURT_SPACE"].includes(formData.propertyType) && (
+                      <>
+                        <div><span className="font-semibold text-[#3d3127]">Frontage Width:</span> {formData.frontageWidth || "0"} ft</div>
+                        <div><span className="font-semibold text-[#3d3127]">Corner Shop:</span> {formData.cornerShop || "NO"}</div>
+                        <div><span className="font-semibold text-[#3d3127]">Main Road Facing:</span> {formData.mainRoadFacing || "NO"}</div>
+                        <div><span className="font-semibold text-[#3d3127]">Ground Floor:</span> {formData.groundFloor || "NO"}</div>
+                      </>
+                    )}
 
-                <div><span className="font-semibold text-[#3d3127]">Type:</span> {formData.propertyType}</div>
+                    {["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) && (
+                      <>
+                        <div><span className="font-semibold text-[#3d3127]">Loading Dock:</span> {formData.loadingDock || "NO"}</div>
+                        <div><span className="font-semibold text-[#3d3127]">Truck Access:</span> {formData.truckAccess || "NO"}</div>
+                        <div><span className="font-semibold text-[#3d3127]">Ceiling Height:</span> {formData.ceilingHeight || "0"} ft</div>
+                        <div><span className="font-semibold text-[#3d3127]">Power Load:</span> {formData.powerLoad || "0"} KW</div>
+                        <div><span className="font-semibold text-[#3d3127]">Fire NOC Available:</span> {formData.fireNocAvailable || "NO"}</div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div><span className="font-semibold text-[#3d3127]">Category:</span> Residential</div>
+                    <div><span className="font-semibold text-[#3d3127]">Title:</span> {formData.propertyTitle}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Price:</span> ₹{Number(formData.price || 0).toLocaleString()}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Type:</span> {formData.propertyType}</div>
+                    <div><span className="font-semibold text-[#3d3127]">BHK:</span> {formData.bhkType}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Furnishing:</span> {formData.furnishing}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Mobile:</span> {formData.mobileNumber}</div>
+                    <div><span className="font-semibold text-[#3d3127]">Apartment Name:</span> {formData.apartmentName}</div>
+                  </>
+                )}
 
-                <div><span className="font-semibold text-[#3d3127]">BHK:</span> {formData.bhkType}</div>
+                <div className="sm:col-span-2"><span className="font-semibold text-[#3d3127]">Location:</span> {formData.location}, {resolvedCity || formData.city}, {formData.state} - {formData.pincode}</div>
 
-                <div><span className="font-semibold text-[#3d3127]">Furnishing:</span> {formData.furnishing}</div>
+                <div className="sm:col-span-2"><span className="font-semibold text-[#3d3127]">Address:</span> {formData.address}</div>
 
-                <div><span className="font-semibold text-[#3d3127]">Mobile:</span> {formData.mobileNumber}</div>
-
-                <div className="md:col-span-2"><span className="font-semibold text-[#3d3127]">Location:</span> {formData.location}</div>
-
-                <div className="md:col-span-2"><span className="font-semibold text-[#3d3127]">Description:</span> {formData.description}</div>
+                <div className="sm:col-span-2"><span className="font-semibold text-[#3d3127]">Description:</span> {formData.description}</div>
 
               </div>
 
@@ -4464,8 +5477,570 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
 
 
             <form onSubmit={handleUpdateProperty} className="p-4 sm:p-6 space-y-4">
+              {formData.propertyCategory === "COMMERCIAL" ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                        Property Title <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                        value={formData.propertyTitle}
+                        onChange={(e) =>
+                          setFormData({ ...formData, propertyTitle: e.target.value })
+                        }
+                      />
+                    </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                        Monthly Rent (₹) <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                        value={formData.price}
+                        onChange={(e) =>
+                          setFormData({ ...formData, price: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                        Commercial Property Type <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                        value={formData.propertyType}
+                        onChange={(e) =>
+                          setFormData({ ...formData, propertyType: e.target.value })
+                        }
+                      >
+                        <option value="">Select type</option>
+                        <option value="OFFICE">Office</option>
+                        <option value="SHOP">Shop</option>
+                        <option value="SHOWROOM">Showroom</option>
+                        <option value="WAREHOUSE">Warehouse</option>
+                        <option value="INDUSTRIAL_SHED">Industrial Shed</option>
+                        <option value="CO_WORKING_SPACE">Co-working Space</option>
+                        <option value="COMMERCIAL_LAND">Commercial Land</option>
+                        <option value="BUSINESS_CENTER">Business Center</option>
+                        <option value="FOOD_COURT_SPACE">Food Court Space</option>
+                        <option value="RETAIL_SPACE">Retail Space</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                        Listed By <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                        value={formData.listedBy}
+                        onChange={(e) =>
+                          setFormData({ ...formData, listedBy: e.target.value })
+                        }
+                      >
+                        <option value="">Select option</option>
+                        <option value="OWNER">Owner</option>
+                        <option value="BROKER">Broker</option>
+                        <option value="BUILDER">Builder</option>
+                        <option value="COMPANY">Company</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                        City <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                        value={formData.city}
+                        onChange={(e) =>
+                          setFormData({ ...formData, city: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                        Location <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                        value={formData.location}
+                        onChange={(e) =>
+                          setFormData({ ...formData, location: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                        Mobile Number <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                        value={formData.mobileNumber}
+                        onChange={(e) =>
+                          setFormData({ ...formData, mobileNumber: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                        State <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#efe4d7]"
+                        value={formData.state}
+                        readOnly
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                        Pincode <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                        value={formData.pincode}
+                        onChange={(e) =>
+                          setFormData({ ...formData, pincode: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                        Project / Building Name
+                      </label>
+                      <input
+                        type="text"
+                        className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                        value={formData.apartmentName}
+                        onChange={(e) =>
+                          setFormData({ ...formData, apartmentName: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                      value={formData.address}
+                      onChange={(e) =>
+                        setFormData({ ...formData, address: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  {/* Commercial Specifications */}
+                  <div className="bg-[#efe4d7]/40 rounded-xl p-4 border border-[#d9c7b2]/40 space-y-4">
+                    <h4 className="font-semibold text-sm text-[#1a1a1a]">Commercial Specifications</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                          Furnishing <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                          value={formData.furnishing}
+                          onChange={(e) =>
+                            setFormData({ ...formData, furnishing: e.target.value })
+                          }
+                        >
+                          <option value="">Select furnishing</option>
+                          <option value="FULLY_FURNISHED">Fully Furnished</option>
+                          <option value="SEMI_FURNISHED">Semi Furnished</option>
+                          <option value="UNFURNISHED">Unfurnished</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                          Super Built Area <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                          value={formData.superBuiltUpArea}
+                          onChange={(e) =>
+                            setFormData({ ...formData, superBuiltUpArea: e.target.value })
+                          }
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                          Carpet Area <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                          value={formData.carpetArea}
+                          onChange={(e) =>
+                            setFormData({ ...formData, carpetArea: e.target.value })
+                          }
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                          Available From <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                          value={formData.availableFrom}
+                          onChange={(e) =>
+                            setFormData({ ...formData, availableFrom: e.target.value })
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                          Washrooms <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                          value={formData.washrooms}
+                          onChange={(e) =>
+                            setFormData({ ...formData, washrooms: e.target.value })
+                          }
+                        >
+                          <option value="">Select option</option>
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                          <option value="4">4</option>
+                          <option value="5+">5+</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                          Car Parking <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                          value={formData.carParking}
+                          onChange={(e) =>
+                            setFormData({ ...formData, carParking: e.target.value })
+                          }
+                        >
+                          <option value="">Select option</option>
+                          <option value="0">0</option>
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                          <option value="4">4</option>
+                          <option value="5+">5+</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                          Floor Number <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                          value={formData.floorNumber}
+                          onChange={(e) =>
+                            setFormData({ ...formData, floorNumber: e.target.value })
+                          }
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                          Total Floors <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                          value={formData.totalFloors}
+                          onChange={(e) =>
+                            setFormData({ ...formData, totalFloors: e.target.value })
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Conditional Office Section */}
+                  {["OFFICE", "BUSINESS_CENTER", "CO_WORKING_SPACE", "CO_WORK_SPACE"].includes(formData.propertyType) && (
+                    <div className="bg-[#efe4d7]/40 rounded-xl p-4 border border-[#d9c7b2]/40 space-y-4">
+                      <h4 className="font-semibold text-sm text-[#1a1a1a]">Office Specific Details</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Cabin Count</label>
+                          <input
+                            type="text"
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                            value={formData.cabinCount}
+                            onChange={(e) =>
+                              setFormData({ ...formData, cabinCount: e.target.value })
+                            }
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Meeting Rooms</label>
+                          <input
+                            type="text"
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                            value={formData.meetingRooms}
+                            onChange={(e) =>
+                              setFormData({ ...formData, meetingRooms: e.target.value })
+                            }
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Reception Area</label>
+                          <select
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                            value={formData.receptionArea}
+                            onChange={(e) =>
+                              setFormData({ ...formData, receptionArea: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Conference Room</label>
+                          <select
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                            value={formData.conferenceRoom}
+                            onChange={(e) =>
+                              setFormData({ ...formData, conferenceRoom: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Pantry</label>
+                          <select
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                            value={formData.pantry}
+                            onChange={(e) =>
+                              setFormData({ ...formData, pantry: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Server Room</label>
+                          <select
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                            value={formData.serverRoom}
+                            onChange={(e) =>
+                              setFormData({ ...formData, serverRoom: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Conditional Shop/Showroom Section */}
+                  {["SHOP", "SHOWROOM", "RETAIL_SPACE", "FOOD_COURT_SPACE"].includes(formData.propertyType) && (
+                    <div className="bg-[#efe4d7]/40 rounded-xl p-4 border border-[#d9c7b2]/40 space-y-4">
+                      <h4 className="font-semibold text-sm text-[#1a1a1a]">Shop / Showroom Details</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Frontage Width</label>
+                          <input
+                            type="text"
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                            value={formData.frontageWidth}
+                            onChange={(e) =>
+                              setFormData({ ...formData, frontageWidth: e.target.value })
+                            }
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Corner Shop</label>
+                          <select
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                            value={formData.cornerShop}
+                            onChange={(e) =>
+                              setFormData({ ...formData, cornerShop: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Main Road Facing</label>
+                          <select
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                            value={formData.mainRoadFacing}
+                            onChange={(e) =>
+                              setFormData({ ...formData, mainRoadFacing: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Ground Floor</label>
+                          <select
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                            value={formData.groundFloor}
+                            onChange={(e) =>
+                              setFormData({ ...formData, groundFloor: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Conditional Warehouse Section */}
+                  {["WAREHOUSE", "INDUSTRIAL_SHED"].includes(formData.propertyType) && (
+                    <div className="bg-[#efe4d7]/40 rounded-xl p-4 border border-[#d9c7b2]/40 space-y-4">
+                      <h4 className="font-semibold text-sm text-[#1a1a1a]">Warehouse Details</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Loading Dock</label>
+                          <select
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                            value={formData.loadingDock}
+                            onChange={(e) =>
+                              setFormData({ ...formData, loadingDock: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Truck Access</label>
+                          <select
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                            value={formData.truckAccess}
+                            onChange={(e) =>
+                              setFormData({ ...formData, truckAccess: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Ceiling Height</label>
+                          <input
+                            type="text"
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                            value={formData.ceilingHeight}
+                            onChange={(e) =>
+                              setFormData({ ...formData, ceilingHeight: e.target.value })
+                            }
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Power Load (KW)</label>
+                          <input
+                            type="text"
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                            value={formData.powerLoad}
+                            onChange={(e) =>
+                              setFormData({ ...formData, powerLoad: e.target.value })
+                            }
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#3d3127] mb-2">Fire NOC Available</label>
+                          <select
+                            className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f7f0e8]"
+                            value={formData.fireNocAvailable}
+                            onChange={(e) =>
+                              setFormData({ ...formData, fireNocAvailable: e.target.value })
+                            }
+                          >
+                            <option value="">Select option</option>
+                            <option value="YES">Yes</option>
+                            <option value="NO">No</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#3d3127] mb-2">
+                      Description <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      className="w-full px-4 py-3 border border-[#d9c7b2] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff7a00]/30 bg-[#f9f3ed]"
+                      rows="4"
+                      value={formData.description}
+                      onChange={(e) =>
+                        setFormData({ ...formData, description: e.target.value })
+                      }
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
                 <div>
 
@@ -4924,6 +6499,8 @@ toast.error(getApiErrorMessage(err, "Failed to update property"));
                 </div>
 
               </div>
+            </>
+          )}
 
 
 

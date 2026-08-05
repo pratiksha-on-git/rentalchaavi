@@ -297,8 +297,11 @@ export const adminModerationApi = {
 };
 
 export const paymentApi = {
-  buyUserPremium: (userId) =>
-    api.post(`/user/buyPremium/${userId}`, {}, authConfigFor("userToken")),
+  buyUserPremium: (userId, category = "") =>
+    api.post(`/user/buyPremium/${userId}`, {}, {
+      ...authConfigFor("userToken"),
+      params: category ? { category } : {}
+    }),
   getUserPremiumStatus: (userId) =>
     api.get(`/user/premium-status/${userId}`, authConfigFor("userToken")),
   buyPropertyPremium: (propertyId) =>

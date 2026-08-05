@@ -77,6 +77,7 @@ const BrowseProperties = () => {
   const [tempFilters, setTempFilters] =
     useState({
       type: "",
+      propertyCategory: "",
       city: "",
       address: "",
       minPrice: "",
@@ -209,6 +210,26 @@ const BrowseProperties = () => {
         dto
       );
 
+    const commercialTypes = [
+      "OFFICE",
+      "OFFICE_SPACE",
+      "BUSINESS_CENTER",
+      "COMMERCIAL_BUILDING",
+      "CO_WORKING_SPACE",
+      "CO_WORK_SPACE",
+      "SHOP",
+      "SHOWROOM",
+      "RETAIL_SPACE",
+      "FOOD_COURT_SPACE",
+      "WAREHOUSE",
+      "INDUSTRIAL_SHED",
+      "COMMERCIAL_LAND",
+    ];
+
+    const rawCategory = String(dto?.propertyCategory || dto?._raw?.propertyCategory || "").trim().toUpperCase();
+    const rawType = String(dto?.propertyType || dto?.type || "").trim().toUpperCase();
+    const isCommercial = rawCategory === "COMMERCIAL" || commercialTypes.includes(rawType);
+
     return {
       id:
         dto?.id ||
@@ -258,6 +279,10 @@ const BrowseProperties = () => {
       details:
         dto?.description ||
         "No details available",
+
+      propertyCategory: isCommercial ? "COMMERCIAL" : "RESIDENTIAL",
+
+      sittingCapacity: dto?.sittingCapacity || "",
 
       image:
         imageCandidates[0] ||
@@ -492,6 +517,11 @@ setAddressOptions(
         }
 
         const payload = {
+          propertyCategory:
+            filters.propertyCategory === "" || !filters.propertyCategory
+              ? null
+              : filters.propertyCategory,
+
           propertyType:
             mapUiTypeToBackend(
               filters.type
@@ -518,6 +548,10 @@ setAddressOptions(
               ? null
               : filters.pgType,
         };
+
+        if (!payload.propertyCategory) {
+          delete payload.propertyCategory;
+        }
 
         if (
           !payload.propertyType
@@ -551,7 +585,8 @@ setAddressOptions(
         if (!payload.pgType) {
           delete payload.pgType;
         }
-if (
+
+        if (
           Object.keys(payload)
             .length === 0
         ) {
@@ -621,6 +656,15 @@ setError(
     fetchLikedMetadata();
   }, []);
 
+  const handleCategoryToggle = (category) => {
+    const updated = {
+      ...tempFilters,
+      propertyCategory: category,
+    };
+    setTempFilters(updated);
+    applyBackendFilter(updated);
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F4EF]">
       <ToastContainer position="top-right" autoClose={3000} />
@@ -689,6 +733,7 @@ setError(
             clearFilters={() => {
               const reset = {
                 type: "",
+                propertyCategory: "",
                 city: "",
                 address: "",
                 minPrice: "",
@@ -711,16 +756,6 @@ setError(
 
         {/* PROPERTY LIST */}
         <div className="mt-10">
-          <div className="mb-5">
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1F2937]">
-              Available Listings
-            </h2>
-
-            <p className="text-[#9CA3AF] text-sm">
-              Properties Found
-            </p>
-          </div>
-
           {loading && (
             <p className="text-[#374151] font-semibold">
               Loading properties...
@@ -760,6 +795,12 @@ setError(
             }
             onLikeToggle={
               handleLikeToggle
+            }
+            selectedCategory={
+              tempFilters.propertyCategory
+            }
+            onCategoryToggle={
+              handleCategoryToggle
             }
           />
         </div>

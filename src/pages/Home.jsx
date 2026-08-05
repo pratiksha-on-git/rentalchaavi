@@ -73,7 +73,7 @@ const Home = () => {
             return bId - aId;
           });
 
-          const sliced = list.slice(0, 5).map((item) => {
+          const sliced = list.slice(0, 15).map((item) => {
             const candidates = getPropertyImageCandidates(item._raw || item);
             const addrCity = [item.address, item.city].filter(Boolean).join(", ").trim();
             const aptCity = [item.apartmentName, item.city].filter(Boolean).join(", ").trim();
@@ -93,6 +93,7 @@ const Home = () => {
               image: candidates[0] || item.coverImageData || item.coverImage || item.image || FALLBACK_PROPERTY_IMAGE_DATA_URL,
               price: Number(item.price || item.rent || 0),
               location: actualLocation,
+              propertyCategory: item.propertyCategory || item._raw?.propertyCategory || "RESIDENTIAL",
             };
           });
           setFeaturedProperties(sliced);
@@ -108,6 +109,13 @@ const Home = () => {
 
     fetchFeaturedProperties();
   }, []);
+
+  const residentialProperties = featuredProperties.filter(
+    (p) => p.propertyCategory !== "COMMERCIAL"
+  );
+  const commercialProperties = featuredProperties.filter(
+    (p) => p.propertyCategory === "COMMERCIAL"
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -444,8 +452,9 @@ const Home = () => {
 
       {/* FEATURED PROPERTIES PREVIEW SECTION */}
       <section id="properties" className="py-16 px-4 md:px-6 bg-slate-50 border-y border-slate-100">
-        <div className="max-w-[1510px] mx-auto">
-          <div className="text-center mb-10">
+        <div className="max-w-[1510px] mx-auto space-y-12">
+          {/* TOP SECTION HEADER */}
+          <div className="text-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#ffe7db] px-4 py-1.5 text-[#ff7438] font-bold text-xs sm:text-sm mb-3">
               <Sparkles size={16} /> Live Deals & Properties
             </div>
@@ -459,84 +468,148 @@ const Home = () => {
             </p>
           </div>
 
-          {/* 5 CARDS IN ONE ROW */}
-          {featuredProperties.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
-              {featuredProperties.map((property) => (
-                <motion.div
-                  key={property.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4 }}
-                  viewport={{ once: true }}
-                  onClick={() => navigate("/login")}
-                  className="group relative cursor-pointer bg-[#fffaf4] rounded-3xl shadow-[0_6px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_14px_40px_rgba(249,115,22,0.16)] overflow-hidden border border-[#f3e7da] transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between"
-                >
-                  {/* COVER IMAGE - FIRST UPLOADED IMAGE */}
-                  <div className="relative overflow-hidden rounded-t-[22px] aspect-[4/3] w-full bg-slate-100">
-                    <img
-                      src={property.image || FALLBACK_PROPERTY_IMAGE_DATA_URL}
-                      alt={property.title}
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = FALLBACK_PROPERTY_IMAGE_DATA_URL;
-                      }}
-                      className="h-full w-full object-cover group-hover:scale-108 transition-transform duration-500"
-                    />
-                  </div>
+          {/* 1. RESIDENTIAL PROPERTIES */}
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-7 w-1.5 bg-[#ff7438] rounded-full"></div>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Residential Properties
+              </h3>
+            </div>
 
-                  {/* CONTENT SECTION - CLEAN SANS-SERIF TYPOGRAPHY WITHOUT MOBILE NUMBER */}
-                  <div className="p-4 sm:p-5 bg-[#fffaf4] flex-grow flex flex-col justify-between">
-                    <div className="space-y-1">
-                      {/* TITLE */}
-                      <h3 className="text-base sm:text-lg font-bold text-slate-900 truncate leading-snug">
-                        {property.title}
-                      </h3>
-
-                      {/* LOCATION */}
-                      <p className="text-xs sm:text-sm text-slate-700 font-medium truncate">
-                        {property.location || "Location Not Available"}
-                      </p>
-
-                      {/* PRICE */}
-                      <p className="text-base sm:text-lg font-bold text-[#f97316]">
-                        ₹{Number(property.price || 0).toLocaleString("en-IN")}
-                      </p>
+            {residentialProperties.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+                {residentialProperties.map((property) => (
+                  <motion.div
+                    key={property.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    viewport={{ once: true }}
+                    onClick={() => navigate("/login")}
+                    className="group relative cursor-pointer bg-[#fffaf4] rounded-3xl shadow-[0_6px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_14px_40px_rgba(249,115,22,0.16)] overflow-hidden border border-[#f3e7da] transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between"
+                  >
+                    <div className="relative overflow-hidden rounded-t-[22px] aspect-[4/3] w-full bg-slate-100">
+                      <img
+                        src={property.image || FALLBACK_PROPERTY_IMAGE_DATA_URL}
+                        alt={property.title}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = FALLBACK_PROPERTY_IMAGE_DATA_URL;
+                        }}
+                        className="h-full w-full object-cover group-hover:scale-108 transition-transform duration-500"
+                      />
                     </div>
 
-                    {/* UNLOCK DETAILS BUTTON */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate("/login");
-                      }}
-                      className="w-full mt-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-[#F97316] to-[#EA580C] hover:opacity-95 text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all duration-200 flex items-center justify-center gap-1.5"
-                    >
-                      <Crown size={15} />
-                      Unlock Details
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white rounded-3xl p-10 text-center max-w-md mx-auto shadow-md border border-slate-200/80">
-              <div className="w-16 h-16 rounded-2xl bg-[#ffe7db] flex items-center justify-center text-[#ff7438] mx-auto mb-4">
-                <Building2 size={32} />
+                    <div className="p-4 sm:p-5 bg-[#fffaf4] flex-grow flex flex-col justify-between">
+                      <div className="space-y-1">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-900 truncate leading-snug">
+                          {property.title}
+                        </h3>
+
+                        <p className="text-xs sm:text-sm text-slate-700 font-medium truncate">
+                          {property.location || "Location Not Available"}
+                        </p>
+
+                        <p className="text-base sm:text-lg font-bold text-[#f97316]">
+                          ₹{Number(property.price || 0).toLocaleString("en-IN")}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/login");
+                        }}
+                        className="w-full mt-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-[#F97316] to-[#EA580C] hover:opacity-95 text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all duration-200 flex items-center justify-center gap-1.5"
+                      >
+                        <Crown size={15} />
+                        Unlock Details
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
+            ) : (
+              <div className="bg-white rounded-3xl p-8 text-center max-w-md mx-auto shadow-sm border border-slate-200/80">
+                <p className="text-slate-500 text-sm font-medium">No residential properties listed yet.</p>
+              </div>
+            )}
+          </div>
 
-              <h3 className="text-xl font-black text-slate-900 mb-2">
-                No properties registered yet
+          {/* 2. COMMERCIAL PROPERTIES */}
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-7 w-1.5 bg-[#ff7438] rounded-full"></div>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Commercial Properties
               </h3>
-
-              <p className="text-slate-500 text-sm font-medium">
-                Check back soon for new property deals and listings!
-              </p>
             </div>
-          )}
 
-          <div className="mt-10 text-center">
+            {commercialProperties.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5">
+                {commercialProperties.map((property) => (
+                  <motion.div
+                    key={property.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    viewport={{ once: true }}
+                    onClick={() => navigate("/login")}
+                    className="group relative cursor-pointer bg-[#fffaf4] rounded-3xl shadow-[0_6px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_14px_40px_rgba(249,115,22,0.16)] overflow-hidden border border-[#f3e7da] transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between"
+                  >
+                    <div className="relative overflow-hidden rounded-t-[22px] aspect-[4/3] w-full bg-slate-100">
+                      <img
+                        src={property.image || FALLBACK_PROPERTY_IMAGE_DATA_URL}
+                        alt={property.title}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = FALLBACK_PROPERTY_IMAGE_DATA_URL;
+                        }}
+                        className="h-full w-full object-cover group-hover:scale-108 transition-transform duration-500"
+                      />
+                    </div>
+
+                    <div className="p-4 sm:p-5 bg-[#fffaf4] flex-grow flex flex-col justify-between">
+                      <div className="space-y-1">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-900 truncate leading-snug">
+                          {property.title}
+                        </h3>
+
+                        <p className="text-xs sm:text-sm text-slate-700 font-medium truncate">
+                          {property.location || "Location Not Available"}
+                        </p>
+
+                        <p className="text-base sm:text-lg font-bold text-[#f97316]">
+                          ₹{Number(property.price || 0).toLocaleString("en-IN")}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/login");
+                        }}
+                        className="w-full mt-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-[#F97316] to-[#EA580C] hover:opacity-95 text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all duration-200 flex items-center justify-center gap-1.5"
+                      >
+                        <Crown size={15} />
+                        Unlock Details
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-3xl p-8 text-center max-w-md mx-auto shadow-sm border border-slate-200/80">
+                <p className="text-slate-500 text-sm font-medium">No commercial properties listed yet.</p>
+              </div>
+            )}
+          </div>
+
+          {/* CENTERED LOGIN BUTTON */}
+          <div className="pt-4 text-center">
             <button
               onClick={() => navigate("/login")}
               className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#ff7438] text-white font-black text-sm rounded-xl hover:bg-[#f05f24] hover:shadow-xl hover:shadow-[#ff7438]/20 transition-all duration-300"

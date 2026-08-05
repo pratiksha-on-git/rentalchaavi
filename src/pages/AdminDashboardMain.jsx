@@ -324,7 +324,7 @@ const AdminDashboardMain = () => {
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <p className="font-semibold text-[#1a1a1a]">{item?.title || "Untitled Property"}</p>
-                            <p className="text-xs text-[#7d6c5c] mt-1">Property ID: {propertyId || "-"}</p>
+                            <p className="text-xs text-[#7d6c5c] mt-1">Property ID: {propertyId ? (item?.propertyCategory === "COMMERCIAL" ? `com-${propertyId}` : propertyId) : "-"}</p>
                           </div>
                           <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${paymentBadge.className}`}>
                             {paymentBadge.label}

@@ -125,6 +125,23 @@ const Filter = ({
     <div className="bg-[#050505] p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border-2 border-[#1f1f1f] shadow-[0_25px_80px_rgba(0,0,0,0.28)] overflow-hidden">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5">
         <div>
+          <label className={labelStyle}>Category</label>
+          <div className="relative">
+            <Building2 className={fieldIconStyle} aria-hidden="true" />
+            <select
+              name="propertyCategory"
+              value={tempFilters.propertyCategory || ""}
+              onChange={handleChange}
+              className={selectStyle}
+            >
+              <option value="">All Categories</option>
+              <option value="RESIDENTIAL">Residential</option>
+              <option value="COMMERCIAL">Commercial</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
           <label className={labelStyle}>Property Type</label>
           <div className="relative">
             <Building2 className={fieldIconStyle} aria-hidden="true" />
