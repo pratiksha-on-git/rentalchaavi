@@ -73,7 +73,7 @@ const Home = () => {
             return bId - aId;
           });
 
-          const sliced = list.slice(0, 15).map((item) => {
+          const mapped = list.map((item) => {
             const candidates = getPropertyImageCandidates(item._raw || item);
             const addrCity = [item.address, item.city].filter(Boolean).join(", ").trim();
             const aptCity = [item.apartmentName, item.city].filter(Boolean).join(", ").trim();
@@ -93,10 +93,11 @@ const Home = () => {
               image: candidates[0] || item.coverImageData || item.coverImage || item.image || FALLBACK_PROPERTY_IMAGE_DATA_URL,
               price: Number(item.price || item.rent || 0),
               location: actualLocation,
+              propertyType: item.propertyType || item._raw?.propertyType || "",
               propertyCategory: item.propertyCategory || item._raw?.propertyCategory || "RESIDENTIAL",
             };
           });
-          setFeaturedProperties(sliced);
+          setFeaturedProperties(mapped);
         } else {
           setFeaturedProperties([]);
         }
@@ -110,12 +111,35 @@ const Home = () => {
     fetchFeaturedProperties();
   }, []);
 
-  const residentialProperties = featuredProperties.filter(
-    (p) => p.propertyCategory !== "COMMERCIAL"
-  );
-  const commercialProperties = featuredProperties.filter(
-    (p) => p.propertyCategory === "COMMERCIAL"
-  );
+  const commercialTypes = [
+    "OFFICE",
+    "OFFICE_SPACE",
+    "BUSINESS_CENTER",
+    "COMMERCIAL_BUILDING",
+    "CO_WORKING_SPACE",
+    "CO_WORK_SPACE",
+    "SHOP",
+    "SHOWROOM",
+    "RETAIL_SPACE",
+    "FOOD_COURT_SPACE",
+    "WAREHOUSE",
+    "INDUSTRIAL_SHED",
+    "COMMERCIAL_LAND",
+  ];
+
+  const isCommercialItem = (p) => {
+    const cat = String(p.propertyCategory || "").trim().toUpperCase();
+    const type = String(p.propertyType || "").trim().toUpperCase();
+    return cat === "COMMERCIAL" || commercialTypes.includes(type);
+  };
+
+  const residentialProperties = featuredProperties
+    .filter((p) => !isCommercialItem(p))
+    .slice(0, 5);
+
+  const commercialProperties = featuredProperties
+    .filter((p) => isCommercialItem(p))
+    .slice(0, 5);
 
   useEffect(() => {
     const handleScroll = () => {
